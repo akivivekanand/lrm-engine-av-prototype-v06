@@ -58,6 +58,9 @@ const Cover = () => {
 
         <GlassCard>
           <p className="text-xs text-muted-foreground leading-relaxed">{disclaimers.legal}</p>
+          <div className="mt-3 pt-3 border-t border-border">
+            <ContactCard contact={content.isso} className="shadow-none border-none p-0" />
+          </div>
         </GlassCard>
 
         <Button
