@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
+import ContactCard from "@/components/ContactCard";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { calcFilingDeadline, formatDate } from "@/lib/calculations";
 import content from "@/data/content.json";
@@ -24,6 +25,19 @@ const processingOptions = [
   { value: "standard", label: "Standard Processing" },
   { value: "premium", label: "Premium Processing" },
 ];
+
+const STATUS_TEXT: Record<string, string> = {
+  notApplied: "You have not applied for OPT yet. Your filing deadline is typically within 60 days after your program completion date. Confirm the exact date on your I-20 and with your DSO.",
+  waiting: "Your OPT application is pending. Use this planner to sequence outreach and preparation while you wait.",
+  approved: "Your OPT is approved. Your EAD Start Date anchors your job search timeline and unemployment tracking.",
+  rfe: "You received a Request for Evidence (RFE). This increases timeline uncertainty. Confirm next steps with your DSO.",
+  denied: "Your OPT application was denied. Contact your DSO immediately.",
+};
+
+const PROCESSING_TEXT: Record<string, string> = {
+  standard: "Standard processing is often estimated at 3-5 months (planning estimate).",
+  premium: "Premium processing is designed for an estimated 30-day window (planning estimate).",
+};
 
 function DatePickerField({
   label,
@@ -76,12 +90,6 @@ const Step1Authorization = () => {
 
   const filingDeadline = gradDateObj ? calcFilingDeadline(gradDateObj) : null;
 
-  const statusMessage = content.statusMessages[optStatus as keyof typeof content.statusMessages];
-  const processingNote = content.processingEstimates[processingType as keyof typeof content.processingEstimates];
-
-  const { universityContact } = content;
-
-  // Continue gate logic
   const canContinue = (() => {
     if (!gradDateObj) return false;
     if (optStatus === "denied") return false;
@@ -94,7 +102,6 @@ const Step1Authorization = () => {
     <StepLayout>
       <h1 className="text-xl font-bold text-foreground">Step 1: Authorization</h1>
 
-      {/* OPT Status selector — always shown */}
       <GlassCard>
         <label className="text-sm font-medium text-foreground block mb-2">OPT Status</label>
         <Select value={optStatus} onValueChange={setOptStatus}>
@@ -105,30 +112,18 @@ const Step1Authorization = () => {
             ))}
           </SelectContent>
         </Select>
-        {statusMessage && (
-          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{statusMessage}</p>
+        {STATUS_TEXT[optStatus] && (
+          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{STATUS_TEXT[optStatus]}</p>
         )}
       </GlassCard>
 
-      {/* Denied: show contact card, no other fields */}
       {optStatus === "denied" && (
-        <GlassCard>
-          <h2 className="text-sm font-semibold text-foreground mb-2">{universityContact.name}</h2>
-          <p className="text-xs text-muted-foreground">{universityContact.office}</p>
-          <p className="text-xs text-muted-foreground mt-1">{universityContact.address}</p>
-          <p className="text-xs text-muted-foreground mt-1">{universityContact.phone}</p>
-          <a
-            href={universityContact.web}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-primary hover:underline mt-1 block"
-          >
-            Visit ISSO Website
-          </a>
-        </GlassCard>
+        <ContactCard
+          contact={content.isso}
+          disclaimer="Contact University DSO for official policy guidance."
+        />
       )}
 
-      {/* All non-denied statuses show Graduation Date */}
       {optStatus !== "denied" && (
         <GlassCard>
           <DatePickerField
@@ -144,7 +139,6 @@ const Step1Authorization = () => {
         </GlassCard>
       )}
 
-      {/* Waiting: Submission Date + Processing Type */}
       {optStatus === "waiting" && (
         <>
           <GlassCard>
@@ -164,12 +158,11 @@ const Step1Authorization = () => {
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{processingNote}</p>
+            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{PROCESSING_TEXT[processingType]}</p>
           </GlassCard>
         </>
       )}
 
-      {/* Approved: EAD Start Date */}
       {optStatus === "approved" && (
         <GlassCard>
           <DatePickerField
@@ -180,7 +173,6 @@ const Step1Authorization = () => {
         </GlassCard>
       )}
 
-      {/* RFE: RFE Response Date */}
       {optStatus === "rfe" && (
         <GlassCard>
           <DatePickerField
@@ -190,6 +182,15 @@ const Step1Authorization = () => {
           />
         </GlassCard>
       )}
+
+      {/* Compliance Info */}
+      <div className="space-y-3">
+        <h2 className="text-sm font-semibold text-foreground">Compliance Info</h2>
+        <ContactCard
+          contact={content.isso}
+          disclaimer="Contact University DSO for official policy guidance."
+        />
+      </div>
 
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate("/cover")} className="flex-1">
