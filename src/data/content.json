@@ -1,0 +1,92 @@
+{
+  "universityContact": {
+    "name": "Suffolk University ISSO",
+    "office": "Center for International Education and Study Away (CIESA)",
+    "address": "73 Tremont Street | 9th Floor | Boston, MA 02108",
+    "phone": "617.573.8034",
+    "altPhone": "617.725.4151",
+    "web": "https://www.suffolk.edu/global/international-students/isso"
+  },
+  "disclaimers": {
+    "legal": "This tool provides strategic planning guidance and does not constitute legal immigration advice. Confirm deadlines and eligibility with your DSO.",
+    "uscis": "As of March 1, 2026, USCIS Premium Processing for Form I-765 is $1,780 with an estimated 30-day turnaround. Standard processing is often estimated at 3\u20135 months. Confirm current information on USCIS.gov.",
+    "employment": "Prioritize qualifying OPT employment. Confirm all employment, volunteering, or self-employment eligibility with your DSO before beginning."
+  },
+  "statusMessages": {
+    "notApplied": "You have not applied for OPT yet. Your filing deadline is typically within 60 days after your program completion date. Confirm the exact date on your I-20 and with your DSO.",
+    "waiting": "Your OPT application is pending. Use this planner to sequence outreach and preparation while you wait.",
+    "approved": "Your OPT is approved. Your EAD Start Date anchors your job search timeline and unemployment tracking.",
+    "rfe": "You received a Request for Evidence (RFE). This increases timeline uncertainty. Confirm next steps with your DSO.",
+    "denied": "Your OPT application was denied. Contact your DSO immediately."
+  },
+  "processingEstimates": {
+    "standard": "Standard processing is often estimated at 3\u20135 months (planning estimate).",
+    "premium": "Premium processing is designed for an estimated 30-day window (planning estimate)."
+  },
+  "industrySnapshots": {
+    "finance": { "weeks": 14, "note": "Finance cycles are structured and longer. Expect multi-round sequences." },
+    "tech": { "weeks": 5, "note": "Tech hiring can be sprint-based. Portfolio strength matters early." },
+    "consulting": { "weeks": 9, "note": "Consulting often includes multiple interview rounds." },
+    "healthcare": { "weeks": 7, "note": "Healthcare timelines vary by credentialing and role type." },
+    "general": { "weeks": 6, "note": "General hiring cycles average 6\u20138 weeks." }
+  },
+  "templates": [
+    {
+      "id": "alumniOutreach",
+      "title": "Alumni Outreach",
+      "body": "Hi [Name], I'm a current international student at [University] studying [Major]. I'd value 15 minutes to ask about your experience at [Company]."
+    },
+    {
+      "id": "referralRequest",
+      "title": "Referral Request",
+      "body": "Hi [Name], I'm applying for the [Job Title] role at [Company]. Would you be open to sharing advice on team priorities?"
+    },
+    {
+      "id": "infoInterview",
+      "title": "Informational Interview Request",
+      "body": "Hi [Name], I'm researching [Industry] and would appreciate a 20-minute chat to learn from your perspective."
+    },
+    {
+      "id": "thankYou",
+      "title": "Post-Interview Thank You",
+      "body": "Thank you for the opportunity to interview for [Role]. I appreciated our discussion about [Topic]."
+    },
+    {
+      "id": "elevatorPitch",
+      "title": "30-Second Elevator Pitch",
+      "body": "I'm a [Major] student focused on [Skill]. Recently I achieved [Result]. I'm targeting [Industry] because I'm interested in solving [Problem]."
+    }
+  ],
+  "aiPrompts": [
+    {
+      "id": "skillGap",
+      "title": "Skill Gap Analysis",
+      "prompt": "Act as a Senior Recruiter. Compare this Job Description to my Resume and identify 5 skill gaps."
+    },
+    {
+      "id": "resumeOptimize",
+      "title": "Resume Optimization",
+      "prompt": "Rewrite my bullets using the Google X-Y-Z formula: Accomplished [X] as measured by [Y], by doing [Z]."
+    },
+    {
+      "id": "coverLetterReview",
+      "title": "Cover Letter Review",
+      "prompt": "Review this cover letter for clarity and specificity. Remove generic wording."
+    },
+    {
+      "id": "linkedinAudit",
+      "title": "LinkedIn Audit",
+      "prompt": "Improve my LinkedIn headline and About section for keyword alignment."
+    },
+    {
+      "id": "starStory",
+      "title": "STAR Story Builder",
+      "prompt": "Help me structure this story using the STAR method."
+    },
+    {
+      "id": "companyResearch",
+      "title": "Company Research Synthesis",
+      "prompt": "Summarize [Company] mission, priorities, competitors, and 3 challenges."
+    }
+  ]
+}

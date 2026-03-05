@@ -1,0 +1,18 @@
+{
+  "foundation": [
+    { "id": "f1", "task": "Verify Program Completion Date on your I-20." },
+    { "id": "f2", "task": "Identify 40 target companies." }
+  ],
+  "preparation": [
+    { "id": "p1", "task": "Market mapping and finalize target list." },
+    { "id": "p2", "task": "Align resume and LinkedIn to target roles." }
+  ],
+  "humanLayer": [
+    { "id": "h1", "task": "Send 3\u20135 outreach messages daily." },
+    { "id": "h2", "task": "Follow up every 7 days." }
+  ],
+  "compliance": [
+    { "id": "c1", "task": "Verify SEVP Portal contact information." },
+    { "id": "c2", "task": "Confirm employment eligibility with DSO." }
+  ]
+}
