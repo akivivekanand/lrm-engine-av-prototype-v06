@@ -1,74 +1,85 @@
 
 
-# Strategic Career Timeline Mapping
+# Revised Implementation Plan — Incremental Refactor
 
-A mobile-first, glassmorphism-styled React app guiding international students through OPT career planning with a multi-step flow and dynamic timeline calculations.
+## Constraints (locked)
 
-## Design System
-- **Style**: Glassmorphism — white/translucent cards with `backdrop-blur`, subtle borders, soft shadows
-- **Font**: Inter (Google Fonts)
-- **Colors**: Slate-900 text, Indigo-600 primary, Emerald-500 on-track, Amber-500 compression, Rose-500 crisis
-- **No emojis** anywhere in the UI
+- `content.json` keeps all existing keys verbatim: `universityContact`, `disclaimers`, `statusMessages`, `processingEstimates`, `industrySnapshots`, `templates`, `aiPrompts`
+- `tasks.json` keeps four buckets with `{id, task}` objects — no changes
+- `src/utils/dateCalculator.ts` stays in place (not deleted)
+- No JSON key renames, no value changes
+- All status/processing text rendered from JSON, never hardcoded
 
-## Data Layer
-- Create `src/data/content.json` and `src/data/tasks.json` verbatim from user-provided content
-- All UI text, disclaimers, templates, AI prompts, and tasks imported from these JSON files — nothing hard-coded in components
+## New Files (additive only)
 
-## Route Structure (`react-router-dom`)
-`/cover` → `/step-1-authorization` → `/step-2-strategy` → `/step-3-timeline` → `/dashboard`
+### `src/lib/calculations.ts`
+Thin wrapper that re-exports and extends `src/utils/dateCalculator.ts`:
+- `calcFilingDeadline(gradDate)` — grad + 60
+- `calcAuthorizationWall(chosenStart, govDays, bufferDays)` — chosenStart - (gov + buffer)
+- `calcHiringCyclePeak(authWall, hiringWeeks)` — authWall - (weeks * 7)
+- `calcLRMDate(peak, prepDays)` — peak - prepDays
+- Updated `calculateLRMChain` signature accepting `prepPhaseDays` param (replaces hardcoded 7)
+- Re-exports existing `stripTime`, `addDays`, `formatDate`, `getMilestoneStatus`
 
-- Persistent **progress bar** at the top of steps 1–4 showing: Authorization → Strategy → Timeline → Plan
-- On app load, restore last visited route from `localStorage`
+### `src/lib/smart-suggestions.ts`
+- `getDefaultHiringWeeks(industry)` — reads `content.industrySnapshots[key].weeks`
+- `getDefaultProcessingDays(type)` — 30 premium, 120 standard
+- `suggestBufferDays(optStatus)` — 14 default, 21 for RFE
 
-## Page Breakdown
+### `src/components/StepLayout.tsx`
+Wraps step pages: gradient background, `<ProgressBar />`, `max-w-md` container, children slot. Each page drops its boilerplate div + ProgressBar import in favor of `<StepLayout>`.
 
-### 1. Cover Page (`/cover`)
-- App title, Suffolk ISSO contact info (from JSON), legal disclaimer
-- Single CTA button to begin → navigates to Step 1
+## Page Changes
 
-### 2. Step 1 — Authorization (`/step-1-authorization`)
-- Inputs: Graduation date (datepicker), OPT status (not applied / waiting / approved / RFE / denied), processing type (standard / premium), EAD start date (if approved)
-- Display contextual status message from JSON based on selection
-- Filing deadline auto-calculated: Graduation + 60 days
-- Save all inputs to localStorage on change
+### Step 1 — `Step1Authorization.tsx` (rewrite)
+Conditional UI per OPT status, all text from `content.statusMessages` and `content.processingEstimates`:
+- **Not Applied**: Graduation Date → show Filing Deadline (grad + 60)
+- **Waiting**: Graduation Date + Submission Date + Processing Type (standard/premium) + `processingEstimates[type]` text
+- **Approved**: Graduation Date + EAD Start Date (required)
+- **RFE**: Graduation Date + RFE Response Date + `statusMessages.rfe` text
+- **Denied**: `statusMessages.denied` + universityContact card, Continue disabled
 
-### 3. Step 2 — Strategy (`/step-2-strategy`)
-- Industry selector (finance / tech / consulting / healthcare / general) — shows hiring cycle weeks + note from JSON
-- Buffer weeks slider (1–4 weeks, default 2)
-- Checklist of foundation + preparation tasks from `tasks.json` with checkbox persistence
-- Templates section: expandable cards from JSON with copy-to-clipboard
+New persisted keys: `submissionDate`, `rfeResponseDate`. Remove `processingType` from this page's own persistence (only used under "waiting" for display). Continue gate varies by status.
 
-### 4. Step 3 — Timeline (`/step-3-timeline`)
-- **LRM Chain Calculation** (all local timezone, date-only):
-  - Filing Deadline = Graduation + 60 days
-  - Authorization Wall = EAD Start Date − (processing days + buffer days)
-  - Hiring Cycle Peak = Authorization Wall − (industry weeks × 7)
-  - LRM Date = Hiring Cycle Peak − 7 days
-- Visual vertical timeline showing each milestone with color-coded status (emerald/amber/rose based on proximity to today)
-- Human Layer + Compliance tasks from JSON as actionable checklist
-- AI Prompts section: cards with copy-to-clipboard for each prompt
+### Step 2 — `Step2Strategy.tsx` (modify)
+- Remove buffer weeks slider (moves to Step 3)
+- Add hiring weeks slider: default from `industrySnapshots[industry].weeks`, user adjustable (2–20 range)
+- New persisted key: `hiringWeeks`
+- Keep industry selector, task checklists, templates unchanged
 
-### 5. Dashboard (`/dashboard`)
-- Summary card showing all key dates from the LRM chain
-- **Unemployment Gauge**: circular progress (days used out of 90)
-  - Input for days used, visual ring
-  - Emerald when ≥ 20 days remaining, Amber ≤ 20, Rose ≤ 10
-  - Required text from JSON: "Prioritize qualifying OPT employment..."
-- Task completion progress across all categories
-- Quick links to templates and AI prompts
-- ISSO contact card from JSON
+### Step 3 — `Step3Timeline.tsx` (rewrite)
+New inputs (all persisted):
+- `govProcessingDays`: number input (default 90)
+- `bufferDays`: number input (default 10)
+- `prepPhaseDays`: number input (default 7)
+- **Chosen Start Date**: if `optStatus === "approved"` → locked to EAD date (read-only); otherwise → `targetWorkReadyDate` date picker
 
-## Persistence
-- All user inputs, checkbox states, and current route saved to `localStorage`
-- Custom hook `usePersistedState` for consistent save/restore
-- On mount, `App.tsx` reads saved route and redirects via `useNavigate`
+Compute LRM chain via `src/lib/calculations.ts`. Display vertical timeline + human layer/compliance tasks + AI prompts (all from JSON).
 
-## Key Components
-- `ProgressBar` — shared step indicator across all step pages
-- `GlassCard` — reusable glassmorphism container
-- `UnemploymentGauge` — circular SVG progress with color thresholds
-- `TimelineMilestone` — vertical timeline node with date + status color
-- `TemplateCard` — expandable card with copy button
-- `TaskChecklist` — checkbox list with localStorage persistence
-- `DateCalculator` utility — all LRM chain math, local timezone only
+### Dashboard — `Dashboard.tsx` (update)
+- Read new persisted keys: `govProcessingDays`, `bufferDays`, `prepPhaseDays`, `hiringWeeks`, `targetWorkReadyDate`
+- Compute LRM chain with updated params
+- Unemployment gauge only shown when `optStatus === "approved"`
+- Add Resource Vault section: render `templates` + `aiPrompts` from JSON inline (with copy buttons)
+- Keep universityContact card, disclaimers, task progress from JSON
+
+### Cover — `Cover.tsx` (minor)
+- Wrap in `StepLayout` (without progress bar flag) — or keep as-is since cover has unique centered layout. No functional changes needed.
+
+## Files Summary
+
+| File | Action |
+|------|--------|
+| `src/data/content.json` | No change |
+| `src/data/tasks.json` | No change |
+| `src/utils/dateCalculator.ts` | No change (kept) |
+| `src/lib/calculations.ts` | Create — extends dateCalculator with prepPhaseDays support |
+| `src/lib/smart-suggestions.ts` | Create — default value helpers |
+| `src/components/StepLayout.tsx` | Create — shared layout wrapper |
+| `src/pages/Step1Authorization.tsx` | Rewrite — conditional status UI |
+| `src/pages/Step2Strategy.tsx` | Modify — swap buffer slider for hiring weeks slider |
+| `src/pages/Step3Timeline.tsx` | Rewrite — LRM inputs + chosen start date logic |
+| `src/pages/Dashboard.tsx` | Update — new keys, resource vault, conditional gauge |
+| `src/pages/Cover.tsx` | No change |
+| `src/App.tsx` | No change |
 
