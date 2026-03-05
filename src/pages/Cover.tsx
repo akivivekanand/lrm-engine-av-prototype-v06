@@ -10,17 +10,47 @@ const Cover = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full space-y-6">
-        <div className="text-center space-y-2">
+      <div className="max-w-lg w-full space-y-6">
+        <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold text-foreground leading-tight">
-            Strategic Career Timeline Mapping
+            International Student Strategic Career Timeline Mapping Engine
           </h1>
-          <p className="text-sm text-muted-foreground">
-            OPT Career Planning for International Students
+        </div>
+
+        <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
+          <p>
+            This application is a specialized strategic planning tool designed to help international students navigate the complex intersection of U.S. hiring cycles and F-1 OPT regulatory requirements.
+          </p>
+          <p>
+            Unlike a standard job search, an international career search requires backward-mapping from your desired start date to account for government processing times, industry-specific hiring lags, and strict filing windows.
+          </p>
+          <p>
+            This engine calculates your Last Responsible Moment (LRM)--the final date you can begin your search while maintaining a viable safety buffer for your legal status.
           </p>
         </div>
 
-        <ContactCard contact={careerCenter} />
+        <GlassCard>
+          <h2 className="text-sm font-semibold text-foreground mb-3">What this app provides:</h2>
+          <ul className="space-y-3 text-xs text-muted-foreground leading-relaxed">
+            <li>
+              <span className="font-semibold text-foreground">LRM Calculation:</span> A precise date to launch your search based on your specific industry (e.g., Finance, Tech, or Consulting).
+            </li>
+            <li>
+              <span className="font-semibold text-foreground">Regulatory Anchors:</span> Clear visibility of your USCIS filing window and your absolute Last Day to Start Working (Start Date + 90 days).
+            </li>
+            <li>
+              <span className="font-semibold text-foreground">Strategic Roadmap:</span> A fluid, segmented timeline that visualizes the "Hiring Lag" versus "Government Processing" phases.
+            </li>
+            <li>
+              <span className="font-semibold text-foreground">Customized Action Plan:</span> Frequency-based to-do lists (Daily, Weekly, Monthly) and a library of high-leverage Gen AI prompts to optimize your outreach and interview performance.
+            </li>
+          </ul>
+        </GlassCard>
+
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground text-center">Hosted by</p>
+          <ContactCard contact={careerCenter} />
+        </div>
 
         <GlassCard>
           <p className="text-xs text-muted-foreground leading-relaxed">{disclaimers.uscis}</p>
