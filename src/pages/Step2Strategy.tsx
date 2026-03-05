@@ -1,58 +1,58 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
-import TaskChecklist from "@/components/TaskChecklist";
 import TemplateCard from "@/components/TemplateCard";
 import { usePersistedState } from "@/hooks/usePersistedState";
-import { getDefaultHiringWeeks } from "@/lib/smart-suggestions";
+import { suggestIndustry } from "@/lib/smart-suggestions";
 import content from "@/data/content.json";
-import tasks from "@/data/tasks.json";
-
-const industries = [
-  { value: "finance", label: "Finance" },
-  { value: "tech", label: "Tech" },
-  { value: "consulting", label: "Consulting" },
-  { value: "healthcare", label: "Healthcare" },
-  { value: "general", label: "General" },
-];
 
 const Step2Strategy = () => {
   const navigate = useNavigate();
-  const [industry, setIndustry] = usePersistedState<string>("industry", "general");
-  const [hiringWeeks, setHiringWeeks] = usePersistedState<number>("hiringWeeks", getDefaultHiringWeeks("general"));
+  const [hiringWeeks, setHiringWeeks] = usePersistedState<number>("hiringWeeks", 6);
+  const [industryText, setIndustryText] = useState("");
+  const [suggestion, setSuggestion] = useState<{ industryKey: string; weeks: number; note: string } | null>(null);
 
-  const snapshot = content.industrySnapshots[industry as keyof typeof content.industrySnapshots];
-  const suggestedWeeks = getDefaultHiringWeeks(industry);
+  const handleSuggest = () => {
+    if (!industryText.trim()) return;
+    setSuggestion(suggestIndustry(industryText));
+  };
 
-  // When industry changes, reset hiring weeks to suggested default
-  useEffect(() => {
-    setHiringWeeks(suggestedWeeks);
-  }, [industry, suggestedWeeks, setHiringWeeks]);
+  const handleAccept = () => {
+    if (suggestion) {
+      setHiringWeeks(suggestion.weeks);
+    }
+  };
 
   return (
     <StepLayout>
       <h1 className="text-xl font-bold text-foreground">Step 2: Strategy</h1>
 
       <GlassCard>
-        <label className="text-sm font-medium text-foreground block mb-2">Target Industry</label>
-        <Select value={industry} onValueChange={setIndustry}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {industries.map((i) => (
-              <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {snapshot && (
-          <div className="mt-3 space-y-1">
-            <p className="text-xs text-foreground font-medium">
-              Suggested Hiring Cycle: ~{suggestedWeeks} weeks
+        <label className="text-sm font-medium text-foreground block mb-2">Target Industry or Role</label>
+        <div className="flex gap-2">
+          <Input
+            placeholder="e.g. finance, tech, consulting..."
+            value={industryText}
+            onChange={(e) => setIndustryText(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSuggest()}
+          />
+          <Button onClick={handleSuggest} size="sm" className="shrink-0">
+            Smart Suggest
+          </Button>
+        </div>
+        {suggestion && (
+          <div className="mt-3 space-y-2 p-3 rounded-lg bg-muted/50">
+            <p className="text-xs font-medium text-foreground">
+              Suggested: {suggestion.industryKey} - ~{suggestion.weeks} weeks
             </p>
-            <p className="text-xs text-muted-foreground leading-relaxed">{snapshot.note}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{suggestion.note}</p>
+            <Button size="sm" variant="outline" onClick={handleAccept}>
+              Accept
+            </Button>
           </div>
         )}
       </GlassCard>
@@ -74,18 +74,10 @@ const Step2Strategy = () => {
         </div>
       </GlassCard>
 
-      <GlassCard>
-        <TaskChecklist title="Foundation Tasks" tasks={tasks.foundation} storageKey="tasks-foundation" />
-      </GlassCard>
-
-      <GlassCard>
-        <TaskChecklist title="Preparation Tasks" tasks={tasks.preparation} storageKey="tasks-preparation" />
-      </GlassCard>
-
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-foreground">Templates</h2>
         {content.templates.map((t) => (
-          <TemplateCard key={t.id} title={t.title} body={t.body} />
+          <TemplateCard key={t.id} title={t.title} body={t.body} subject={t.subject} />
         ))}
       </div>
 

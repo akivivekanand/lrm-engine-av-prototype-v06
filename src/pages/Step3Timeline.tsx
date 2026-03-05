@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Copy, Check } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,12 +9,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import TimelineMilestone from "@/components/TimelineMilestone";
-import TaskChecklist from "@/components/TaskChecklist";
+import SegmentedTimeline from "@/components/SegmentedTimeline";
+import PromptLibrary from "@/components/PromptLibrary";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { calculateLRMChainV2, getMilestoneStatus, formatDate } from "@/lib/calculations";
-import { getDefaultHiringWeeks } from "@/lib/smart-suggestions";
 import content from "@/data/content.json";
-import tasks from "@/data/tasks.json";
 
 const Step3Timeline = () => {
   const navigate = useNavigate();
@@ -23,8 +21,7 @@ const Step3Timeline = () => {
   const [gradDate] = usePersistedState<string | null>("gradDate", null);
   const [eadDate] = usePersistedState<string | null>("eadDate", null);
   const [optStatus] = usePersistedState<string>("optStatus", "notApplied");
-  const [industry] = usePersistedState<string>("industry", "general");
-  const [hiringWeeks] = usePersistedState<number>("hiringWeeks", getDefaultHiringWeeks("general"));
+  const [hiringWeeks] = usePersistedState<number>("hiringWeeks", 6);
 
   const [govProcessingDays, setGovProcessingDays] = usePersistedState<number>("govProcessingDays", 90);
   const [bufferDays, setBufferDays] = usePersistedState<number>("bufferDays", 10);
@@ -32,12 +29,9 @@ const Step3Timeline = () => {
   const [targetWorkReadyDate, setTargetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
 
   const isApproved = optStatus === "approved";
-
-  // Chosen start date: locked to EAD if approved, otherwise user-selected
   const chosenStartDateStr = isApproved ? eadDate : targetWorkReadyDate;
   const chosenStartDateObj = chosenStartDateStr ? new Date(chosenStartDateStr) : undefined;
   const targetDateObj = targetWorkReadyDate ? new Date(targetWorkReadyDate) : undefined;
-
   const gradDateObj = gradDate ? new Date(gradDate) : undefined;
 
   const hasData = gradDateObj && chosenStartDateObj;
@@ -66,47 +60,24 @@ const Step3Timeline = () => {
     <StepLayout>
       <h1 className="text-xl font-bold text-foreground">Step 3: Timeline</h1>
 
-      {/* Timeline inputs */}
       <GlassCard>
         <h2 className="text-sm font-semibold text-foreground mb-4">Timeline Parameters</h2>
         <div className="space-y-4">
           <div>
             <label className="text-xs text-muted-foreground block mb-1">Gov Processing Days</label>
-            <Input
-              type="number"
-              min={1}
-              max={365}
-              value={govProcessingDays}
-              onChange={(e) => setGovProcessingDays(Math.max(1, parseInt(e.target.value) || 90))}
-              className="w-28"
-            />
+            <Input type="number" min={1} max={365} value={govProcessingDays} onChange={(e) => setGovProcessingDays(Math.max(1, parseInt(e.target.value) || 90))} className="w-28" />
           </div>
           <div>
             <label className="text-xs text-muted-foreground block mb-1">Buffer Days</label>
-            <Input
-              type="number"
-              min={0}
-              max={60}
-              value={bufferDays}
-              onChange={(e) => setBufferDays(Math.max(0, parseInt(e.target.value) || 10))}
-              className="w-28"
-            />
+            <Input type="number" min={0} max={60} value={bufferDays} onChange={(e) => setBufferDays(Math.max(0, parseInt(e.target.value) || 10))} className="w-28" />
           </div>
           <div>
             <label className="text-xs text-muted-foreground block mb-1">Prep Phase Days</label>
-            <Input
-              type="number"
-              min={1}
-              max={60}
-              value={prepPhaseDays}
-              onChange={(e) => setPrepPhaseDays(Math.max(1, parseInt(e.target.value) || 7))}
-              className="w-28"
-            />
+            <Input type="number" min={1} max={60} value={prepPhaseDays} onChange={(e) => setPrepPhaseDays(Math.max(1, parseInt(e.target.value) || 7))} className="w-28" />
           </div>
         </div>
       </GlassCard>
 
-      {/* Chosen Start Date */}
       <GlassCard>
         {isApproved ? (
           <>
@@ -121,30 +92,54 @@ const Step3Timeline = () => {
             <label className="text-sm font-medium text-foreground block mb-2">Target Work-Ready Date</label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn("w-full justify-start text-left font-normal", !targetDateObj && "text-muted-foreground")}
-                >
+                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !targetDateObj && "text-muted-foreground")}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {targetDateObj ? format(targetDateObj, "PPP") : "Select date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={targetDateObj}
-                  onSelect={(d) => setTargetWorkReadyDate(d ? d.toISOString() : null)}
-                  className={cn("p-3 pointer-events-auto")}
-                />
+                <Calendar mode="single" selected={targetDateObj} onSelect={(d) => setTargetWorkReadyDate(d ? d.toISOString() : null)} className={cn("p-3 pointer-events-auto")} />
               </PopoverContent>
             </Popover>
           </>
         )}
       </GlassCard>
 
-      {/* LRM Chain Timeline */}
+      {/* Regulatory Anchors */}
+      {chain && (
+        <GlassCard>
+          <h2 className="text-sm font-semibold text-foreground mb-3">Regulatory Anchors</h2>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Last Day to Start Working</span>
+              <span className="font-medium text-foreground">{formatDate(chain.lastDayToWork)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Application Anchor</span>
+              <span className="font-medium text-foreground">{formatDate(chain.applicationAnchor)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Filing Window (Earliest)</span>
+              <span className="font-medium text-foreground">{formatDate(chain.filingWindow.earliest)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Filing Window (Latest)</span>
+              <span className="font-medium text-foreground">{formatDate(chain.filingWindow.latest)}</span>
+            </div>
+          </div>
+        </GlassCard>
+      )}
+
+      {/* Segmented Timeline Bar */}
+      {chain && (
+        <GlassCard>
+          <h2 className="text-sm font-semibold text-foreground mb-3">Timeline Breakdown</h2>
+          <SegmentedTimeline prepDays={prepPhaseDays} hiringDays={hiringWeeks * 7} authDays={govProcessingDays + bufferDays} />
+        </GlassCard>
+      )}
+
       {!hasData ? (
-        <GlassCard className="bg-amber/5 border-amber/20">
+        <GlassCard>
           <p className="text-sm text-muted-foreground">
             {isApproved
               ? "Please set your Graduation Date and EAD Start Date in Step 1 to generate your timeline."
@@ -155,33 +150,18 @@ const Step3Timeline = () => {
         <GlassCard>
           <h2 className="text-sm font-semibold text-foreground mb-4">Your LRM Chain</h2>
           {milestones.map((m, i) => (
-            <TimelineMilestone
-              key={m.label}
-              label={m.label}
-              date={m.date}
-              status={getMilestoneStatus(m.date)}
-              isLast={i === milestones.length - 1}
-            />
+            <TimelineMilestone key={m.label} label={m.label} date={m.date} status={getMilestoneStatus(m.date)} isLast={i === milestones.length - 1} />
           ))}
         </GlassCard>
       )}
 
-      <GlassCard>
-        <TaskChecklist title="Human Layer Tasks" tasks={tasks.humanLayer} storageKey="tasks-humanLayer" />
-      </GlassCard>
-
-      <GlassCard>
-        <TaskChecklist title="Compliance Tasks" tasks={tasks.compliance} storageKey="tasks-compliance" />
-      </GlassCard>
-
+      {/* Prompt Library */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">AI Prompts</h2>
-        {content.aiPrompts.map((p) => (
-          <AiPromptCard key={p.id} title={p.title} prompt={p.prompt} />
-        ))}
+        <h2 className="text-sm font-semibold text-foreground">AI Prompt Library</h2>
+        <PromptLibrary />
       </div>
 
-      <GlassCard className="bg-amber/5 border-amber/20">
+      <GlassCard>
         <p className="text-xs text-muted-foreground leading-relaxed">{content.disclaimers.uscis}</p>
       </GlassCard>
 
@@ -196,31 +176,5 @@ const Step3Timeline = () => {
     </StepLayout>
   );
 };
-
-function AiPromptCard({ title, prompt }: { title: string; prompt: string }) {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(prompt);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <GlassCard className="p-4">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-sm font-semibold text-foreground">{title}</p>
-          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{prompt}</p>
-        </div>
-        <button
-          onClick={handleCopy}
-          className="shrink-0 p-1.5 rounded-md hover:bg-muted transition-colors"
-        >
-          {copied ? <Check className="w-4 h-4 text-emerald" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
-        </button>
-      </div>
-    </GlassCard>
-  );
-}
 
 export default Step3Timeline;
