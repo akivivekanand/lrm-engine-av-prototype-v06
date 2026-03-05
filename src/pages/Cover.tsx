@@ -13,19 +13,19 @@ const Cover = () => {
       <div className="max-w-lg w-full space-y-6">
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold text-foreground leading-tight">
-            International Student Strategic Career Timeline Mapping Engine
+            Career Timeline Mapping Engine: Strategic Job Search Navigation
           </h1>
         </div>
 
         <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
           <p>
-            This application is a specialized strategic planning tool designed to help international students navigate the complex intersection of U.S. hiring cycles and F-1 OPT regulatory requirements.
+            This tool helps international students backward-map their job search from a desired start date to account for industry-specific hiring lags and OPT regulatory requirements.
           </p>
           <p>
-            Unlike a standard job search, an international career search requires backward-mapping from your desired start date to account for government processing times, industry-specific hiring lags, and strict filing windows.
+            Unlike a standard job search, an international career search requires planning around government processing times, strict filing windows, and a 90-day unemployment limit.
           </p>
           <p>
-            This engine calculates your Last Responsible Moment (LRM)--the final date you can begin your search while maintaining a viable safety buffer for your legal status.
+            The engine calculates your Last Responsible Moment (LRM), the final date you can begin your search while maintaining a viable safety buffer for your legal status.
           </p>
         </div>
 
@@ -36,13 +36,13 @@ const Cover = () => {
               <span className="font-semibold text-foreground">LRM Calculation:</span> A precise date to launch your search based on your specific industry (e.g., Finance, Tech, or Consulting).
             </li>
             <li>
-              <span className="font-semibold text-foreground">Regulatory Anchors:</span> Clear visibility of your USCIS filing window and your absolute Last Day to Start Working (Start Date + 90 days).
+              <span className="font-semibold text-foreground">Regulatory Anchors:</span> Clear visibility of your OPT filing window and your absolute Last Day to Start Working (Start Date + 90 days).
             </li>
             <li>
-              <span className="font-semibold text-foreground">Strategic Roadmap:</span> A fluid, segmented timeline that visualizes the "Hiring Lag" versus "Government Processing" phases.
+              <span className="font-semibold text-foreground">Strategic Roadmap:</span> A segmented timeline that visualizes the hiring cycle for your field versus government processing phases.
             </li>
             <li>
-              <span className="font-semibold text-foreground">Customized Action Plan:</span> Frequency-based to-do lists (Daily, Weekly, Monthly) and a library of high-leverage Gen AI prompts to optimize your outreach and interview performance.
+              <span className="font-semibold text-foreground">Customized Action Plan:</span> Frequency-based to-do lists (Daily, Weekly, Monthly) and a library of high-leverage AI prompts to optimize your outreach and interview performance.
             </li>
           </ul>
         </GlassCard>
@@ -58,9 +58,6 @@ const Cover = () => {
 
         <GlassCard>
           <p className="text-xs text-muted-foreground leading-relaxed">{disclaimers.legal}</p>
-          <div className="mt-3 pt-3 border-t border-border">
-            <ContactCard contact={content.isso} className="shadow-none border-none p-0" />
-          </div>
         </GlassCard>
 
         <Button

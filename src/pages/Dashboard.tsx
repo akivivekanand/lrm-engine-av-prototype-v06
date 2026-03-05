@@ -1,8 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
@@ -13,7 +11,7 @@ import TaskEngineComponent from "@/components/TaskEngineComponent";
 import PromptLibrary from "@/components/PromptLibrary";
 import ContactCard from "@/components/ContactCard";
 import { usePersistedState } from "@/hooks/usePersistedState";
-import { calculateLRMChainV2, formatDate, getMilestoneStatus } from "@/lib/calculations";
+import { calculateLRMChainV2, formatDate, getMilestoneStatus, daysBetween, stripTime } from "@/lib/calculations";
 import content from "@/data/content.json";
 
 const Dashboard = () => {
@@ -25,9 +23,7 @@ const Dashboard = () => {
   const [hiringWeeks] = usePersistedState<number>("hiringWeeks", 6);
   const [govProcessingDays] = usePersistedState<number>("govProcessingDays", 90);
   const [bufferDays] = usePersistedState<number>("bufferDays", 10);
-  const [prepPhaseDays] = usePersistedState<number>("prepPhaseDays", 7);
   const [targetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
-  const [daysUsed, setDaysUsed] = usePersistedState<number>("daysUsed", 0);
 
   const isApproved = optStatus === "approved";
   const chosenStartDateStr = isApproved ? eadDate : targetWorkReadyDate;
@@ -35,17 +31,41 @@ const Dashboard = () => {
   const hasData = gradDate && chosenStartDateStr;
   const chain = hasData
     ? calculateLRMChainV2({
-        graduationDate: new Date(gradDate),
+        programEndDate: new Date(gradDate),
         chosenStartDate: new Date(chosenStartDateStr),
         govProcessingDays,
         bufferDays,
         hiringWeeks,
-        prepPhaseDays,
       })
     : null;
 
   const lrmStatus = chain ? getMilestoneStatus(chain.lrmDate) : null;
   const statusColor = lrmStatus === "crisis" ? "destructive" : lrmStatus === "compression" ? "secondary" : "outline";
+
+  // Auto-calculate unemployment days for approved status
+  const autoCalcDaysUsed = (() => {
+    if (!isApproved || !chosenStartDateStr) return 0;
+    const start = stripTime(new Date(chosenStartDateStr));
+    const today = stripTime(new Date());
+    const diff = daysBetween(start, today);
+    return Math.max(0, Math.min(90, diff));
+  })();
+
+  // Build timing constraints list based on status
+  const timingItems = chain
+    ? [
+        { label: "LRM Date", date: chain.lrmDate },
+        { label: "Hiring Completion Deadline", date: chain.hiringCompletionDeadline },
+        { label: "Chosen Start Date", date: chain.chosenStartDate },
+        { label: "Last Day to Start Working", date: chain.lastDayToWork },
+        ...(optStatus === "notApplied"
+          ? [
+              { label: "Earliest Date to Apply for OPT", date: chain.earliestDateToApply },
+              { label: "Last Date to Apply for OPT", date: chain.lastDateToApply },
+            ]
+          : []),
+      ]
+    : [];
 
   return (
     <StepLayout>
@@ -61,25 +81,21 @@ const Dashboard = () => {
               {lrmStatus === "crisis" ? "Past Due" : lrmStatus === "compression" ? "Soon" : "On Track"}
             </Badge>
           </div>
+          <div className="flex items-start gap-1.5 mt-3 p-2 rounded bg-muted/50">
+            <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              This is calculated by taking your absolute last day to start working (90 days after your chosen start date) and backward-mapping the hiring cycle for your field, plus a 2-week strategic buffer.
+            </p>
+          </div>
         </GlassCard>
       )}
 
-      {/* Key Dates */}
-      {chain && (
+      {/* Timing Constraints */}
+      {chain && timingItems.length > 0 && (
         <GlassCard>
-          <h2 className="text-sm font-semibold text-foreground mb-3">Key Dates</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-3">Timing Constraints</h2>
           <div className="space-y-2">
-            {[
-              { label: "LRM Date", date: chain.lrmDate },
-              { label: "Hiring Cycle Peak", date: chain.hiringCyclePeak },
-              { label: "Authorization Wall", date: chain.authorizationWall },
-              { label: "Filing Deadline", date: chain.filingDeadline },
-              { label: "Chosen Start Date", date: chain.chosenStartDate },
-              { label: "Last Day to Start Working", date: chain.lastDayToWork },
-              { label: "Application Anchor", date: chain.applicationAnchor },
-              { label: "Filing Window (Earliest)", date: chain.filingWindow.earliest },
-              { label: "Filing Window (Latest)", date: chain.filingWindow.latest },
-            ].map((item) => (
+            {timingItems.map((item) => (
               <div key={item.label} className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{item.label}</span>
                 <span className="font-medium text-foreground">{formatDate(item.date)}</span>
@@ -93,7 +109,7 @@ const Dashboard = () => {
       {chain && (
         <GlassCard>
           <h2 className="text-sm font-semibold text-foreground mb-3">Timeline Breakdown</h2>
-          <SegmentedTimeline prepDays={prepPhaseDays} hiringDays={hiringWeeks * 7} authDays={govProcessingDays + bufferDays} />
+          <SegmentedTimeline prepDays={14} hiringDays={hiringWeeks * 7} authDays={govProcessingDays + bufferDays} />
         </GlassCard>
       )}
 
@@ -101,18 +117,7 @@ const Dashboard = () => {
       {isApproved && (
         <GlassCard>
           <h2 className="text-sm font-semibold text-foreground mb-4">Unemployment Tracker</h2>
-          <UnemploymentGauge daysUsed={daysUsed} />
-          <div className="mt-4">
-            <label className="text-xs text-muted-foreground block mb-1">Days Used</label>
-            <Input
-              type="number"
-              min={0}
-              max={90}
-              value={daysUsed}
-              onChange={(e) => setDaysUsed(Math.min(90, Math.max(0, parseInt(e.target.value) || 0)))}
-              className="w-24"
-            />
-          </div>
+          <UnemploymentGauge daysUsed={autoCalcDaysUsed} />
         </GlassCard>
       )}
 
@@ -141,9 +146,6 @@ const Dashboard = () => {
           disclaimer="Contact University DSO for official policy guidance."
         />
       </div>
-
-      {/* Career Center */}
-      <ContactCard contact={content.careerCenter} />
 
       {/* Disclaimers */}
       <GlassCard>

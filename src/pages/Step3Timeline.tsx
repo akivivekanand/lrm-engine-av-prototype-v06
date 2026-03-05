@@ -25,7 +25,6 @@ const Step3Timeline = () => {
 
   const [govProcessingDays, setGovProcessingDays] = usePersistedState<number>("govProcessingDays", 90);
   const [bufferDays, setBufferDays] = usePersistedState<number>("bufferDays", 10);
-  const [prepPhaseDays, setPrepPhaseDays] = usePersistedState<number>("prepPhaseDays", 7);
   const [targetWorkReadyDate, setTargetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
 
   const isApproved = optStatus === "approved";
@@ -37,22 +36,20 @@ const Step3Timeline = () => {
   const hasData = gradDateObj && chosenStartDateObj;
   const chain = hasData
     ? calculateLRMChainV2({
-        graduationDate: gradDateObj,
+        programEndDate: gradDateObj,
         chosenStartDate: chosenStartDateObj,
         govProcessingDays,
         bufferDays,
         hiringWeeks,
-        prepPhaseDays,
       })
     : null;
 
   const milestones = chain
     ? [
         { label: "LRM Date (Start Outreach)", date: chain.lrmDate },
-        { label: "Hiring Cycle Peak", date: chain.hiringCyclePeak },
-        { label: "Authorization Wall", date: chain.authorizationWall },
-        { label: "Filing Deadline", date: chain.filingDeadline },
+        { label: "Hiring Completion Deadline", date: chain.hiringCompletionDeadline },
         { label: "Chosen Start Date", date: chain.chosenStartDate },
+        { label: "Last Day to Start Working", date: chain.lastDayToWork },
       ]
     : [];
 
@@ -70,10 +67,6 @@ const Step3Timeline = () => {
           <div>
             <label className="text-xs text-muted-foreground block mb-1">Buffer Days</label>
             <Input type="number" min={0} max={60} value={bufferDays} onChange={(e) => setBufferDays(Math.max(0, parseInt(e.target.value) || 10))} className="w-28" />
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground block mb-1">Prep Phase Days</label>
-            <Input type="number" min={1} max={60} value={prepPhaseDays} onChange={(e) => setPrepPhaseDays(Math.max(1, parseInt(e.target.value) || 7))} className="w-28" />
           </div>
         </div>
       </GlassCard>
@@ -115,16 +108,12 @@ const Step3Timeline = () => {
               <span className="font-medium text-foreground">{formatDate(chain.lastDayToWork)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Application Anchor</span>
-              <span className="font-medium text-foreground">{formatDate(chain.applicationAnchor)}</span>
+              <span className="text-muted-foreground">Earliest Date to Apply for OPT</span>
+              <span className="font-medium text-foreground">{formatDate(chain.earliestDateToApply)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Filing Window (Earliest)</span>
-              <span className="font-medium text-foreground">{formatDate(chain.filingWindow.earliest)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Filing Window (Latest)</span>
-              <span className="font-medium text-foreground">{formatDate(chain.filingWindow.latest)}</span>
+              <span className="text-muted-foreground">Last Date to Apply for OPT</span>
+              <span className="font-medium text-foreground">{formatDate(chain.lastDateToApply)}</span>
             </div>
           </div>
         </GlassCard>
@@ -134,7 +123,7 @@ const Step3Timeline = () => {
       {chain && (
         <GlassCard>
           <h2 className="text-sm font-semibold text-foreground mb-3">Timeline Breakdown</h2>
-          <SegmentedTimeline prepDays={prepPhaseDays} hiringDays={hiringWeeks * 7} authDays={govProcessingDays + bufferDays} />
+          <SegmentedTimeline prepDays={14} hiringDays={hiringWeeks * 7} authDays={govProcessingDays + bufferDays} />
         </GlassCard>
       )}
 
@@ -142,8 +131,8 @@ const Step3Timeline = () => {
         <GlassCard>
           <p className="text-sm text-muted-foreground">
             {isApproved
-              ? "Please set your Graduation Date and EAD Start Date in Step 1 to generate your timeline."
-              : "Please set your Graduation Date in Step 1 and a Target Work-Ready Date above to generate your timeline."}
+              ? "Please set your Program End Date and EAD Start Date in Step 1 to generate your timeline."
+              : "Please set your Program End Date in Step 1 and a Target Work-Ready Date above to generate your timeline."}
           </p>
         </GlassCard>
       ) : (

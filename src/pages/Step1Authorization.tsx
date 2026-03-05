@@ -10,7 +10,7 @@ import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import ContactCard from "@/components/ContactCard";
 import { usePersistedState } from "@/hooks/usePersistedState";
-import { calcFilingDeadline, formatDate } from "@/lib/calculations";
+import { calcLastDateToApply, formatDate } from "@/lib/calculations";
 import content from "@/data/content.json";
 
 const statusOptions = [
@@ -27,7 +27,7 @@ const processingOptions = [
 ];
 
 const STATUS_TEXT: Record<string, string> = {
-  notApplied: "You have not applied for OPT yet. Your filing deadline is typically within 60 days after your program completion date. Confirm the exact date on your I-20 and with your DSO.",
+  notApplied: "You have not applied for OPT yet. Your last date to apply is typically within 60 days after your program end date. Confirm the exact date on your I-20 and with your DSO.",
   waiting: "Your OPT application is pending. Use this planner to sequence outreach and preparation while you wait.",
   approved: "Your OPT is approved. Your EAD Start Date anchors your job search timeline and unemployment tracking.",
   rfe: "You received a Request for Evidence (RFE). This increases timeline uncertainty. Confirm next steps with your DSO.",
@@ -35,22 +35,27 @@ const STATUS_TEXT: Record<string, string> = {
 };
 
 const PROCESSING_TEXT: Record<string, string> = {
-  standard: "Standard processing is often estimated at 3-5 months (planning estimate).",
+  standard: "Standard processing is often estimated at 3 to 5 months (planning estimate).",
   premium: "Premium processing is designed for an estimated 30-day window (planning estimate).",
 };
 
 function DatePickerField({
   label,
+  helperText,
   value,
   onChange,
 }: {
   label: string;
+  helperText?: string;
   value: Date | undefined;
   onChange: (d: Date | undefined) => void;
 }) {
   return (
     <>
       <label className="text-sm font-medium text-foreground block mb-2">{label}</label>
+      {helperText && (
+        <p className="text-xs text-muted-foreground mb-2">{helperText}</p>
+      )}
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -88,7 +93,7 @@ const Step1Authorization = () => {
   const submissionDateObj = submissionDate ? new Date(submissionDate) : undefined;
   const rfeResponseDateObj = rfeResponseDate ? new Date(rfeResponseDate) : undefined;
 
-  const filingDeadline = gradDateObj ? calcFilingDeadline(gradDateObj) : null;
+  const lastDateToApply = gradDateObj ? calcLastDateToApply(gradDateObj) : null;
 
   const canContinue = (() => {
     if (!gradDateObj) return false;
@@ -127,13 +132,14 @@ const Step1Authorization = () => {
       {optStatus !== "denied" && (
         <GlassCard>
           <DatePickerField
-            label="Graduation Date"
+            label="Program End Date"
+            helperText="Your Program End Date can be found on page 1 of your current I-20."
             value={gradDateObj}
             onChange={(d) => setGradDate(d ? d.toISOString() : null)}
           />
-          {filingDeadline && (
+          {lastDateToApply && (
             <p className="text-xs text-muted-foreground mt-2">
-              Filing Deadline: <span className="font-medium text-foreground">{formatDate(filingDeadline)}</span>
+              Last Date to Apply for OPT: <span className="font-medium text-foreground">{formatDate(lastDateToApply)}</span>
             </p>
           )}
         </GlassCard>

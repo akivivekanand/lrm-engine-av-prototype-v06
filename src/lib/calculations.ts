@@ -1,5 +1,5 @@
 /**
- * Calculations module — extends src/utils/dateCalculator.ts
+ * Calculations module -- extends src/utils/dateCalculator.ts
  * All date math uses local timezone, date-only (no time component).
  */
 
@@ -18,13 +18,18 @@ import {
 export { stripTime, addDays, subtractDays, daysBetween, formatDate, getMilestoneStatus };
 export type { LRMChain, MilestoneStatus };
 
-/** Graduation date + 60 days */
-export function calcFilingDeadline(graduationDate: Date): Date {
-  return addDays(stripTime(graduationDate), 60);
+/** Program End Date + 60 days */
+export function calcLastDateToApply(programEndDate: Date): Date {
+  return addDays(stripTime(programEndDate), 60);
 }
 
-/** chosenStartDate - (govProcessingDays + bufferDays) */
-export function calcAuthorizationWall(
+/** Program End Date - 90 days */
+export function calcEarliestDateToApply(programEndDate: Date): Date {
+  return subtractDays(stripTime(programEndDate), 90);
+}
+
+/** Chosen Start Date - (govProcessingDays + bufferDays) */
+export function calcHiringCompletionDeadline(
   chosenStartDate: Date,
   govProcessingDays: number,
   bufferDays: number
@@ -32,78 +37,49 @@ export function calcAuthorizationWall(
   return subtractDays(stripTime(chosenStartDate), govProcessingDays + bufferDays);
 }
 
-/** authorizationWall - (hiringWeeks * 7) */
-export function calcHiringCyclePeak(authorizationWall: Date, hiringWeeks: number): Date {
-  return subtractDays(authorizationWall, hiringWeeks * 7);
-}
-
-/** hiringCyclePeak - prepPhaseDays */
-export function calcLRMDate(hiringCyclePeak: Date, prepPhaseDays: number): Date {
-  return subtractDays(hiringCyclePeak, prepPhaseDays);
-}
-
-export interface LRMChainParams {
-  graduationDate: Date;
-  chosenStartDate: Date;
-  govProcessingDays: number;
-  bufferDays: number;
-  hiringWeeks: number;
-  prepPhaseDays: number;
-}
-
-export interface LRMChainResult {
-  graduationDate: Date;
-  filingDeadline: Date;
-  chosenStartDate: Date;
-  authorizationWall: Date;
-  hiringCyclePeak: Date;
-  lrmDate: Date;
-  lastDayToWork: Date;
-  applicationAnchor: Date;
-  filingWindow: { earliest: Date; latest: Date };
-}
-
 /** Chosen Start Date + 90 days */
 export function calcLastDayToWork(chosenStartDate: Date): Date {
   return addDays(stripTime(chosenStartDate), 90);
 }
 
-/** Program End Date - 60 - 21 = Program End Date - 81 */
-export function calcApplicationAnchor(programEndDate: Date): Date {
-  return subtractDays(stripTime(programEndDate), 81);
-}
-
-/** Filing window: earliest = programEndDate - 90, latest = programEndDate + 60 */
-export function calcFilingWindow(programEndDate: Date): { earliest: Date; latest: Date } {
-  const d = stripTime(programEndDate);
-  return { earliest: subtractDays(d, 90), latest: addDays(d, 60) };
-}
-
 /**
- * Updated calculateLRMChain that accepts prepPhaseDays param
- * and computes regulatory anchors.
+ * LRM = Last Day to Start Working - (hiringWeeks * 7) - 14
+ * Expands to: (Chosen Start Date + 90) - (hiringWeeks * 7) - 14
  */
+export function calcLRM(chosenStartDate: Date, hiringWeeks: number): Date {
+  const lastDay = calcLastDayToWork(chosenStartDate);
+  return subtractDays(lastDay, hiringWeeks * 7 + 14);
+}
+
+export interface LRMChainParams {
+  programEndDate: Date;
+  chosenStartDate: Date;
+  govProcessingDays: number;
+  bufferDays: number;
+  hiringWeeks: number;
+}
+
+export interface LRMChainResult {
+  programEndDate: Date;
+  lastDateToApply: Date;
+  earliestDateToApply: Date;
+  chosenStartDate: Date;
+  hiringCompletionDeadline: Date;
+  lastDayToWork: Date;
+  lrmDate: Date;
+}
+
 export function calculateLRMChainV2(params: LRMChainParams): LRMChainResult {
-  const grad = stripTime(params.graduationDate);
+  const programEnd = stripTime(params.programEndDate);
   const chosen = stripTime(params.chosenStartDate);
 
-  const filingDeadline = calcFilingDeadline(grad);
-  const authorizationWall = calcAuthorizationWall(chosen, params.govProcessingDays, params.bufferDays);
-  const hiringCyclePeak = calcHiringCyclePeak(authorizationWall, params.hiringWeeks);
-  const lrmDate = calcLRMDate(hiringCyclePeak, params.prepPhaseDays);
-  const lastDayToWork = calcLastDayToWork(chosen);
-  const applicationAnchor = calcApplicationAnchor(grad);
-  const filingWindow = calcFilingWindow(grad);
-
   return {
-    graduationDate: grad,
-    filingDeadline,
+    programEndDate: programEnd,
+    lastDateToApply: calcLastDateToApply(programEnd),
+    earliestDateToApply: calcEarliestDateToApply(programEnd),
     chosenStartDate: chosen,
-    authorizationWall,
-    hiringCyclePeak,
-    lrmDate,
-    lastDayToWork,
-    applicationAnchor,
-    filingWindow,
+    hiringCompletionDeadline: calcHiringCompletionDeadline(chosen, params.govProcessingDays, params.bufferDays),
+    lastDayToWork: calcLastDayToWork(chosen),
+    lrmDate: calcLRM(chosen, params.hiringWeeks),
   };
 }
