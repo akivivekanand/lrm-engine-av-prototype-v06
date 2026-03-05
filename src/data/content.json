@@ -1,92 +1,122 @@
 {
-  "universityContact": {
+  "careerCenter": {
+    "name": "Center for Career Equity Development and Success",
+    "location": "73 Tremont Street, 1st Floor, Boston, MA 02108",
+    "phone": "617-573-8480",
+    "email": "careers@suffolk.edu",
+    "web": "https://careers.suffolk.edu/"
+  },
+  "isso": {
     "name": "Suffolk University ISSO",
-    "office": "Center for International Education and Study Away (CIESA)",
-    "address": "73 Tremont Street | 9th Floor | Boston, MA 02108",
-    "phone": "617.573.8034",
-    "altPhone": "617.725.4151",
+    "location": "73 Tremont Street, 9th Floor, Boston, MA 02108",
+    "phone": "617-573-8034",
+    "email": "isso@suffolk.edu",
     "web": "https://www.suffolk.edu/global/international-students/isso"
   },
   "disclaimers": {
-    "legal": "This tool provides strategic planning guidance and does not constitute legal immigration advice. Confirm deadlines and eligibility with your DSO.",
-    "uscis": "As of March 1, 2026, USCIS Premium Processing for Form I-765 is $1,780 with an estimated 30-day turnaround. Standard processing is often estimated at 3\u20135 months. Confirm current information on USCIS.gov.",
-    "employment": "Prioritize qualifying OPT employment. Confirm all employment, volunteering, or self-employment eligibility with your DSO before beginning."
+    "uscis": "As of March 1, 2026, USCIS Premium Processing for Form I-765 is $1,780 with an estimated 30-day turnaround. Standard processing is often estimated at 3-5 months. Confirm current information on USCIS.gov.",
+    "legal": "This tool provides strategic planning guidance and does not constitute legal immigration advice. Confirm deadlines and eligibility with your DSO."
   },
-  "statusMessages": {
-    "notApplied": "You have not applied for OPT yet. Your filing deadline is typically within 60 days after your program completion date. Confirm the exact date on your I-20 and with your DSO.",
-    "waiting": "Your OPT application is pending. Use this planner to sequence outreach and preparation while you wait.",
-    "approved": "Your OPT is approved. Your EAD Start Date anchors your job search timeline and unemployment tracking.",
-    "rfe": "You received a Request for Evidence (RFE). This increases timeline uncertainty. Confirm next steps with your DSO.",
-    "denied": "Your OPT application was denied. Contact your DSO immediately."
-  },
-  "processingEstimates": {
-    "standard": "Standard processing is often estimated at 3\u20135 months (planning estimate).",
-    "premium": "Premium processing is designed for an estimated 30-day window (planning estimate)."
-  },
-  "industrySnapshots": {
-    "finance": { "weeks": 14, "note": "Finance cycles are structured and longer. Expect multi-round sequences." },
-    "tech": { "weeks": 5, "note": "Tech hiring can be sprint-based. Portfolio strength matters early." },
-    "consulting": { "weeks": 9, "note": "Consulting often includes multiple interview rounds." },
-    "healthcare": { "weeks": 7, "note": "Healthcare timelines vary by credentialing and role type." },
-    "general": { "weeks": 6, "note": "General hiring cycles average 6\u20138 weeks." }
-  },
+  "promptGuide": "A strong prompt typically follows this structure: assign the AI assistant a role + provide clear context about your situation + define the specific task you want completed + add constraints or guidance for how the response should be developed + specify the format you want the output delivered in.",
+  "genAiPromptExamples": [
+    {
+      "id": "ba-gap",
+      "title": "Skill Gap Analysis (Business Analyst Focus)",
+      "prompt": "Act as a recruiter hiring entry-level business analysts in the finance industry. I am an international graduate student studying business analytics and preparing to apply for analyst roles in the United States. Below is a job description and a summary of my current resume. Compare my experience with the requirements listed in the job description and identify the top five skill gaps or areas where my experience could be presented more strongly. Focus on practical improvements that would make my resume more competitive for this type of role. Avoid generic advice and prioritize suggestions that demonstrate measurable impact. Present your response as a table with three columns: Skill Gap, Why Employers Value This Skill, and Suggested Resume Bullet Point."
+    },
+    {
+      "id": "transferable-skills",
+      "title": "Translating International Experience",
+      "prompt": "Role: Act as a Career Coach specializing in international student transitions. Context: I have 2 years of experience as a [Job Title] in [Home Country]. I am now applying for [Target Job] in the US. Task: Review my international experience and identify how to rephrase my accomplishments to align with US corporate cultural norms, specifically emphasizing individual impact and technical leadership. Format: Deliver the response as a bulleted list of 'Local Version' vs. 'US Market Version'."
+    },
+    {
+      "id": "star-story",
+      "title": "STAR Story Generator",
+      "prompt": "Role: Act as an Interview Coach. Context: I am preparing for a behavioral interview for a [Job Title] role. Task: Using the STAR method (Situation, Task, Action, Result), help me draft a story that demonstrates my ability to solve complex problems under pressure. Use the following context: [Insert Brief Scenario]. Constraints: Ensure the 'Action' section highlights my specific contributions and the 'Result' is quantified with data or metrics. Format: A structured 4-paragraph response."
+    },
+    {
+      "id": "networking-icebreaker",
+      "title": "Networking Icebreaker",
+      "prompt": "Role: Act as a Networking Expert. Context: I am attending a professional mixer for [Industry]. I want to approach a Senior Manager at [Company]. Based on their recent company news about [Insert News Item], draft 3 different natural-sounding opening questions that show I have done my research and am interested in their perspective. Format: 3 distinct options with brief explanations of why each works."
+    },
+    {
+      "id": "salary-research",
+      "title": "Salary Range Research",
+      "prompt": "Role: Act as a Compensation Analyst. Context: Provide a realistic salary range for a [Job Title] in [City, State] with a Master's degree and 0-2 years of experience. Task: Include data points for base salary, signing bonuses, and typical benefits for this industry. Format: A concise summary with a 'Low/Median/High' breakdown."
+    },
+    {
+      "id": "ats-keyword",
+      "title": "ATS Keyword Optimization",
+      "prompt": "Role: Act as an ATS (Applicant Tracking System) Specialist. Context: I am providing a Job Description and my Resume. Task: Scan both and identify the top 10 keywords or technical phrases present in the JD that are missing from my resume. Constraints: Suggest exactly where in my resume I should integrate these keywords to increase my match score without keyword stuffing. Format: A prioritized checklist."
+    },
+    {
+      "id": "visa-exp",
+      "title": "Explaining OPT/H1B Status",
+      "prompt": "Role: Act as an Immigration Policy Expert. Context: I am in a final round interview and the recruiter asked about my work authorization. Task: Draft a 3-sentence response that explains my OPT status clearly. Constraints: Emphasize that no sponsorship is required for the first 12-36 months and mention eligibility for the H1B lottery. Format: A conversational script."
+    },
+    {
+      "id": "case-interview",
+      "title": "Case Interview Framework",
+      "prompt": "Role: Act as a Management Consultant. Context: I am preparing for a case interview regarding [Topic, e.g., Market Entry]. Task: Provide a 5-step framework I can use to structure my thoughts during the interview. For each step, provide 2 probing questions I should ask the interviewer to gather more data. Format: A numbered list with 'Rationale' for each step."
+    },
+    {
+      "id": "cold-outreach",
+      "title": "Cold Outreach Personalizer",
+      "prompt": "Role: Act as a Communication Specialist. Context: I am writing a cold email to a hiring manager for [Position]. Task: I want to stand out by mentioning a specific technical challenge their team is currently facing: [Insert Challenge]. Constraints: Draft a 3-paragraph email that is concise, professional, and focuses on how my background in [Your Skill] can help solve that specific challenge. Format: A ready-to-copy email template."
+    },
+    {
+      "id": "github-readme",
+      "title": "GitHub/Portfolio Narrative",
+      "prompt": "Role: Act as a Technical Writer. Context: I have a project on GitHub about [Project Topic]. Task: Review my project description and draft a professional 'README.md' summary that focuses on the 'Business Value' of the code. Constraints: Ensure you highlight the tech stack used and the specific problem solved. Format: Markdown code block."
+    }
+  ],
   "templates": [
     {
-      "id": "alumniOutreach",
-      "title": "Alumni Outreach",
-      "body": "Hi [Name], I'm a current international student at [University] studying [Major]. I'd value 15 minutes to ask about your experience at [Company]."
+      "id": "informational",
+      "title": "Informational Interview Request",
+      "subject": "Fellow Suffolk Alum / Researching the [Industry] Landscape in [City]",
+      "body": "Hi [Name], I am a current international graduate student at Suffolk University pursuing my Master's in [Major]. I have been following your career trajectory at [Company Name], and I was specifically struck by your transition into your current work with [Specific Project or Skill]. As an international student, I am currently mapping out my career timeline and trying to understand the human reality of the hiring cycle in the US [Industry] sector. I am not seeking a job lead, but rather 15-20 minutes of your time to ask specific questions about the cultural adjustments and technical must-haves for entry-level professionals. I am happy to work around your schedule for a brief Zoom or coffee chat."
+    },
+    {
+      "id": "elevatorPitch",
+      "title": "Problem-Solver Elevator Pitch",
+      "subject": null,
+      "body": "I am a [Major] student at Suffolk University specializing in [Skill A] and [Skill B]. I recently achieved [Result] by implementing [Method]. I am currently focusing on the [Industry] sector to solve [Specific Problem] through data-driven strategies. My goal is to bring my international perspective and technical background to a team like yours to help drive [Specific Outcome]. I have been following [Company's] work on [Project], and I would love to learn more about how your team handles [Related Challenge]."
     },
     {
       "id": "referralRequest",
       "title": "Referral Request",
-      "body": "Hi [Name], I'm applying for the [Job Title] role at [Company]. Would you be open to sharing advice on team priorities?"
-    },
-    {
-      "id": "infoInterview",
-      "title": "Informational Interview Request",
-      "body": "Hi [Name], I'm researching [Industry] and would appreciate a 20-minute chat to learn from your perspective."
+      "subject": "Quick question about the [Job Title] role at [Company]",
+      "body": "Hi [Name], I am applying for the [Job Title] role at [Company]. Would you be open to sharing advice on team priorities and whether a referral might be appropriate? I want to make sure my application highlights the right strengths."
     },
     {
       "id": "thankYou",
       "title": "Post-Interview Thank You",
-      "body": "Thank you for the opportunity to interview for [Role]. I appreciated our discussion about [Topic]."
+      "subject": "Thank you for the conversation about [Role]",
+      "body": "Thank you for the opportunity to interview for [Role]. I appreciated our discussion about [Topic] and am excited about the possibility of contributing to [Company's] work in [Area]. Please do not hesitate to reach out if you need any additional information."
     },
     {
-      "id": "elevatorPitch",
-      "title": "30-Second Elevator Pitch",
-      "body": "I'm a [Major] student focused on [Skill]. Recently I achieved [Result]. I'm targeting [Industry] because I'm interested in solving [Problem]."
+      "id": "coldOutreach",
+      "title": "Cold Outreach to Hiring Manager",
+      "subject": "Interest in [Position] - [Your Name], Suffolk University",
+      "body": "Hi [Name], I am a graduate student at Suffolk University with a background in [Skill]. I noticed your team is working on [Challenge or Project], and I believe my experience with [Relevant Experience] could contribute meaningfully to your efforts. I would welcome the chance to learn more about your team's priorities. Would you be open to a brief conversation?"
     }
   ],
   "aiPrompts": [
     {
-      "id": "skillGap",
+      "id": "sg",
       "title": "Skill Gap Analysis",
       "prompt": "Act as a Senior Recruiter. Compare this Job Description to my Resume and identify 5 skill gaps."
     },
     {
-      "id": "resumeOptimize",
+      "id": "ro",
       "title": "Resume Optimization",
       "prompt": "Rewrite my bullets using the Google X-Y-Z formula: Accomplished [X] as measured by [Y], by doing [Z]."
     },
     {
-      "id": "coverLetterReview",
-      "title": "Cover Letter Review",
-      "prompt": "Review this cover letter for clarity and specificity. Remove generic wording."
-    },
-    {
-      "id": "linkedinAudit",
+      "id": "lc",
       "title": "LinkedIn Audit",
       "prompt": "Improve my LinkedIn headline and About section for keyword alignment."
-    },
-    {
-      "id": "starStory",
-      "title": "STAR Story Builder",
-      "prompt": "Help me structure this story using the STAR method."
-    },
-    {
-      "id": "companyResearch",
-      "title": "Company Research Synthesis",
-      "prompt": "Summarize [Company] mission, priorities, competitors, and 3 challenges."
     }
   ]
 }

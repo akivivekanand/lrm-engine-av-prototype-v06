@@ -58,11 +58,30 @@ export interface LRMChainResult {
   authorizationWall: Date;
   hiringCyclePeak: Date;
   lrmDate: Date;
+  lastDayToWork: Date;
+  applicationAnchor: Date;
+  filingWindow: { earliest: Date; latest: Date };
+}
+
+/** Chosen Start Date + 90 days */
+export function calcLastDayToWork(chosenStartDate: Date): Date {
+  return addDays(stripTime(chosenStartDate), 90);
+}
+
+/** Program End Date - 60 - 21 = Program End Date - 81 */
+export function calcApplicationAnchor(programEndDate: Date): Date {
+  return subtractDays(stripTime(programEndDate), 81);
+}
+
+/** Filing window: earliest = programEndDate - 90, latest = programEndDate + 60 */
+export function calcFilingWindow(programEndDate: Date): { earliest: Date; latest: Date } {
+  const d = stripTime(programEndDate);
+  return { earliest: subtractDays(d, 90), latest: addDays(d, 60) };
 }
 
 /**
  * Updated calculateLRMChain that accepts prepPhaseDays param
- * instead of hardcoding 7.
+ * and computes regulatory anchors.
  */
 export function calculateLRMChainV2(params: LRMChainParams): LRMChainResult {
   const grad = stripTime(params.graduationDate);
@@ -72,6 +91,9 @@ export function calculateLRMChainV2(params: LRMChainParams): LRMChainResult {
   const authorizationWall = calcAuthorizationWall(chosen, params.govProcessingDays, params.bufferDays);
   const hiringCyclePeak = calcHiringCyclePeak(authorizationWall, params.hiringWeeks);
   const lrmDate = calcLRMDate(hiringCyclePeak, params.prepPhaseDays);
+  const lastDayToWork = calcLastDayToWork(chosen);
+  const applicationAnchor = calcApplicationAnchor(grad);
+  const filingWindow = calcFilingWindow(grad);
 
   return {
     graduationDate: grad,
@@ -80,5 +102,8 @@ export function calculateLRMChainV2(params: LRMChainParams): LRMChainResult {
     authorizationWall,
     hiringCyclePeak,
     lrmDate,
+    lastDayToWork,
+    applicationAnchor,
+    filingWindow,
   };
 }

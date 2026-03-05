@@ -6,14 +6,17 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 interface TemplateCardProps {
   title: string;
   body: string;
+  subject?: string | null;
 }
 
-const TemplateCard = ({ title, body }: TemplateCardProps) => {
+const TemplateCard = ({ title, body, subject }: TemplateCardProps) => {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const copyText = subject ? `Subject: ${subject}\n\n${body}` : body;
+
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(body);
+    await navigator.clipboard.writeText(copyText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -29,6 +32,9 @@ const TemplateCard = ({ title, body }: TemplateCardProps) => {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="px-4 pb-4">
+            {subject && (
+              <p className="text-xs text-muted-foreground/70 mb-2 italic">Subject: {subject}</p>
+            )}
             <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{body}</p>
             <button
               onClick={handleCopy}
