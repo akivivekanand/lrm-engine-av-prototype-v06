@@ -10,9 +10,11 @@ import UnemploymentGauge from "@/components/UnemploymentGauge";
 import TaskEngineComponent from "@/components/TaskEngineComponent";
 import PromptLibrary from "@/components/PromptLibrary";
 import ContactCard from "@/components/ContactCard";
+import EventCard from "@/components/EventCard";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { calculateLRMChainV2, formatDate, getMilestoneStatus, daysBetween, stripTime } from "@/lib/calculations";
 import content from "@/data/content.json";
+import type { CalendarEvent } from "@/types/events";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -151,6 +153,28 @@ const Dashboard = () => {
       <GlassCard>
         <p className="text-xs text-muted-foreground leading-relaxed">{content.disclaimers.legal}</p>
       </GlassCard>
+
+      {/* Upcoming Events */}
+      {chain && (() => {
+        try {
+          const stored = localStorage.getItem("semesterEvents");
+          if (!stored) return null;
+          const all: CalendarEvent[] = JSON.parse(stored);
+          const today = new Date().toISOString().split("T")[0];
+          const upcoming = all.filter((e) => e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+          if (upcoming.length === 0) return null;
+          return (
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold text-foreground">Upcoming Events</h2>
+              {upcoming.map((ev) => (
+                <EventCard key={ev.id} event={ev} />
+              ))}
+            </div>
+          );
+        } catch {
+          return null;
+        }
+      })()}
 
       <Button variant="outline" onClick={() => navigate("/step-1-authorization")} className="w-full">
         Edit Inputs
