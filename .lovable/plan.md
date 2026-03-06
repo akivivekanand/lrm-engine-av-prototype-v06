@@ -1,57 +1,71 @@
 
 
-# Fix Calculation Logic, Terminology, and Conditional UI
+# Events Integration: Admin Calendar PDF Upload
 
-## Changes across 5 files
+## Overview
 
-### 1. Terminology Renames (global)
+Add an admin events management page where administrators can upload semester calendar PDFs from the Career Center or International Student Office. The system extracts event details and displays them on the student dashboard after timeline generation.
 
-| Old Term | New Term | Files Affected |
-|----------|----------|----------------|
-| Graduation Date | Program End Date | Step1, Step3, Dashboard, calculations |
-| Filing Deadline | Last Date to Apply for OPT | Step1, Step3, Dashboard |
-| Application Anchor | Earliest Date to Apply for OPT | Step3, Dashboard |
-| Authorization Wall | Hiring Completion Deadline | Step3, Dashboard |
-| Key Dates | Timing Constraints | Dashboard |
+## New Files
 
-### 2. LRM Calculation Fix (`src/lib/calculations.ts`)
+### 1. `src/pages/AdminEvents.tsx`
+Admin-only page at route `/admin/events` with:
+- Two upload zones: "Career Center Calendar" and "International Student Office Calendar"
+- File input accepting PDFs only
+- On upload: parse PDF using `document--parse_document` approach -- but since there's no backend, we'll use a client-side PDF text extraction library (`pdfjs-dist`) to extract raw text, then parse it with heuristics to find events
+- Extracted events displayed in an editable table (title, date, host office, location/link)
+- Admin can edit/delete extracted events before saving
+- "Save Events" button persists to localStorage under key `semesterEvents`
 
-Current LRM formula chains through authorizationWall and hiringCyclePeak with prepPhaseDays. The spec requires a simpler formula:
+### 2. `src/lib/parseCalendarPdf.ts`
+Client-side PDF parsing utility:
+- Uses `pdfjs-dist` to extract text from uploaded PDF
+- Regex/heuristic parser to identify event patterns (date patterns, titles, locations)
+- Returns array of `CalendarEvent` objects
+- Fallback: if extraction fails, admin can manually add events
 
-**New LRM**: `Last Day to Start Working - (Hiring Weeks * 7) - 14 days`
+### 3. `src/components/EventCard.tsx`
+Simple card component displaying: event title, date (formatted), host office badge (Career Center / ISSO), location or meeting link (clickable if URL)
 
-Which expands to: `(Chosen Start Date + 90) - (Hiring Weeks * 7) - 14`
+### 4. `src/types/events.ts`
+```
+interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string; // ISO date
+  hostOffice: "Career Center" | "International Student Office";
+  location: string; // physical address or meeting URL
+}
+```
 
-This replaces the current chain that goes through govProcessingDays/bufferDays/prepPhaseDays. The `calculateLRMChainV2` function will be updated accordingly. The `Earliest Date to Apply for OPT` also changes from `Program End Date - 81` to `Program End Date - 90`.
+## Modified Files
 
-### 3. Step 1 Updates (`src/pages/Step1Authorization.tsx`)
+### 5. `src/App.tsx`
+Add route: `/admin/events` pointing to `AdminEvents` page.
 
-- Rename "Graduation Date" label to "Program End Date"
-- Add helper text: "Your Program End Date can be found on page 1 of your current I-20."
-- Rename "Filing Deadline" display text to "Last Date to Apply for OPT"
+### 6. `src/pages/Dashboard.tsx`
+After the timeline is generated (below existing content), add an "Upcoming Events" section:
+- Read `semesterEvents` from localStorage
+- Filter to events with date >= today
+- Sort chronologically
+- Render each with `EventCard`
+- Only visible after the plan/timeline data exists (i.e., `chain` is not null)
 
-### 4. Dashboard Updates (`src/pages/Dashboard.tsx`)
+## Dependencies
 
-- Rename "Key Dates" to "Timing Constraints"
-- Rename all date labels per terminology table
-- Add LRM info text explaining the calculation logic (tooltip or small text beneath the LRM hero)
-- **Conditional rendering**: If `optStatus !== "notApplied"`, hide "Earliest Date to Apply for OPT" and "Last Date to Apply for OPT" from the list
-- **Unemployment Gauge**: Auto-calculate `daysUsed` as `daysBetween(chosenStartDate, today)` clamped 0-90. Remove manual input field and `daysUsed` persisted state
-- Remove Career Center ContactCard (line 146) since it's already on Cover. Keep ISSO as compliance footer only on Step 1 and Dashboard
+Add `pdfjs-dist` for client-side PDF text extraction.
 
-### 5. Step 3 Updates (`src/pages/Step3Timeline.tsx`)
+## Admin Access
 
-- Rename milestone labels: "Authorization Wall" to "Hiring Completion Deadline", "Filing Deadline" to "Last Date to Apply for OPT", "Application Anchor" to "Earliest Date to Apply for OPT"
+Since there's no auth backend, the admin page is simply an unlisted route (`/admin/events`). A small "Admin" link can be added to the Cover page footer for access. No student-facing upload UI.
 
-### 6. Cover Page (`src/pages/Cover.tsx`)
+## Event Extraction Heuristics
 
-- Update title to "Career Timeline Mapping Engine: Strategic Job Search Navigation"
-- Remove ISSO ContactCard from legal disclaimer card (lines 61-63). Only Suffolk Career Center contact remains on Cover
+The parser will look for:
+- Date patterns (Month Day, YYYY or MM/DD/YYYY variants)
+- Lines adjacent to dates treated as event titles
+- Keywords like "Room", "Zoom", "http", "Building" to identify location
+- Host office determined by which upload zone was used (Career Center vs ISSO)
 
-### 7. Calculation Details (`src/lib/calculations.ts`)
-
-- `calcApplicationAnchor` (renamed to Earliest Date to Apply): change from `programEndDate - 81` to `programEndDate - 90`
-- New simplified LRM: `calcLastDayToWork(chosenStartDate) - (hiringWeeks * 7) - 14`
-- The `LRMChainResult` interface fields rename: `filingDeadline` to `lastDateToApply`, `applicationAnchor` to `earliestDateToApply`, `authorizationWall` to `hiringCompletionDeadline`
-- Remove `filingWindow` from the result (replaced by `earliestDateToApply` and `lastDateToApply`)
+If extraction quality is low, the admin sees a warning and can manually edit all fields in the table before saving.
 
