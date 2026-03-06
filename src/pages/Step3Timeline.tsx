@@ -1,18 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import TimelineMilestone from "@/components/TimelineMilestone";
 import SegmentedTimeline from "@/components/SegmentedTimeline";
-import PromptLibrary from "@/components/PromptLibrary";
+import { Button } from "@/components/ui/button";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { calculateLRMChainV2, getMilestoneStatus, formatDate } from "@/lib/calculations";
-import content from "@/data/content.json";
 
 const Step3Timeline = () => {
   const navigate = useNavigate();
@@ -22,14 +15,13 @@ const Step3Timeline = () => {
   const [optStatus] = usePersistedState<string>("optStatus", "notApplied");
   const [hiringWeeks] = usePersistedState<number>("hiringWeeks", 6);
   const [prepWindowDays] = usePersistedState<number>("prepWindowDays", 14);
-
-  const [targetWorkReadyDate, setTargetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
+  const [targetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
+  const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
 
   const isApproved = optStatus === "approved";
-  const chosenStartDateStr = isApproved ? eadDate : targetWorkReadyDate;
-  const chosenStartDateObj = chosenStartDateStr ? new Date(chosenStartDateStr) : undefined;
-  const targetDateObj = targetWorkReadyDate ? new Date(targetWorkReadyDate) : undefined;
+  const chosenStartDateStr = isApproved ? eadDate : (targetWorkReadyDate || estimatedStartDate);
   const gradDateObj = gradDate ? new Date(gradDate) : undefined;
+  const chosenStartDateObj = chosenStartDateStr ? new Date(chosenStartDateStr) : undefined;
 
   const hasData = gradDateObj && chosenStartDateObj;
   const chain = hasData
@@ -52,76 +44,80 @@ const Step3Timeline = () => {
 
   return (
     <StepLayout>
-      <h1 className="text-xl font-bold text-foreground">Step 3: Timeline</h1>
+      <h1 className="text-xl font-bold text-foreground">Step 3: Timeline Review</h1>
 
+      {/* Displayed Inputs */}
       <GlassCard>
-        {isApproved ? (
-          <>
-            <label className="text-sm font-medium text-foreground block mb-2">Chosen Start Date (EAD)</label>
-            <p className="text-sm font-medium text-foreground">
-              {chosenStartDateObj ? formatDate(chosenStartDateObj) : "Set EAD Start Date in Step 1"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">Locked to your EAD Start Date from Step 1.</p>
-          </>
-        ) : (
-          <>
-            <label className="text-sm font-medium text-foreground block mb-2">Target Work-Ready Date</label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !targetDateObj && "text-muted-foreground")}>
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {targetDateObj ? format(targetDateObj, "PPP") : "Select date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={targetDateObj} onSelect={(d) => setTargetWorkReadyDate(d ? d.toISOString() : null)} className={cn("p-3 pointer-events-auto")} />
-              </PopoverContent>
-            </Popover>
-          </>
-        )}
+        <h2 className="text-sm font-semibold text-foreground mb-3">Your Inputs</h2>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Program End Date</span>
+            <span className="font-medium text-foreground">{gradDateObj ? formatDate(gradDateObj) : "Not set"}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Chosen Start Date</span>
+            <span className="font-medium text-foreground">{chosenStartDateObj ? formatDate(chosenStartDateObj) : "Not set"}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Hiring Cycle</span>
+            <span className="font-medium text-foreground">{hiringWeeks} weeks</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Preparation Window</span>
+            <span className="font-medium text-foreground">{prepWindowDays} days</span>
+          </div>
+        </div>
       </GlassCard>
 
-      {/* Timeline Visualization */}
-      {chain && (
-        <GlassCard>
-          <h2 className="text-sm font-semibold text-foreground mb-3">Timeline</h2>
-          <SegmentedTimeline chain={chain} />
-        </GlassCard>
-      )}
-
+      {/* Calculated Dates */}
       {!hasData ? (
         <GlassCard>
           <p className="text-sm text-muted-foreground">
-            {isApproved
-              ? "Please set your Program End Date and EAD Start Date in Step 1 to generate your timeline."
-              : "Please set your Program End Date in Step 1 and a Target Work-Ready Date above to generate your timeline."}
+            Please complete Steps 1 and 2 to generate your timeline.
           </p>
         </GlassCard>
       ) : (
-        <GlassCard>
-          <h2 className="text-sm font-semibold text-foreground mb-4">Key Dates</h2>
-          {milestones.map((m, i) => (
-            <TimelineMilestone key={m.label} label={m.label} date={m.date} status={getMilestoneStatus(m.date)} isLast={i === milestones.length - 1} />
-          ))}
-        </GlassCard>
+        <>
+          <GlassCard>
+            <h2 className="text-sm font-semibold text-foreground mb-3">Core Timeline Calculations</h2>
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Last Day to Start Working</span>
+                <span className="font-medium text-foreground">{formatDate(chain!.lastDayToWork)}</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground">Program End Date + 90 days</p>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Last Responsible Moment (LRM)</span>
+                <span className="font-medium text-foreground">{formatDate(chain!.lrmDate)}</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground">Last Day to Start Working minus Hiring Cycle minus Preparation Window</p>
+            </div>
+          </GlassCard>
+
+          {/* Timeline Visualization */}
+          <GlassCard>
+            <h2 className="text-sm font-semibold text-foreground mb-3">Timeline Markers</h2>
+            <SegmentedTimeline chain={chain!} />
+          </GlassCard>
+
+          {/* Key Dates */}
+          <GlassCard>
+            <h2 className="text-sm font-semibold text-foreground mb-4">Key Dates</h2>
+            {milestones.map((m, i) => (
+              <TimelineMilestone key={m.label} label={m.label} date={m.date} status={getMilestoneStatus(m.date)} isLast={i === milestones.length - 1} />
+            ))}
+          </GlassCard>
+        </>
       )}
-
-      {/* Prompt Library */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">AI Prompt Library</h2>
-        <PromptLibrary />
-      </div>
-
-      <GlassCard>
-        <p className="text-xs text-muted-foreground leading-relaxed">{content.disclaimers.uscis}</p>
-      </GlassCard>
 
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate("/step-2-strategy")} className="flex-1">
           Back
         </Button>
-        <Button onClick={() => navigate("/dashboard")} className="flex-1">
-          View Dashboard
+        <Button onClick={() => navigate("/dashboard")} className="flex-1" disabled={!hasData}>
+          Continue to Dashboard
         </Button>
       </div>
     </StepLayout>

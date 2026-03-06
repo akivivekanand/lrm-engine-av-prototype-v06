@@ -50,6 +50,14 @@ const Dashboard = () => {
 
   const lrmStatus = chain ? getMilestoneStatus(chain.lrmDate) : null;
   const statusColor = lrmStatus === "crisis" ? "destructive" : lrmStatus === "compression" ? "secondary" : "outline";
+  const statusLabel = lrmStatus === "crisis" ? "Past Due" : lrmStatus === "compression" ? "Soon" : "On Track";
+
+  // Timeline color indicator
+  const timelineColorClass = lrmStatus === "crisis"
+    ? "border-destructive/30"
+    : lrmStatus === "compression"
+      ? "border-amber-500/30"
+      : "border-emerald-500/30";
 
   const autoCalcDaysUsed = (() => {
     if (!isApproved || !chosenStartDateStr) return 0;
@@ -63,7 +71,6 @@ const Dashboard = () => {
     if (!chain) return;
     setGenerating(true);
 
-    // Simulate brief processing
     setTimeout(() => {
       const result = generateCareerPlan({
         chain,
@@ -75,7 +82,6 @@ const Dashboard = () => {
       setPlan(result);
       setGenerating(false);
 
-      // Fire confetti
       confetti({
         particleCount: 150,
         spread: 80,
@@ -85,33 +91,47 @@ const Dashboard = () => {
     }, 800);
   };
 
+  // Upcoming events
+  const getUpcomingEvents = (): CalendarEvent[] => {
+    try {
+      const stored = localStorage.getItem("semesterEvents");
+      if (!stored) return [];
+      const all: CalendarEvent[] = JSON.parse(stored);
+      const today = new Date().toISOString().split("T")[0];
+      return all.filter((e) => e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+    } catch {
+      return [];
+    }
+  };
+
   // Collapsible section state
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     timeline: true,
     guidance: true,
     action: true,
     resources: false,
+    events: true,
   });
   const toggle = (key: string) => setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const upcomingEvents = getUpcomingEvents();
 
   return (
     <StepLayout>
       {/* Hero: LRM Date */}
       {chain && (
-        <GlassCard>
+        <GlassCard className={`border-2 ${timelineColorClass}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground">Last Responsible Moment</p>
               <p className="text-lg font-bold text-foreground">{formatDate(chain.lrmDate)}</p>
             </div>
-            <Badge variant={statusColor}>
-              {lrmStatus === "crisis" ? "Past Due" : lrmStatus === "compression" ? "Soon" : "On Track"}
-            </Badge>
+            <Badge variant={statusColor}>{statusLabel}</Badge>
           </div>
           <div className="flex items-start gap-1.5 mt-3 p-2 rounded bg-muted/50">
             <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              LRM = Last Day to Start Working − Hiring Cycle − Preparation Window. This is the latest date you should begin your job search.
+              LRM = Last Day to Start Working minus Hiring Cycle minus Preparation Window. This is the latest date you should begin your job search.
             </p>
           </div>
         </GlassCard>
@@ -142,6 +162,17 @@ const Dashboard = () => {
         <GlassCard>
           <h2 className="text-sm font-semibold text-foreground mb-3">Timeline</h2>
           <SegmentedTimeline chain={chain} />
+          <div className="flex gap-3 mt-3 text-[10px]">
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> On Track
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" /> Compressed
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-destructive inline-block" /> Conflict
+            </span>
+          </div>
         </GlassCard>
       )}
 
@@ -301,6 +332,28 @@ const Dashboard = () => {
               </CollapsibleContent>
             </GlassCard>
           </Collapsible>
+
+          {/* Upcoming Events (after plan generation) */}
+          {upcomingEvents.length > 0 && (
+            <Collapsible open={openSections.events} onOpenChange={() => toggle("events")}>
+              <GlassCard>
+                <CollapsibleTrigger className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4 text-primary" />
+                    <h2 className="text-sm font-semibold text-foreground">Upcoming Events</h2>
+                  </div>
+                  {openSections.events ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="mt-3 space-y-3">
+                    {upcomingEvents.map((ev) => (
+                      <EventCard key={ev.id} event={ev} />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </GlassCard>
+            </Collapsible>
+          )}
         </div>
       )}
 
@@ -317,28 +370,6 @@ const Dashboard = () => {
       <GlassCard>
         <p className="text-xs text-muted-foreground leading-relaxed">{content.disclaimers.legal}</p>
       </GlassCard>
-
-      {/* Upcoming Events */}
-      {chain && (() => {
-        try {
-          const stored = localStorage.getItem("semesterEvents");
-          if (!stored) return null;
-          const all: CalendarEvent[] = JSON.parse(stored);
-          const today = new Date().toISOString().split("T")[0];
-          const upcoming = all.filter((e) => e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
-          if (upcoming.length === 0) return null;
-          return (
-            <div className="space-y-3">
-              <h2 className="text-sm font-semibold text-foreground">Upcoming Events</h2>
-              {upcoming.map((ev) => (
-                <EventCard key={ev.id} event={ev} />
-              ))}
-            </div>
-          );
-        } catch {
-          return null;
-        }
-      })()}
 
       <Button variant="outline" onClick={() => navigate("/step-1-authorization")} className="w-full">
         Edit Inputs

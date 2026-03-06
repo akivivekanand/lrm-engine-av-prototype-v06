@@ -28,7 +28,7 @@ const processingOptions = [
 ];
 
 const PROCESSING_TEXT: Record<string, string> = {
-  standard: "Standard processing: estimated 3–5 months.",
+  standard: "Standard processing: estimated 3 to 5 months.",
   premium: "Premium processing: estimated approximately 30 days.",
 };
 
@@ -143,10 +143,20 @@ const Step1Authorization = () => {
 
       {/* Denied: DSO contact only, no timeline */}
       {optStatus === "denied" && (
-        <ContactCard
-          contact={content.isso}
-          disclaimer="Timeline calculation is disabled for denied status. Contact your DSO for next steps."
-        />
+        <>
+          <GlassCard>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Students should immediately contact their DSO and career center to discuss next steps and contingency planning. Timeline calculations should not proceed until this status is resolved.
+            </p>
+          </GlassCard>
+          <ContactCard
+            contact={content.isso}
+            disclaimer="Contact University DSO for official policy guidance."
+          />
+          <ContactCard
+            contact={content.careerCenter}
+          />
+        </>
       )}
 
       {/* ===== NOT APPLIED ===== */}
@@ -169,6 +179,9 @@ const Step1Authorization = () => {
                   <span className="text-muted-foreground">OPT Filing Deadline</span>
                   <span className="font-medium text-foreground">{formatDate(optFilingDeadline!)}</span>
                 </div>
+                <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
+                  The earliest OPT application date is especially important for planning because students should begin preparing application materials and job search strategy before this window opens.
+                </p>
               </div>
             )}
           </GlassCard>
@@ -220,6 +233,9 @@ const Step1Authorization = () => {
             >
               <ExternalLink className="h-3 w-3" /> Check USCIS Processing Times
             </a>
+            <GlassCard className="mt-3 p-3">
+              <p className="text-xs text-muted-foreground leading-relaxed">{content.disclaimers.uscis}</p>
+            </GlassCard>
           </GlassCard>
           <GlassCard>
             <DatePickerField
@@ -242,11 +258,11 @@ const Step1Authorization = () => {
               <GlassCard>
                 <DatePickerField
                   label="Estimated Start Date"
-                  helperText={`Enter an estimated start date. Typically 4–5 months after submission${suggestedEstimatedDate ? ` (suggested: ${formatDate(suggestedEstimatedDate)})` : ""}.`}
+                  helperText={`Enter an estimated start date. Students should enter an approximate start date around 4 to 5 months after the OPT application submission date${suggestedEstimatedDate ? ` (suggested: ${formatDate(suggestedEstimatedDate)})` : ""}.`}
                   value={estimatedStartDateObj}
                   onChange={(d) => setEstimatedStartDate(d ? d.toISOString() : null)}
                 />
-                <p className="text-xs text-muted-foreground mt-2">This estimated date will be used as your planning anchor.</p>
+                <p className="text-xs text-muted-foreground mt-2">This estimated date will temporarily serve as the planning anchor for the timeline calculations.</p>
               </GlassCard>
             </>
           )}
@@ -266,7 +282,7 @@ const Step1Authorization = () => {
           </GlassCard>
           <GlassCard>
             <DatePickerField
-              label="EAD Start Date"
+              label="Chosen Start Date (EAD Start Date)"
               helperText="The start date on your Employment Authorization Document."
               value={eadDateObj}
               onChange={(d) => setEadDate(d ? d.toISOString() : null)}
@@ -284,6 +300,13 @@ const Step1Authorization = () => {
               helperText="Found on page 1 of your current I-20."
               value={gradDateObj}
               onChange={(d) => setGradDate(d ? d.toISOString() : null)}
+            />
+          </GlassCard>
+          <GlassCard>
+            <DatePickerField
+              label="OPT Application Submission Date"
+              value={submissionDateObj}
+              onChange={(d) => setSubmissionDate(d ? d.toISOString() : null)}
             />
           </GlassCard>
           <GlassCard>
@@ -313,7 +336,7 @@ const Step1Authorization = () => {
           Back
         </Button>
         <Button onClick={() => navigate("/step-2-strategy")} className="flex-1" disabled={!canContinue}>
-          Continue
+          Continue to Step 2
         </Button>
       </div>
     </StepLayout>
