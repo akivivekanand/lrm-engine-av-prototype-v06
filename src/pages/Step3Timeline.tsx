@@ -3,7 +3,6 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import GlassCard from "@/components/GlassCard";
@@ -22,9 +21,8 @@ const Step3Timeline = () => {
   const [eadDate] = usePersistedState<string | null>("eadDate", null);
   const [optStatus] = usePersistedState<string>("optStatus", "notApplied");
   const [hiringWeeks] = usePersistedState<number>("hiringWeeks", 6);
+  const [prepWindowDays] = usePersistedState<number>("prepWindowDays", 14);
 
-  const [govProcessingDays, setGovProcessingDays] = usePersistedState<number>("govProcessingDays", 90);
-  const [bufferDays, setBufferDays] = usePersistedState<number>("bufferDays", 10);
   const [targetWorkReadyDate, setTargetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
 
   const isApproved = optStatus === "approved";
@@ -38,17 +36,16 @@ const Step3Timeline = () => {
     ? calculateLRMChainV2({
         programEndDate: gradDateObj,
         chosenStartDate: chosenStartDateObj,
-        govProcessingDays,
-        bufferDays,
         hiringWeeks,
+        prepWindowDays,
       })
     : null;
 
   const milestones = chain
     ? [
-        { label: "LRM Date (Start Outreach)", date: chain.lrmDate },
-        { label: "Hiring Completion Deadline", date: chain.hiringCompletionDeadline },
+        { label: "Last Responsible Moment (LRM)", date: chain.lrmDate },
         { label: "Chosen Start Date", date: chain.chosenStartDate },
+        { label: "Program End Date", date: chain.programEndDate },
         { label: "Last Day to Start Working", date: chain.lastDayToWork },
       ]
     : [];
@@ -56,20 +53,6 @@ const Step3Timeline = () => {
   return (
     <StepLayout>
       <h1 className="text-xl font-bold text-foreground">Step 3: Timeline</h1>
-
-      <GlassCard>
-        <h2 className="text-sm font-semibold text-foreground mb-4">Timeline Parameters</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="text-xs text-muted-foreground block mb-1">Gov Processing Days</label>
-            <Input type="number" min={1} max={365} value={govProcessingDays} onChange={(e) => setGovProcessingDays(Math.max(1, parseInt(e.target.value) || 90))} className="w-28" />
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground block mb-1">Buffer Days</label>
-            <Input type="number" min={0} max={60} value={bufferDays} onChange={(e) => setBufferDays(Math.max(0, parseInt(e.target.value) || 10))} className="w-28" />
-          </div>
-        </div>
-      </GlassCard>
 
       <GlassCard>
         {isApproved ? (
@@ -98,32 +81,11 @@ const Step3Timeline = () => {
         )}
       </GlassCard>
 
-      {/* Regulatory Anchors */}
+      {/* Timeline Visualization */}
       {chain && (
         <GlassCard>
-          <h2 className="text-sm font-semibold text-foreground mb-3">Regulatory Anchors</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Last Day to Start Working</span>
-              <span className="font-medium text-foreground">{formatDate(chain.lastDayToWork)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Earliest Date to Apply for OPT</span>
-              <span className="font-medium text-foreground">{formatDate(chain.earliestDateToApply)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Last Date to Apply for OPT</span>
-              <span className="font-medium text-foreground">{formatDate(chain.lastDateToApply)}</span>
-            </div>
-          </div>
-        </GlassCard>
-      )}
-
-      {/* Segmented Timeline Bar */}
-      {chain && (
-        <GlassCard>
-          <h2 className="text-sm font-semibold text-foreground mb-3">Timeline Breakdown</h2>
-          <SegmentedTimeline prepDays={14} hiringDays={hiringWeeks * 7} authDays={govProcessingDays + bufferDays} />
+          <h2 className="text-sm font-semibold text-foreground mb-3">Timeline</h2>
+          <SegmentedTimeline chain={chain} />
         </GlassCard>
       )}
 
@@ -137,7 +99,7 @@ const Step3Timeline = () => {
         </GlassCard>
       ) : (
         <GlassCard>
-          <h2 className="text-sm font-semibold text-foreground mb-4">Your LRM Chain</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-4">Key Dates</h2>
           {milestones.map((m, i) => (
             <TimelineMilestone key={m.label} label={m.label} date={m.date} status={getMilestoneStatus(m.date)} isLast={i === milestones.length - 1} />
           ))}

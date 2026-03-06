@@ -10,7 +10,7 @@ import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import ContactCard from "@/components/ContactCard";
 import { usePersistedState } from "@/hooks/usePersistedState";
-import { calcLastDateToApply, formatDate } from "@/lib/calculations";
+import { formatDate } from "@/lib/calculations";
 import content from "@/data/content.json";
 
 const statusOptions = [
@@ -93,7 +93,7 @@ const Step1Authorization = () => {
   const submissionDateObj = submissionDate ? new Date(submissionDate) : undefined;
   const rfeResponseDateObj = rfeResponseDate ? new Date(rfeResponseDate) : undefined;
 
-  const lastDateToApply = gradDateObj ? calcLastDateToApply(gradDateObj) : null;
+  
 
   const canContinue = (() => {
     if (!gradDateObj) return false;
@@ -137,11 +137,7 @@ const Step1Authorization = () => {
             value={gradDateObj}
             onChange={(d) => setGradDate(d ? d.toISOString() : null)}
           />
-          {lastDateToApply && (
-            <p className="text-xs text-muted-foreground mt-2">
-              Last Date to Apply for OPT: <span className="font-medium text-foreground">{formatDate(lastDateToApply)}</span>
-            </p>
-          )}
+          
         </GlassCard>
       )}
 
