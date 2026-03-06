@@ -16,14 +16,14 @@ import {
 export { stripTime, addDays, subtractDays, daysBetween, formatDate, getMilestoneStatus };
 export type { MilestoneStatus };
 
-/** Last Day to Start Working = Program End Date + 90 days */
-export function calcLastDayToWork(programEndDate: Date): Date {
-  return addDays(stripTime(programEndDate), 90);
+/** Last Day to Start Working = Chosen Start Date + 90 days */
+export function calcLastDayToWork(chosenStartDate: Date): Date {
+  return addDays(stripTime(chosenStartDate), 90);
 }
 
 /** LRM = Last Day to Start Working - (hiringWeeks * 7) - prepWindowDays */
-export function calcLRM(programEndDate: Date, hiringWeeks: number, prepWindowDays: number): Date {
-  const lastDay = calcLastDayToWork(programEndDate);
+export function calcLRM(chosenStartDate: Date, hiringWeeks: number, prepWindowDays: number): Date {
+  const lastDay = calcLastDayToWork(chosenStartDate);
   return subtractDays(lastDay, hiringWeeks * 7 + prepWindowDays);
 }
 
@@ -48,7 +48,7 @@ export function calculateLRMChainV2(params: LRMChainParams): LRMChainResult {
   return {
     programEndDate: programEnd,
     chosenStartDate: chosen,
-    lastDayToWork: calcLastDayToWork(programEnd),
-    lrmDate: calcLRM(programEnd, params.hiringWeeks, params.prepWindowDays),
+    lastDayToWork: calcLastDayToWork(chosen),
+    lrmDate: calcLRM(chosen, params.hiringWeeks, params.prepWindowDays),
   };
 }

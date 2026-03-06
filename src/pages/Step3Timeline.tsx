@@ -85,7 +85,7 @@ const Step3Timeline = () => {
                 <span className="text-muted-foreground">Last Day to Start Working</span>
                 <span className="font-medium text-foreground">{formatDate(chain!.lastDayToWork)}</span>
               </div>
-              <p className="text-[10px] text-muted-foreground">Program End Date + 90 days</p>
+              <p className="text-[10px] text-muted-foreground">Chosen Start Date + 90 days</p>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
