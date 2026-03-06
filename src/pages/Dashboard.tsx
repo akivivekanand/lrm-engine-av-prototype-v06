@@ -23,8 +23,7 @@ const Dashboard = () => {
   const [eadDate] = usePersistedState<string | null>("eadDate", null);
   const [optStatus] = usePersistedState<string>("optStatus", "notApplied");
   const [hiringWeeks] = usePersistedState<number>("hiringWeeks", 6);
-  const [govProcessingDays] = usePersistedState<number>("govProcessingDays", 90);
-  const [bufferDays] = usePersistedState<number>("bufferDays", 10);
+  const [prepWindowDays] = usePersistedState<number>("prepWindowDays", 14);
   const [targetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
 
   const isApproved = optStatus === "approved";
@@ -35,9 +34,8 @@ const Dashboard = () => {
     ? calculateLRMChainV2({
         programEndDate: new Date(gradDate),
         chosenStartDate: new Date(chosenStartDateStr),
-        govProcessingDays,
-        bufferDays,
         hiringWeeks,
+        prepWindowDays,
       })
     : null;
 
@@ -52,22 +50,6 @@ const Dashboard = () => {
     const diff = daysBetween(start, today);
     return Math.max(0, Math.min(90, diff));
   })();
-
-  // Build timing constraints list based on status
-  const timingItems = chain
-    ? [
-        { label: "LRM Date", date: chain.lrmDate },
-        { label: "Hiring Completion Deadline", date: chain.hiringCompletionDeadline },
-        { label: "Chosen Start Date", date: chain.chosenStartDate },
-        { label: "Last Day to Start Working", date: chain.lastDayToWork },
-        ...(optStatus === "notApplied"
-          ? [
-              { label: "Earliest Date to Apply for OPT", date: chain.earliestDateToApply },
-              { label: "Last Date to Apply for OPT", date: chain.lastDateToApply },
-            ]
-          : []),
-      ]
-    : [];
 
   return (
     <StepLayout>
@@ -86,18 +68,23 @@ const Dashboard = () => {
           <div className="flex items-start gap-1.5 mt-3 p-2 rounded bg-muted/50">
             <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              This is calculated by taking your absolute last day to start working (90 days after your chosen start date) and backward-mapping the hiring cycle for your field, plus a 2-week strategic buffer.
+              LRM = Last Day to Start Working − Hiring Cycle − Preparation Window. This is the latest date you should begin your job search.
             </p>
           </div>
         </GlassCard>
       )}
 
-      {/* Timing Constraints */}
-      {chain && timingItems.length > 0 && (
+      {/* Key Dates */}
+      {chain && (
         <GlassCard>
-          <h2 className="text-sm font-semibold text-foreground mb-3">Timing Constraints</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-3">Key Dates</h2>
           <div className="space-y-2">
-            {timingItems.map((item) => (
+            {[
+              { label: "LRM", date: chain.lrmDate },
+              { label: "Chosen Start Date", date: chain.chosenStartDate },
+              { label: "Program End Date", date: chain.programEndDate },
+              { label: "Last Day to Start Working", date: chain.lastDayToWork },
+            ].map((item) => (
               <div key={item.label} className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{item.label}</span>
                 <span className="font-medium text-foreground">{formatDate(item.date)}</span>
@@ -107,11 +94,11 @@ const Dashboard = () => {
         </GlassCard>
       )}
 
-      {/* Segmented Timeline */}
+      {/* Timeline Visualization */}
       {chain && (
         <GlassCard>
-          <h2 className="text-sm font-semibold text-foreground mb-3">Timeline Breakdown</h2>
-          <SegmentedTimeline prepDays={14} hiringDays={hiringWeeks * 7} authDays={govProcessingDays + bufferDays} />
+          <h2 className="text-sm font-semibold text-foreground mb-3">Timeline</h2>
+          <SegmentedTimeline chain={chain} />
         </GlassCard>
       )}
 

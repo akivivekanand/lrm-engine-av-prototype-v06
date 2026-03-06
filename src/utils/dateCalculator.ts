@@ -34,39 +34,6 @@ function formatDate(date: Date): string {
   });
 }
 
-export interface LRMChain {
-  graduationDate: Date;
-  filingDeadline: Date;
-  eadStartDate: Date;
-  authorizationWall: Date;
-  hiringCyclePeak: Date;
-  lrmDate: Date;
-}
-
-export function calculateLRMChain(
-  graduationDate: Date,
-  eadStartDate: Date,
-  processingDays: number,
-  bufferDays: number,
-  hiringWeeks: number
-): LRMChain {
-  const grad = stripTime(graduationDate);
-  const ead = stripTime(eadStartDate);
-  const filingDeadline = addDays(grad, 60);
-  const authorizationWall = subtractDays(ead, processingDays + bufferDays);
-  const hiringCyclePeak = subtractDays(authorizationWall, hiringWeeks * 7);
-  const lrmDate = subtractDays(hiringCyclePeak, 7);
-
-  return {
-    graduationDate: grad,
-    filingDeadline,
-    eadStartDate: ead,
-    authorizationWall,
-    hiringCyclePeak,
-    lrmDate,
-  };
-}
-
 export type MilestoneStatus = "on-track" | "compression" | "crisis";
 
 export function getMilestoneStatus(milestoneDate: Date): MilestoneStatus {

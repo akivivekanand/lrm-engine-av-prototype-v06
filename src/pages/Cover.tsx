@@ -36,7 +36,7 @@ const Cover = () => {
               <span className="font-semibold text-foreground">LRM Calculation:</span> A precise date to launch your search based on your specific industry (e.g., Finance, Tech, or Consulting).
             </li>
             <li>
-              <span className="font-semibold text-foreground">Regulatory Anchors:</span> Clear visibility of your OPT filing window and your absolute Last Day to Start Working (Start Date + 90 days).
+              <span className="font-semibold text-foreground">Key Dates:</span> Clear visibility of your Program End Date, Chosen Start Date, Last Day to Start Working, and LRM.
             </li>
             <li>
               <span className="font-semibold text-foreground">Strategic Roadmap:</span> A segmented timeline that visualizes the hiring cycle for your field versus government processing phases.
