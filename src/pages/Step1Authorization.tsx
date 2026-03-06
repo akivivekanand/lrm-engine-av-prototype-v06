@@ -1,23 +1,24 @@
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, AlertTriangle, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import ContactCard from "@/components/ContactCard";
 import { usePersistedState } from "@/hooks/usePersistedState";
-import { formatDate } from "@/lib/calculations";
+import { addDays, subtractDays, stripTime, formatDate } from "@/lib/calculations";
 import content from "@/data/content.json";
 
 const statusOptions = [
   { value: "notApplied", label: "Not Applied" },
-  { value: "waiting", label: "Waiting / Pending" },
+  { value: "waiting", label: "Applied and Waiting" },
   { value: "approved", label: "Approved" },
-  { value: "rfe", label: "RFE Received" },
+  { value: "rfe", label: "RFE" },
   { value: "denied", label: "Denied" },
 ];
 
@@ -26,17 +27,9 @@ const processingOptions = [
   { value: "premium", label: "Premium Processing" },
 ];
 
-const STATUS_TEXT: Record<string, string> = {
-  notApplied: "You have not applied for OPT yet. Your last date to apply is typically within 60 days after your program end date. Confirm the exact date on your I-20 and with your DSO.",
-  waiting: "Your OPT application is pending. Use this planner to sequence outreach and preparation while you wait.",
-  approved: "Your OPT is approved. Your EAD Start Date anchors your job search timeline and unemployment tracking.",
-  rfe: "You received a Request for Evidence (RFE). This increases timeline uncertainty. Confirm next steps with your DSO.",
-  denied: "Your OPT application was denied. Contact your DSO immediately.",
-};
-
 const PROCESSING_TEXT: Record<string, string> = {
-  standard: "Standard processing is often estimated at 3 to 5 months (planning estimate).",
-  premium: "Premium processing is designed for an estimated 30-day window (planning estimate).",
+  standard: "Standard processing: estimated 3–5 months.",
+  premium: "Premium processing: estimated approximately 30 days.",
 };
 
 function DatePickerField({
@@ -84,22 +77,40 @@ const Step1Authorization = () => {
   const [gradDate, setGradDate] = usePersistedState<string | null>("gradDate", null);
   const [optStatus, setOptStatus] = usePersistedState<string>("optStatus", "notApplied");
   const [eadDate, setEadDate] = usePersistedState<string | null>("eadDate", null);
+  const [chosenStartDate, setChosenStartDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
   const [submissionDate, setSubmissionDate] = usePersistedState<string | null>("submissionDate", null);
   const [processingType, setProcessingType] = usePersistedState<string>("processingType", "standard");
-  const [rfeResponseDate, setRfeResponseDate] = usePersistedState<string | null>("rfeResponseDate", null);
+  const [estimatedStartDate, setEstimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
 
   const gradDateObj = gradDate ? new Date(gradDate) : undefined;
   const eadDateObj = eadDate ? new Date(eadDate) : undefined;
+  const chosenStartDateObj = chosenStartDate ? new Date(chosenStartDate) : undefined;
   const submissionDateObj = submissionDate ? new Date(submissionDate) : undefined;
-  const rfeResponseDateObj = rfeResponseDate ? new Date(rfeResponseDate) : undefined;
+  const estimatedStartDateObj = estimatedStartDate ? new Date(estimatedStartDate) : undefined;
 
-  
+  // Derived dates for "Not Applied"
+  const earliestOptDate = gradDateObj ? subtractDays(stripTime(gradDateObj), 90) : null;
+  const optFilingDeadline = gradDateObj ? addDays(stripTime(gradDateObj), 60) : null;
+
+  // Special case: waiting + chosen start date has passed
+  const today = stripTime(new Date());
+  const startDatePassed = optStatus === "waiting" && chosenStartDateObj && stripTime(chosenStartDateObj).getTime() < today.getTime();
+
+  // Auto-suggest estimated start date (~4.5 months after submission)
+  const suggestedEstimatedDate = submissionDateObj ? addDays(stripTime(submissionDateObj), 135) : null;
+
+  const isDeniedOrRfe = optStatus === "rfe" || optStatus === "denied";
 
   const canContinue = (() => {
-    if (!gradDateObj) return false;
     if (optStatus === "denied") return false;
+    if (!gradDateObj) return false;
+    if (optStatus === "notApplied" && !chosenStartDateObj) return false;
+    if (optStatus === "waiting") {
+      if (startDatePassed && !estimatedStartDateObj) return false;
+      if (!startDatePassed && !chosenStartDateObj) return false;
+    }
     if (optStatus === "approved" && !eadDateObj) return false;
-    if (optStatus === "rfe" && !rfeResponseDateObj) return false;
+    if (optStatus === "rfe" && !chosenStartDateObj) return false;
     return true;
   })();
 
@@ -107,6 +118,7 @@ const Step1Authorization = () => {
     <StepLayout>
       <h1 className="text-xl font-bold text-foreground">Step 1: Authorization</h1>
 
+      {/* OPT Status */}
       <GlassCard>
         <label className="text-sm font-medium text-foreground block mb-2">OPT Status</label>
         <Select value={optStatus} onValueChange={setOptStatus}>
@@ -117,35 +129,74 @@ const Step1Authorization = () => {
             ))}
           </SelectContent>
         </Select>
-        {STATUS_TEXT[optStatus] && (
-          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{STATUS_TEXT[optStatus]}</p>
-        )}
       </GlassCard>
 
+      {/* RFE / Denied Warning */}
+      {isDeniedOrRfe && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription className="text-sm">
+            Please contact your university DSO urgently if you have not already done so after receiving this status from USCIS.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Denied: DSO contact only, no timeline */}
       {optStatus === "denied" && (
         <ContactCard
           contact={content.isso}
-          disclaimer="Contact University DSO for official policy guidance."
+          disclaimer="Timeline calculation is disabled for denied status. Contact your DSO for next steps."
         />
       )}
 
-      {optStatus !== "denied" && (
-        <GlassCard>
-          <DatePickerField
-            label="Program End Date"
-            helperText="Your Program End Date can be found on page 1 of your current I-20."
-            value={gradDateObj}
-            onChange={(d) => setGradDate(d ? d.toISOString() : null)}
-          />
-          
-        </GlassCard>
+      {/* ===== NOT APPLIED ===== */}
+      {optStatus === "notApplied" && (
+        <>
+          <GlassCard>
+            <DatePickerField
+              label="Program End Date"
+              helperText="Found on page 1 of your current I-20."
+              value={gradDateObj}
+              onChange={(d) => setGradDate(d ? d.toISOString() : null)}
+            />
+            {gradDateObj && (
+              <div className="mt-3 space-y-1.5 p-3 rounded-lg bg-muted/50">
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Earliest OPT Application Date</span>
+                  <span className="font-medium text-foreground">{formatDate(earliestOptDate!)}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">OPT Filing Deadline</span>
+                  <span className="font-medium text-foreground">{formatDate(optFilingDeadline!)}</span>
+                </div>
+              </div>
+            )}
+          </GlassCard>
+          <GlassCard>
+            <DatePickerField
+              label="Chosen Start Date"
+              helperText="When you want to start working."
+              value={chosenStartDateObj}
+              onChange={(d) => setChosenStartDate(d ? d.toISOString() : null)}
+            />
+          </GlassCard>
+        </>
       )}
 
+      {/* ===== APPLIED AND WAITING ===== */}
       {optStatus === "waiting" && (
         <>
           <GlassCard>
             <DatePickerField
-              label="Submission Date"
+              label="Program End Date"
+              helperText="Found on page 1 of your current I-20."
+              value={gradDateObj}
+              onChange={(d) => setGradDate(d ? d.toISOString() : null)}
+            />
+          </GlassCard>
+          <GlassCard>
+            <DatePickerField
+              label="OPT Application Submission Date"
               value={submissionDateObj}
               onChange={(d) => setSubmissionDate(d ? d.toISOString() : null)}
             />
@@ -161,38 +212,101 @@ const Step1Authorization = () => {
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{PROCESSING_TEXT[processingType]}</p>
+            <a
+              href="https://egov.uscis.gov/processing-times/i765"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline flex items-center gap-1 mt-2"
+            >
+              <ExternalLink className="h-3 w-3" /> Check USCIS Processing Times
+            </a>
+          </GlassCard>
+          <GlassCard>
+            <DatePickerField
+              label="Chosen Start Date"
+              helperText="When you want to start working."
+              value={chosenStartDateObj}
+              onChange={(d) => setChosenStartDate(d ? d.toISOString() : null)}
+            />
+          </GlassCard>
+
+          {/* Special case: start date passed */}
+          {startDatePassed && (
+            <>
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  Your OPT start date has passed and your application is still pending. Please contact your DSO and career center immediately.
+                </AlertDescription>
+              </Alert>
+              <GlassCard>
+                <DatePickerField
+                  label="Estimated Start Date"
+                  helperText={`Enter an estimated start date. Typically 4–5 months after submission${suggestedEstimatedDate ? ` (suggested: ${formatDate(suggestedEstimatedDate)})` : ""}.`}
+                  value={estimatedStartDateObj}
+                  onChange={(d) => setEstimatedStartDate(d ? d.toISOString() : null)}
+                />
+                <p className="text-xs text-muted-foreground mt-2">This estimated date will be used as your planning anchor.</p>
+              </GlassCard>
+            </>
+          )}
+        </>
+      )}
+
+      {/* ===== APPROVED ===== */}
+      {optStatus === "approved" && (
+        <>
+          <GlassCard>
+            <DatePickerField
+              label="Program End Date"
+              helperText="Found on page 1 of your current I-20."
+              value={gradDateObj}
+              onChange={(d) => setGradDate(d ? d.toISOString() : null)}
+            />
+          </GlassCard>
+          <GlassCard>
+            <DatePickerField
+              label="EAD Start Date"
+              helperText="The start date on your Employment Authorization Document."
+              value={eadDateObj}
+              onChange={(d) => setEadDate(d ? d.toISOString() : null)}
+            />
           </GlassCard>
         </>
       )}
 
-      {optStatus === "approved" && (
-        <GlassCard>
-          <DatePickerField
-            label="EAD Start Date"
-            value={eadDateObj}
-            onChange={(d) => setEadDate(d ? d.toISOString() : null)}
-          />
-        </GlassCard>
-      )}
-
+      {/* ===== RFE ===== */}
       {optStatus === "rfe" && (
-        <GlassCard>
-          <DatePickerField
-            label="RFE Response Date"
-            value={rfeResponseDateObj}
-            onChange={(d) => setRfeResponseDate(d ? d.toISOString() : null)}
-          />
-        </GlassCard>
+        <>
+          <GlassCard>
+            <DatePickerField
+              label="Program End Date"
+              helperText="Found on page 1 of your current I-20."
+              value={gradDateObj}
+              onChange={(d) => setGradDate(d ? d.toISOString() : null)}
+            />
+          </GlassCard>
+          <GlassCard>
+            <DatePickerField
+              label="Chosen Start Date"
+              helperText="Your intended start date for planning purposes."
+              value={chosenStartDateObj}
+              onChange={(d) => setChosenStartDate(d ? d.toISOString() : null)}
+            />
+          </GlassCard>
+        </>
       )}
 
       {/* Compliance Info */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">Compliance Info</h2>
-        <ContactCard
-          contact={content.isso}
-          disclaimer="Contact University DSO for official policy guidance."
-        />
-      </div>
+      {optStatus !== "denied" && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground">Compliance Info</h2>
+          <ContactCard
+            contact={content.isso}
+            disclaimer="Contact University DSO for official policy guidance."
+          />
+        </div>
+      )}
 
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate("/cover")} className="flex-1">
