@@ -6,58 +6,64 @@ import content from "@/data/content.json";
 
 const Cover = () => {
   const navigate = useNavigate();
-  const { careerCenter, disclaimers } = content;
+  const { careerCenter, isso, disclaimers } = content;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col items-center justify-center px-4 py-12">
       <div className="max-w-lg w-full space-y-6">
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-foreground leading-tight">
-            Career Timeline Mapping Engine: Strategic Job Search Navigation
+            Strategic Career Timeline Mapping Engine
           </h1>
+          <p className="text-sm font-medium text-muted-foreground">For International Students</p>
         </div>
 
         <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
           <p>
-            This tool helps international students backward-map their job search from a desired start date to account for industry-specific hiring lags and OPT regulatory requirements.
+            This tool helps international students backward map their job search from a desired start date while accounting for industry hiring timelines and OPT regulatory constraints.
           </p>
           <p>
-            Unlike a standard job search, an international career search requires planning around government processing times, strict filing windows, and a 90-day unemployment limit.
+            Unlike a standard job search, international career planning requires careful timing around government processing periods, strict filing windows, and the 90 day unemployment limit after program completion.
           </p>
           <p>
-            The engine calculates your Last Responsible Moment (LRM), the final date you can begin your search while maintaining a viable safety buffer for your legal status.
+            The engine calculates your Last Responsible Moment (LRM). This is the final date you can begin preparing and launching your job search while maintaining a realistic hiring timeline and a safety buffer for your legal status.
           </p>
         </div>
 
         <GlassCard>
-          <h2 className="text-sm font-semibold text-foreground mb-3">What this app provides:</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-3">What This Tool Provides</h2>
           <ul className="space-y-3 text-xs text-muted-foreground leading-relaxed">
             <li>
-              <span className="font-semibold text-foreground">LRM Calculation:</span> A precise date to launch your search based on your specific industry (e.g., Finance, Tech, or Consulting).
+              <span className="font-semibold text-foreground">LRM Calculation:</span> A calculated date indicating when you should begin preparing your job search based on hiring cycles in your target industry.
             </li>
             <li>
-              <span className="font-semibold text-foreground">Key Dates:</span> Clear visibility of your Program End Date, Chosen Start Date, Last Day to Start Working, and LRM.
+              <span className="font-semibold text-foreground">Regulatory Anchors:</span> Visibility into your OPT timeline including your filing window and the absolute Last Day to Start Working, calculated as Program End Date plus 90 days.
             </li>
             <li>
-              <span className="font-semibold text-foreground">Strategic Roadmap:</span> A segmented timeline that visualizes the hiring cycle for your field versus government processing phases.
+              <span className="font-semibold text-foreground">Strategic Timeline Map:</span> A visual timeline comparing industry hiring cycles with regulatory timing constraints so you can understand when preparation, networking, and interviews should begin.
             </li>
             <li>
-              <span className="font-semibold text-foreground">Customized Action Plan:</span> Frequency-based to-do lists (Daily, Weekly, Monthly) and a library of high-leverage AI prompts to optimize your outreach and interview performance.
+              <span className="font-semibold text-foreground">Customized Action Plan:</span> A structured action plan including Daily, Weekly, and Monthly priorities along with a library of AI prompts and outreach templates to strengthen networking, resume optimization, and interview preparation.
             </li>
           </ul>
         </GlassCard>
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground text-center">Hosted by</p>
+          <p className="text-xs font-semibold text-muted-foreground text-center">Hosted By</p>
           <ContactCard contact={careerCenter} />
         </div>
 
-        <GlassCard>
-          <p className="text-xs text-muted-foreground leading-relaxed">{disclaimers.uscis}</p>
-        </GlassCard>
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground text-center">Compliance Information</p>
+          <ContactCard contact={isso} />
+        </div>
 
         <GlassCard>
-          <p className="text-xs text-muted-foreground leading-relaxed">{disclaimers.legal}</p>
+          <h3 className="text-xs font-semibold text-foreground mb-2">Regulatory Notice</h3>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground leading-relaxed">{disclaimers.uscis}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{disclaimers.legal.replace("your DSO", "their Designated School Official")}</p>
+          </div>
         </GlassCard>
 
         <Button
@@ -65,7 +71,7 @@ const Cover = () => {
           className="w-full h-12 text-sm font-semibold"
           size="lg"
         >
-          Begin Planning
+          Let's Get Started
         </Button>
       </div>
     </div>

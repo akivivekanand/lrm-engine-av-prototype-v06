@@ -15,7 +15,7 @@
   },
   "disclaimers": {
     "uscis": "As of March 1, 2026, USCIS Premium Processing for Form I-765 is $1,780 with an estimated 30-day turnaround. Standard processing is often estimated at 3-5 months. Confirm current information on USCIS.gov.",
-    "legal": "This tool provides strategic planning guidance and does not constitute legal immigration advice. Confirm deadlines and eligibility with your DSO."
+    "legal": "This tool provides strategic planning guidance and does not constitute legal immigration advice. Students should confirm deadlines and eligibility requirements with their Designated School Official."
   },
   "promptGuide": "A strong prompt typically follows this structure: assign the AI assistant a role + provide clear context about your situation + define the specific task you want completed + add constraints or guidance for how the response should be developed + specify the format you want the output delivered in.",
   "genAiPromptExamples": [
