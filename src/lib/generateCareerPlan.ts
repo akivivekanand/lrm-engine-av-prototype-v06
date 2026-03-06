@@ -37,7 +37,7 @@ export function generateCareerPlan(input: PlanInput): CareerPlan {
     `Your Last Responsible Moment (LRM) is ${formatDate(chain.lrmDate)}, which is ${daysToLRM > 0 ? `${daysToLRM} days from today` : `${Math.abs(daysToLRM)} days past`}.`,
     `The LRM is calculated by taking your Last Day to Start Working (${formatDate(chain.lastDayToWork)}) and subtracting your ${hiringWeeks}-week hiring cycle and ${prepWindowDays}-day preparation window.`,
     `For ${industry}, the typical hiring cycle runs approximately ${hiringWeeks} weeks from initial application to offer acceptance.`,
-    `Your Program End Date is ${formatDate(chain.programEndDate)}. Under OPT regulations, you must begin employment within 90 days of this date — your absolute deadline is ${formatDate(chain.lastDayToWork)}.`,
+    `Your Program End Date is ${formatDate(chain.programEndDate)}. Under OPT regulations, you must begin employment within 90 days of this date. Your absolute deadline is ${formatDate(chain.lastDayToWork)}.`,
     daysToLRM > 30
       ? `You have a comfortable buffer. Use this time strategically to build relationships and refine your application materials before the hiring cycle intensifies.`
       : daysToLRM > 0
@@ -52,18 +52,18 @@ export function generateCareerPlan(input: PlanInput): CareerPlan {
     strategicGuidance.push(
       `You are currently on track. Focus on building a strong pipeline of opportunities in ${industry} while maintaining consistent daily activity.`,
       `Allocate your preparation window to targeted skill-building, portfolio refinement, and mock interviews before entering active application mode.`,
-      `Aim for 3–5 quality applications per week rather than high-volume submissions. Tailor each resume and cover letter to the specific role.`,
+      `Aim for 3 to 5 quality applications per week rather than high-volume submissions. Tailor each resume and cover letter to the specific role.`,
     );
   } else if (status === "compression") {
     strategicGuidance.push(
-      `Your timeline is compressed — your LRM is approaching within 14 days. Shift from preparation mode to active execution immediately.`,
+      `Your timeline is compressed. Your LRM is approaching within 14 days. Shift from preparation mode to active execution immediately.`,
       `Prioritize warm introductions and referrals over cold applications. Reach out to alumni, former colleagues, and career center contacts this week.`,
       `Consider parallel-tracking: apply to your ideal roles while simultaneously exploring adjacent positions that could serve as a strategic bridge.`,
     );
   } else {
     strategicGuidance.push(
-      `Your LRM has passed. This requires an emergency-level response. Dedicate 3–4 hours daily to active job search activities.`,
-      `Expand your target beyond ${industry} to include adjacent industries where your skills transfer. Every day counts toward your 90-day unemployment limit.`,
+      `Your LRM has passed. This requires an emergency-level response. Dedicate 3 to 4 hours daily to active job search activities.`,
+      `Expand your target beyond ${industry} to include adjacent industries where your skills transfer. Every day counts toward your 90 day unemployment limit.`,
       `Contact your career center immediately for expedited support. Schedule informational interviews with any available contacts this week.`,
     );
   }
