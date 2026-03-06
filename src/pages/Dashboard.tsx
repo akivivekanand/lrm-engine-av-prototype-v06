@@ -25,9 +25,11 @@ const Dashboard = () => {
   const [hiringWeeks] = usePersistedState<number>("hiringWeeks", 6);
   const [prepWindowDays] = usePersistedState<number>("prepWindowDays", 14);
   const [targetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
+  const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
 
   const isApproved = optStatus === "approved";
-  const chosenStartDateStr = isApproved ? eadDate : targetWorkReadyDate;
+  // For waiting status with passed start date, use estimatedStartDate as fallback
+  const chosenStartDateStr = isApproved ? eadDate : (targetWorkReadyDate || estimatedStartDate);
 
   const hasData = gradDate && chosenStartDateStr;
   const chain = hasData
