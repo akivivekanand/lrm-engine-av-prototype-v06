@@ -7,6 +7,7 @@ import Cover from "./pages/Cover";
 import Step1Authorization from "./pages/Step1Authorization";
 import Step2Strategy from "./pages/Step2Strategy";
 import Step3Timeline from "./pages/Step3Timeline";
+import MyPlan from "./pages/MyPlan";
 import Dashboard from "./pages/Dashboard";
 import AdminEvents from "./pages/AdminEvents";
 import NotFound from "./pages/NotFound";
