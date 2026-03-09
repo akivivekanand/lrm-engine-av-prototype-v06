@@ -1,26 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Sparkles, Check, Pencil, Info } from "lucide-react";
+import { Sparkles, Check, Pencil, Info, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { suggestIndustry, type IndustrySuggestion } from "@/lib/smart-suggestions";
 
 type Mode = "ai" | "suggested" | "custom";
-
-const STRATEGY_MODULES = [
-  { id: "networking", label: "Networking Strategy" },
-  { id: "informational", label: "Informational Interview Outreach" },
-  { id: "resume", label: "Resume and Portfolio Preparation" },
-  { id: "targetCompany", label: "Target Company Mapping" },
-  { id: "interview", label: "Interview Preparation" },
-];
 
 const Step2Strategy = () => {
   const navigate = useNavigate();
@@ -29,8 +19,6 @@ const Step2Strategy = () => {
   const [prepWindowDays, setPrepWindowDays] = usePersistedState<number>("prepWindowDays", 14);
   const [hiringMode, setHiringMode] = usePersistedState<Mode>("hiringWeeksMode", "ai");
   const [prepMode, setPrepMode] = usePersistedState<Mode>("prepWindowMode", "ai");
-  const [enabledModules, setEnabledModules] = usePersistedState<string[]>("strategyModules", []);
-  const [personalGoals, setPersonalGoals] = usePersistedState<string>("personalGoals", "");
 
   const [suggestion, setSuggestion] = useState<IndustrySuggestion | null>(null);
   const [assessed, setAssessed] = useState(false);
@@ -58,12 +46,6 @@ const Step2Strategy = () => {
       setPrepWindowDays(suggestion.prepWindowDays);
       setPrepMode("suggested");
     }
-  };
-
-  const toggleModule = (id: string) => {
-    setEnabledModules((prev) =>
-      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
-    );
   };
 
   const modeLabel = (mode: Mode) =>
@@ -101,7 +83,7 @@ const Step2Strategy = () => {
 
   return (
     <StepLayout>
-      <h1 className="text-xl font-bold text-foreground">Step 2: Career Strategy</h1>
+      <h1 className="text-xl font-bold text-foreground">Step 2: Market Reality</h1>
 
       {/* Target Industry */}
       <GlassCard>
@@ -118,6 +100,14 @@ const Step2Strategy = () => {
             Get AI Assessment
           </Button>
         </div>
+        <a
+          href="https://careers.suffolk.edu/labor-market-insights/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 mt-2 font-medium transition-colors"
+        >
+          View Suffolk Labor Market Insights <ExternalLink className="h-3 w-3" />
+        </a>
       </GlassCard>
 
       {/* AI Assessment Result */}
@@ -238,38 +228,6 @@ const Step2Strategy = () => {
           <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
           <p className="text-[10px] text-muted-foreground">Baseline recommendation: at least 7 days of preparation time.</p>
         </div>
-      </GlassCard>
-
-      {/* Optional Strategy Modules */}
-      <GlassCard>
-        <label className="text-sm font-medium text-foreground block mb-3">Optional Strategy Modules</label>
-        <p className="text-xs text-muted-foreground mb-3">Enable additional planning modules to include in your strategy.</p>
-        <div className="space-y-2.5">
-          {STRATEGY_MODULES.map((mod) => (
-            <label key={mod.id} className="flex items-center gap-2.5 cursor-pointer">
-              <Checkbox
-                checked={enabledModules.includes(mod.id)}
-                onCheckedChange={() => toggleModule(mod.id)}
-              />
-              <span className="text-xs text-foreground">{mod.label}</span>
-            </label>
-          ))}
-        </div>
-      </GlassCard>
-
-      {/* Personal Strategy Inputs */}
-      <GlassCard>
-        <label className="text-sm font-medium text-foreground block mb-2">Personal Strategy Inputs</label>
-        <p className="text-xs text-muted-foreground mb-3">
-          Add personal goals such as custom deadlines, networking outreach goals, interview preparation milestones, or company research targets. These will be integrated into your AI generated plan.
-        </p>
-        <Textarea
-          placeholder="e.g. Schedule 3 informational interviews by end of month, complete portfolio website by April 15..."
-          value={personalGoals}
-          onChange={(e) => setPersonalGoals(e.target.value)}
-          rows={4}
-          className="text-xs"
-        />
       </GlassCard>
 
       <div className="flex gap-3">

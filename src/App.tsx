@@ -54,6 +54,7 @@ const App = () => (
           <Route path="/step-2-strategy" element={<Step2Strategy />} />
           <Route path="/step-3-timeline" element={<Step3Timeline />} />
           <Route path="/my-plan" element={<MyPlan />} />
+          <Route path="/resource-vault" element={<ResourceVault />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin/events" element={<AdminEvents />} />
           <Route path="*" element={<NotFound />} />

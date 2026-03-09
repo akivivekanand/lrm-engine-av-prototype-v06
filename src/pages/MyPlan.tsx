@@ -500,8 +500,8 @@ const MyPlan = () => {
         <Button variant="outline" onClick={() => navigate("/step-3-timeline")} className="flex-1">
           Back to Timeline
         </Button>
-        <Button onClick={() => navigate("/dashboard")} className="flex-1">
-          Continue to Dashboard
+        <Button onClick={() => navigate("/resource-vault")} className="flex-1">
+          Continue to Resource Vault
         </Button>
       </div>
     </StepLayout>

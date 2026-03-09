@@ -5,6 +5,7 @@ const steps = [
   { label: "Strategy", path: "/step-2-strategy" },
   { label: "Timeline", path: "/step-3-timeline" },
   { label: "My Plan", path: "/my-plan" },
+  { label: "Resources", path: "/resource-vault" },
   { label: "Dashboard", path: "/dashboard" },
 ];
 
