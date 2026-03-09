@@ -67,12 +67,12 @@ const Dashboard = () => {
     return Math.max(0, Math.min(90, diff));
   })();
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!chain) return;
     setGenerating(true);
 
-    setTimeout(() => {
-      const result = generateCareerPlan({
+    try {
+      const result = await generateCareerPlan({
         chain,
         industryText,
         hiringWeeks,
@@ -80,7 +80,6 @@ const Dashboard = () => {
         optStatus,
       });
       setPlan(result);
-      setGenerating(false);
 
       confetti({
         particleCount: 150,
@@ -88,7 +87,11 @@ const Dashboard = () => {
         origin: { y: 0.6 },
         colors: ["hsl(262,83%,58%)", "hsl(210,40%,98%)", "hsl(262,83%,78%)"],
       });
-    }, 800);
+    } catch (err) {
+      console.error("Career plan generation failed:", err);
+    } finally {
+      setGenerating(false);
+    }
   };
 
   // Upcoming events
