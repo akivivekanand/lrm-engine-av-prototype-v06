@@ -277,10 +277,10 @@ const Dashboard = () => {
                   <TabsContent value="daily" className="mt-3 space-y-3">
                     {plan.actionPlan.daily.map((p) => (
                       <TaskChecklist
-                        key={p.period}
-                        title={p.period}
-                        storageKey={`plan-daily-${p.period}`}
-                        tasks={p.tasks.map((t, i) => ({ id: `${p.period}-${i}`, task: t }))}
+                        key={p.label}
+                        title={p.label}
+                        storageKey={`plan-daily-${p.date}`}
+                        tasks={p.tasks.map((t, i) => ({ id: `${p.date}-${i}`, task: t }))}
                       />
                     ))}
                   </TabsContent>
