@@ -7,6 +7,7 @@ import Cover from "./pages/Cover";
 import Step1Authorization from "./pages/Step1Authorization";
 import Step2Strategy from "./pages/Step2Strategy";
 import Step3Timeline from "./pages/Step3Timeline";
+import MyPlan from "./pages/MyPlan";
 import Dashboard from "./pages/Dashboard";
 import AdminEvents from "./pages/AdminEvents";
 import NotFound from "./pages/NotFound";
@@ -16,7 +17,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 const queryClient = new QueryClient();
 
 const ROUTE_KEY = "currentRoute";
-const VALID_ROUTES = ["/cover", "/step-1-authorization", "/step-2-strategy", "/step-3-timeline", "/dashboard", "/admin/events"];
+const VALID_ROUTES = ["/cover", "/step-1-authorization", "/step-2-strategy", "/step-3-timeline", "/my-plan", "/dashboard", "/admin/events"];
 
 function RouteTracker() {
   const location = useLocation();
@@ -51,6 +52,7 @@ const App = () => (
           <Route path="/step-1-authorization" element={<Step1Authorization />} />
           <Route path="/step-2-strategy" element={<Step2Strategy />} />
           <Route path="/step-3-timeline" element={<Step3Timeline />} />
+          <Route path="/my-plan" element={<MyPlan />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin/events" element={<AdminEvents />} />
           <Route path="*" element={<NotFound />} />

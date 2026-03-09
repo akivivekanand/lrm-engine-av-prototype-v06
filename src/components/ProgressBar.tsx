@@ -4,7 +4,8 @@ const steps = [
   { label: "Authorization", path: "/step-1-authorization" },
   { label: "Strategy", path: "/step-2-strategy" },
   { label: "Timeline", path: "/step-3-timeline" },
-  { label: "Plan", path: "/dashboard" },
+  { label: "My Plan", path: "/my-plan" },
+  { label: "Dashboard", path: "/dashboard" },
 ];
 
 const ProgressBar = () => {
