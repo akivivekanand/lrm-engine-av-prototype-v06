@@ -87,13 +87,13 @@ const MyPlan = () => {
 
   // Swimlane calculations
   const prepEnd = addDays(startDate, prepWindowDays);
-  const chosenStart = chain ? chain.chosenStartDate : prepEnd;
-  const lastDayToWork = chain ? chain.lastDayToWork : chosenStart;
+  const hiringEnd = addDays(prepEnd, hiringWeeks * 7);
+  const lastDayToWork = chain ? chain.lastDayToWork : hiringEnd;
 
   const totalDays = Math.max(1, daysBetween(startDate, lastDayToWork));
   const prepDays = Math.max(0, daysBetween(startDate, prepEnd));
-  const hiringDays = Math.max(0, daysBetween(prepEnd, chosenStart));
-  const bufferDays = Math.max(0, daysBetween(chosenStart, lastDayToWork));
+  const hiringDays = Math.max(0, daysBetween(prepEnd, hiringEnd));
+  const bufferDays = Math.max(0, daysBetween(hiringEnd, lastDayToWork));
 
   const prepPct = (prepDays / totalDays) * 100;
   const hiringPct = (hiringDays / totalDays) * 100;
