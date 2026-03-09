@@ -37,7 +37,7 @@ const Cover = () => {
               <span className="font-semibold text-foreground">LRM Calculation:</span> A calculated date indicating when you should begin preparing your job search based on hiring cycles in your target industry.
             </li>
             <li>
-              <span className="font-semibold text-foreground">Regulatory Anchors:</span> Visibility into your OPT timeline including your filing window and the absolute Last Day to Start Working, calculated as Program End Date plus 90 days.
+              <span className="font-semibold text-foreground">Regulatory Anchors:</span> Visibility into your OPT timeline including your filing window and the absolute Last Day to Start Working, calculated as Chosen Start Date plus 90 days (unemployment days).
             </li>
             <li>
               <span className="font-semibold text-foreground">Strategic Timeline Map:</span> A visual timeline comparing industry hiring cycles with regulatory timing constraints so you can understand when preparation, networking, and interviews should begin.
