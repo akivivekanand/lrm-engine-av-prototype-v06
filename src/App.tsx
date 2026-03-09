@@ -17,7 +17,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 const queryClient = new QueryClient();
 
 const ROUTE_KEY = "currentRoute";
-const VALID_ROUTES = ["/cover", "/step-1-authorization", "/step-2-strategy", "/step-3-timeline", "/dashboard", "/admin/events"];
+const VALID_ROUTES = ["/cover", "/step-1-authorization", "/step-2-strategy", "/step-3-timeline", "/my-plan", "/dashboard", "/admin/events"];
 
 function RouteTracker() {
   const location = useLocation();
