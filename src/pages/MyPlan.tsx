@@ -245,7 +245,7 @@ const MyPlan = () => {
             <div className="flex justify-between text-[9px] text-muted-foreground">
               <span>{formatDate(startDate)}</span>
               {prepDays > 0 && <span>{formatDate(prepEnd)}</span>}
-              <span>{formatDate(chosenStart)}</span>
+              <span>{formatDate(hiringEnd)}</span>
               <span>{formatDate(lastDayToWork)}</span>
             </div>
             {/* Legend */}
