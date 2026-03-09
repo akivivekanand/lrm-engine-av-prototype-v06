@@ -87,13 +87,13 @@ const MyPlan = () => {
 
   // Swimlane calculations
   const prepEnd = addDays(startDate, prepWindowDays);
-  const chosenStart = chain ? chain.chosenStartDate : prepEnd;
-  const lastDayToWork = chain ? chain.lastDayToWork : chosenStart;
+  const hiringEnd = addDays(prepEnd, hiringWeeks * 7);
+  const lastDayToWork = chain ? chain.lastDayToWork : hiringEnd;
 
   const totalDays = Math.max(1, daysBetween(startDate, lastDayToWork));
   const prepDays = Math.max(0, daysBetween(startDate, prepEnd));
-  const hiringDays = Math.max(0, daysBetween(prepEnd, chosenStart));
-  const bufferDays = Math.max(0, daysBetween(chosenStart, lastDayToWork));
+  const hiringDays = Math.max(0, daysBetween(prepEnd, hiringEnd));
+  const bufferDays = Math.max(0, daysBetween(hiringEnd, lastDayToWork));
 
   const prepPct = (prepDays / totalDays) * 100;
   const hiringPct = (hiringDays / totalDays) * 100;
@@ -245,7 +245,7 @@ const MyPlan = () => {
             <div className="flex justify-between text-[9px] text-muted-foreground">
               <span>{formatDate(startDate)}</span>
               {prepDays > 0 && <span>{formatDate(prepEnd)}</span>}
-              <span>{formatDate(chosenStart)}</span>
+              <span>{formatDate(hiringEnd)}</span>
               <span>{formatDate(lastDayToWork)}</span>
             </div>
             {/* Legend */}
@@ -500,8 +500,8 @@ const MyPlan = () => {
         <Button variant="outline" onClick={() => navigate("/step-3-timeline")} className="flex-1">
           Back to Timeline
         </Button>
-        <Button onClick={() => navigate("/dashboard")} className="flex-1">
-          Continue to Dashboard
+        <Button onClick={() => navigate("/resource-vault")} className="flex-1">
+          Continue to Resource Vault
         </Button>
       </div>
     </StepLayout>
