@@ -366,7 +366,9 @@ const Step1Authorization = () => {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-sm">
-            Please complete all required fields to continue.
+            {optStatus === "denied"
+              ? "Please contact ISSO or your DSO."
+              : "Please complete all required fields to continue."}
           </AlertDescription>
         </Alert>
       )}
