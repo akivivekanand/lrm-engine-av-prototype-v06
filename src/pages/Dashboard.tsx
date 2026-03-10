@@ -49,8 +49,9 @@ const TAG_COLORS: Record<string, string> = {
   "career strategy": "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
 };
 
-const ToolkitItemCard = ({ title, tag, type, content: itemContent }: { title: string; tag?: string; type: string; content: string }) => {
+const ToolkitItemCard = ({ title, tag, type, content: itemContent, forceExpanded = false }: { title: string; tag?: string; type: string; content: string; forceExpanded?: boolean }) => {
   const [expanded, setExpanded] = useState(false);
+  const isExpanded = forceExpanded || expanded;
   const [copied, setCopied] = useState(false);
   const contentRef = useRef<HTMLParagraphElement>(null);
   const tagClass = tag ? TAG_COLORS[tag] || "bg-muted text-muted-foreground" : "";
@@ -64,15 +65,15 @@ const ToolkitItemCard = ({ title, tag, type, content: itemContent }: { title: st
 
   return (
     <div className="border border-border rounded-lg p-3">
-      <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpanded(!expanded)}>
+      <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpanded(!isExpanded)}>
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="text-sm font-medium text-foreground">{title}</span>
           {tag && <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0 ${tagClass}`}>{tag}</span>}
           <span className="text-[10px] text-muted-foreground shrink-0">{typeLabel}</span>
         </div>
-        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform shrink-0 ml-2 ${expanded ? "rotate-180" : ""}`} />
+        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform shrink-0 ml-2 print:hidden ${isExpanded ? "rotate-180" : ""}`} />
       </div>
-      {expanded && (
+      {isExpanded && (
         <div className="mt-2 pt-2 border-t border-border space-y-2">
           <p ref={contentRef} className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">{itemContent}</p>
           <button onClick={handleCopy} className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
@@ -201,8 +202,19 @@ const Dashboard = () => {
     }
   }, [strategyGenerated, chain]);
 
+  const [isPrinting, setIsPrinting] = useState(false);
+
   const handleDownloadPDF = () => {
-    window.print();
+    setShowActionPlan(true);
+    setShowToolkit(true);
+    setIsPrinting(true);
+    // Allow React to re-render with expanded state before printing
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+        setIsPrinting(false);
+      });
+    });
   };
 
   const toolkit = useToolkit();
@@ -407,10 +419,7 @@ const Dashboard = () => {
         </Button>
       )}
 
-      {/* ── 5. Career Center Contact ── */}
-      <div className="space-y-3 print:break-inside-avoid">
-        <ContactCard contact={content.careerCenter} />
-      </div>
+      {/* Career Center moved below post-click sections, above compliance */}
 
       {/* ── 6. Post-click: Timeline Intelligence ── */}
       {strategyGenerated && plan && (
@@ -461,64 +470,110 @@ const Dashboard = () => {
 
           {showActionPlan && (
             <GlassCard className="print:break-inside-avoid">
-              <Tabs defaultValue="daily">
-                <TabsList className="w-full print:hidden">
-                  <TabsTrigger value="daily" className="flex-1 text-xs">Daily</TabsTrigger>
-                  <TabsTrigger value="weekly" className="flex-1 text-xs">Weekly</TabsTrigger>
-                  <TabsTrigger value="monthly" className="flex-1 text-xs">Monthly</TabsTrigger>
-                </TabsList>
+              {/* Interactive tabs for screen */}
+              <div className={isPrinting ? "hidden" : ""}>
+                <Tabs defaultValue="daily">
+                  <TabsList className="w-full print:hidden">
+                    <TabsTrigger value="daily" className="flex-1 text-xs">Daily</TabsTrigger>
+                    <TabsTrigger value="weekly" className="flex-1 text-xs">Weekly</TabsTrigger>
+                    <TabsTrigger value="monthly" className="flex-1 text-xs">Monthly</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="daily" className="mt-3 space-y-3">
+                    {actionPlanDaily.map((day) => (
+                      <div key={day.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{day.key}</h4>
+                        {day.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <Checkbox className="mt-0.5" disabled />
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    {actionPlanDaily.length === 0 && <p className="text-xs text-muted-foreground">No daily tasks available.</p>}
+                  </TabsContent>
+                  <TabsContent value="weekly" className="mt-3 space-y-3">
+                    {actionPlanWeekly.map((week) => (
+                      <div key={week.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{week.key}</h4>
+                        {week.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <Checkbox className="mt-0.5" disabled />
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    {actionPlanWeekly.length === 0 && <p className="text-xs text-muted-foreground">No weekly tasks available.</p>}
+                  </TabsContent>
+                  <TabsContent value="monthly" className="mt-3 space-y-3">
+                    {actionPlanMonthly.map((month) => (
+                      <div key={month.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{month.key}</h4>
+                        {month.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <Checkbox className="mt-0.5" disabled />
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    {actionPlanMonthly.length === 0 && <p className="text-xs text-muted-foreground">No monthly tasks available.</p>}
+                  </TabsContent>
+                </Tabs>
+              </div>
 
-                <TabsContent value="daily" className="mt-3 space-y-3">
-                  {actionPlanDaily.map((day) => (
-                    <div key={day.key} className="space-y-1.5">
-                      <h4 className="text-xs font-semibold text-foreground">{day.key}</h4>
-                      {day.tasks.map((task, ti) => (
-                        <div key={ti} className="flex items-start gap-2">
-                          <Checkbox className="mt-0.5" disabled />
-                          <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                  {actionPlanDaily.length === 0 && (
-                    <p className="text-xs text-muted-foreground">No daily tasks available. Complete Step 4 to curate your action plan.</p>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="weekly" className="mt-3 space-y-3">
-                  {actionPlanWeekly.map((week) => (
-                    <div key={week.key} className="space-y-1.5">
-                      <h4 className="text-xs font-semibold text-foreground">{week.key}</h4>
-                      {week.tasks.map((task, ti) => (
-                        <div key={ti} className="flex items-start gap-2">
-                          <Checkbox className="mt-0.5" disabled />
-                          <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                  {actionPlanWeekly.length === 0 && (
-                    <p className="text-xs text-muted-foreground">No weekly tasks available. Complete Step 4 to curate your action plan.</p>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="monthly" className="mt-3 space-y-3">
-                  {actionPlanMonthly.map((month) => (
-                    <div key={month.key} className="space-y-1.5">
-                      <h4 className="text-xs font-semibold text-foreground">{month.key}</h4>
-                      {month.tasks.map((task, ti) => (
-                        <div key={ti} className="flex items-start gap-2">
-                          <Checkbox className="mt-0.5" disabled />
-                          <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                  {actionPlanMonthly.length === 0 && (
-                    <p className="text-xs text-muted-foreground">No monthly tasks available. Complete Step 4 to curate your action plan.</p>
-                  )}
-                </TabsContent>
-              </Tabs>
+              {/* Print-only: all sections expanded inline */}
+              <div className={isPrinting ? "space-y-4" : "hidden"}>
+                {actionPlanDaily.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">Daily</h3>
+                    {actionPlanDaily.map((day) => (
+                      <div key={day.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{day.key}</h4>
+                        {day.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {actionPlanWeekly.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">Weekly</h3>
+                    {actionPlanWeekly.map((week) => (
+                      <div key={week.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{week.key}</h4>
+                        {week.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {actionPlanMonthly.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">Monthly</h3>
+                    {actionPlanMonthly.map((month) => (
+                      <div key={month.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{month.key}</h4>
+                        {month.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </GlassCard>
           )}
         </>
@@ -542,20 +597,21 @@ const Dashboard = () => {
               {toolkit.items.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
                   No items saved yet. Visit{" "}
-                  <button onClick={() => navigate("/resource-vault")} className="text-primary underline">
+                  <button onClick={() => navigate("/resource-vault")} className="text-primary underline print:hidden">
                     Step 5: Resources
                   </button>{" "}
                   to add templates and AI prompts to your toolkit.
                 </p>
               ) : (
                 <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-foreground hidden print:block">My Toolkit</h3>
                   {toolkit.items.map((item) => {
                     const isCustom = item.type === "customized-ai-prompt";
                     const displayTitle = isCustom
                       ? (toolkit.getCustomizedPromptLabel(item.id) || item.title)
                       : item.title;
                     return (
-                      <ToolkitItemCard key={item.id} title={displayTitle} tag={item.tag} type={item.type} content={item.content} />
+                      <ToolkitItemCard key={item.id} title={displayTitle} tag={item.tag} type={item.type} content={item.content} forceExpanded={isPrinting} />
                     );
                   })}
                 </div>
@@ -576,6 +632,11 @@ const Dashboard = () => {
           Download PDF
         </Button>
       )}
+
+      {/* ── Career Center Contact ── */}
+      <div className="space-y-3 print:break-inside-avoid">
+        <ContactCard contact={content.careerCenter} />
+      </div>
 
       {/* ── 11. Compliance Info ── */}
       <div className="space-y-3 print:break-inside-avoid">
