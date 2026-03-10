@@ -161,7 +161,7 @@ const Step2Strategy = () => {
         {hiringMode === "ai" && assessed && suggestion && (
           <div className="p-3 rounded-lg bg-muted/50">
             <p className="text-sm font-medium text-foreground">{suggestion.weeks} weeks</p>
-            <p className="text-[10px] text-muted-foreground mt-1">AI-suggested based on {suggestion.industryKey} market data</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Suggested based on {suggestion.industryKey} market data</p>
             <Button size="sm" variant="outline" className="mt-2" onClick={handleAcceptHiring}>
               Accept This Value
             </Button>
