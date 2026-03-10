@@ -17,30 +17,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 const queryClient = new QueryClient();
 
-const ROUTE_KEY = "currentRoute";
-const VALID_ROUTES = ["/cover", "/step-1-authorization", "/step-2-strategy", "/step-3-timeline", "/my-plan", "/resource-vault", "/dashboard", "/admin/events"];
-
 function RouteTracker() {
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Scroll to top on every route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
-
-  useEffect(() => {
-    if (VALID_ROUTES.includes(location.pathname)) {
-      localStorage.setItem(ROUTE_KEY, location.pathname);
-    }
-  }, [location.pathname]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem(ROUTE_KEY);
-    if (saved && VALID_ROUTES.includes(saved) && location.pathname === "/") {
-      navigate(saved, { replace: true });
-    }
-  }, []);
 
   return null;
 }
