@@ -418,10 +418,7 @@ const Dashboard = () => {
         </Button>
       )}
 
-      {/* ── 5. Career Center Contact ── */}
-      <div className="space-y-3 print:break-inside-avoid">
-        <ContactCard contact={content.careerCenter} />
-      </div>
+      {/* Career Center moved below post-click sections, above compliance */}
 
       {/* ── 6. Post-click: Timeline Intelligence ── */}
       {strategyGenerated && plan && (
