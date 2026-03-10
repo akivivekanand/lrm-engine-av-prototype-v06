@@ -296,10 +296,10 @@ const MyPlan = () => {
                         <Checkbox className="mt-0.5" checked />
                         <span className="text-xs text-foreground leading-relaxed">{task}</span>
                         <button
-                          className="ml-auto text-muted-foreground hover:text-destructive text-xs shrink-0"
+                          className="ml-auto text-destructive hover:text-destructive/80 shrink-0"
                           onClick={() => toggleTaskInList(day.key, task, currentTasks, setSelectedDailyTasks)}
                         >
-                          ×
+                          <Minus className="h-3 w-3" />
                         </button>
                       </label>
                     ))}
