@@ -12,13 +12,35 @@ interface SegmentedTimelineProps {
   startLabel?: string;
 }
 
-const markerColor: Record<string, string> = {
-  Today: "bg-sky",
-  "Program End Date": "bg-slate",
-  LRM: "bg-amber",
-  "EAD Start Date": "bg-primary",
-  "Chosen Start Date": "bg-primary",
-  "Last Day to Start Working": "bg-critical",
+const getMarkerStyle = (label: string) => {
+  if (label === "Today") {
+    return { className: "w-3 h-3 rounded-full bg-sky", ring: false };
+  }
+  if (label === "Program End Date") {
+    return { className: "w-3 h-3 rounded-full bg-muted-foreground/30", ring: false };
+  }
+  if (label === "LRM") {
+    return { className: "w-3 h-3 rounded-full bg-amber", ring: false };
+  }
+  if (label === "Chosen Start Date") {
+    return { className: "w-3 h-3 rounded-sm border-2 border-primary bg-transparent", ring: false };
+  }
+  if (label === "EAD Start Date") {
+    return { className: "w-3 h-3 rounded-full bg-primary", ring: false };
+  }
+  if (label === "Last Day to Start Working") {
+    return { className: "w-3 h-3 rounded-full bg-critical", ring: false };
+  }
+  return { className: "w-3 h-3 rounded-full bg-muted-foreground", ring: false };
+};
+
+const labelColor: Record<string, string> = {
+  Today: "text-sky",
+  "Program End Date": "text-muted-foreground",
+  LRM: "text-amber",
+  "EAD Start Date": "text-primary",
+  "Chosen Start Date": "text-primary",
+  "Last Day to Start Working": "text-critical",
 };
 
 const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date" }: SegmentedTimelineProps) => {
@@ -61,23 +83,43 @@ const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date" }: Segmente
         ? "bg-amber/60"
         : "bg-emerald/60";
 
+  // Segment boundaries for subtle tonal variation on the unfilled portion
+  const todayPct = pct(today);
+  const lrmPct = pct(chain.lrmDate);
+  const startPct = pct(chain.chosenStartDate);
+
   return (
     <div className="space-y-1 overflow-hidden">
       <div className="relative pt-14 pb-14 px-4">
-        {/* Track */}
-        <div className="relative h-2 rounded-full bg-muted">
+        {/* Track with segmented tonal variation */}
+        <div className="relative h-2 rounded-full bg-muted overflow-hidden">
           {/* Filled portion up to today */}
           <div
-            className={`absolute top-0 left-0 h-full rounded-full ${trackColorClass}`}
-            style={{ width: `${pct(today)}%` }}
+            className={`absolute top-0 left-0 h-full ${trackColorClass}`}
+            style={{ width: `${todayPct}%` }}
           />
+          {/* Segment: today → LRM (slightly tinted) */}
+          {lrmPct > todayPct && (
+            <div
+              className="absolute top-0 h-full bg-amber/10"
+              style={{ left: `${todayPct}%`, width: `${lrmPct - todayPct}%` }}
+            />
+          )}
+          {/* Segment: start date → end (subtle critical tint) */}
+          {startPct < 100 && (
+            <div
+              className="absolute top-0 h-full bg-critical/8"
+              style={{ left: `${startPct}%`, width: `${100 - startPct}%` }}
+            />
+          )}
         </div>
 
         {/* Markers */}
         {markers.map((m, i) => {
           const left = pct(m.date);
           const isAbove = i % 2 === 0;
-          const color = markerColor[m.label] || "bg-muted-foreground";
+          const style = getMarkerStyle(m.label);
+          const color = labelColor[m.label] || "text-muted-foreground";
           const isFirst = i === 0;
           const isLast = i === markers.length - 1;
 
@@ -94,9 +136,9 @@ const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date" }: Segmente
               className={`absolute ${m.isPast ? "opacity-40" : ""}`}
               style={{ left: `${left}%`, transform: "translateX(-50%)" }}
             >
-              {/* Dot — uniform size */}
+              {/* Dot */}
               <div
-                className={`w-3 h-3 rounded-full ${color} absolute`}
+                className={`${style.className} absolute`}
                 style={{ top: "0px", transform: "translate(-50%, -50%)", left: "50%" }}
               />
 
@@ -104,7 +146,7 @@ const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date" }: Segmente
               <div
                 className={`absolute whitespace-nowrap ${isAbove ? "bottom-full mb-3" : "top-full mt-3"} ${labelAlign}`}
               >
-                <p className="text-[10px] leading-tight font-medium text-foreground">{m.label}</p>
+                <p className={`text-[10px] leading-tight font-medium ${color}`}>{m.label}</p>
                 <p className="text-[9px] text-muted-foreground leading-tight">{formatDate(m.date)}</p>
               </div>
             </div>

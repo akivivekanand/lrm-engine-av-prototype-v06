@@ -289,8 +289,8 @@ const Step3Timeline = () => {
 
           {/* Timeline Visualization */}
           <GlassCard>
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              <h2 className="text-sm font-semibold text-foreground">Timeline</h2>
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h2 className="text-sm font-semibold text-foreground">Timeline Intelligence</h2>
               <button
                 onClick={() => setShowExplanation(!showExplanation)}
                 className="inline-flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 transition-colors"
@@ -299,6 +299,9 @@ const Step3Timeline = () => {
                 How this works
               </button>
             </div>
+            <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+              This timeline shows how your preparation window, hiring cycle, and OPT timing affect your Last Responsible Moment (LRM).
+            </p>
             {showExplanation && (
               <div className="p-3 rounded-lg bg-muted/50 mb-3 space-y-2">
                 <p className="text-xs text-muted-foreground leading-relaxed">
