@@ -386,7 +386,7 @@ const KEY_LINKS = [
   { id: "kl-uscis", title: "USCIS", url: "https://www.uscis.gov/", description: "Official source for OPT, CPT, and work authorization rules." },
   { id: "kl-myvisajobs", title: "MyVisaJobs", url: "https://www.myvisajobs.com/", description: "Search employers who have historically sponsored H-1B visas." },
   { id: "kl-froghire", title: "FrogHire", url: "https://chromewebstore.google.com/detail/froghireai-ai-resume-job/jabnaledogdghdbckajlnbipcdicinom", description: "AI Chrome extension with sponsorship information about companies on different job search platforms." },
-  { id: "kl-goingglobal", title: "Going Global", url: "https://online.goinglobal.com/", description: "Suffolk has institutional access. Find H-1B and OPT-friendly employers, US city career guides, and international job market guides." },
+  { id: "kl-goingglobal", title: "GoinGlobal", url: "https://online.goinglobal.com/", description: "Suffolk has institutional access. Find H-1B and OPT-friendly employers, US city career guides, and international job market guides." },
 ];
 
 /* ── Tag color map ── */
@@ -494,7 +494,7 @@ const PromptBuilder = () => {
   ];
 
   return (
-    <div className="rounded-xl border-2 border-purple-600 bg-purple-950/20 p-5 space-y-4">
+    <div className="rounded-xl border border-purple-200 bg-purple-50/50 dark:border-purple-800/30 dark:bg-purple-950/10 p-5 space-y-4">
       <div className="flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-purple-400" />
         <h3 className="text-sm font-bold text-foreground">Build Your Own AI Prompt</h3>
@@ -630,7 +630,7 @@ const ResourceVault = () => {
           <PromptBuilder />
 
           {/* Prompt Engineering Formula */}
-          <div className="rounded-xl border-2 border-purple-600 bg-purple-950/20 p-5">
+          <div className="rounded-xl border border-purple-200 bg-purple-50/50 dark:border-purple-800/30 dark:bg-purple-950/10 p-5">
             <div className="flex items-center gap-2 mb-2">
               <Lightbulb className="h-4 w-4 text-purple-400" />
               <h3 className="text-sm font-bold text-foreground">Prompt Engineering Formula</h3>
