@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
-import { Info, Sparkles, CalendarDays, Clock, Shield, Briefcase, BookOpen, CheckSquare, AlertTriangle } from "lucide-react";
+import { Info, Sparkles, CalendarDays, Clock, Shield, Briefcase, CheckSquare, AlertTriangle } from "lucide-react";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +27,7 @@ const Dashboard = () => {
   const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
   const [industryText] = usePersistedState<string>("industryText", "");
   const [careerPlanStartDate] = usePersistedState<string>("careerPlanStartDate", new Date().toISOString().split("T")[0]);
-  const [selectedResources] = usePersistedState<string[]>("selectedResources", []);
+  
   const [completedActions, setCompletedActions] = usePersistedState<string[]>("dashboardCompletedActions", []);
 
   const isApproved = optStatus === "approved";
@@ -105,45 +105,6 @@ const Dashboard = () => {
       prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
     );
   };
-
-  // Resource labels
-  const allResourceCards = useMemo(() => {
-    // Inline mapping of resource IDs to titles/categories
-    const resourceMap: Record<string, { title: string; category: string }> = {};
-    const resourceDefs = [
-      { id: "tpl-info-interview", title: "Informational Interview Request", category: "Template" },
-      { id: "tpl-recruiter", title: "Recruiter Outreach", category: "Template" },
-      { id: "tpl-follow-up", title: "Networking Follow-Up", category: "Template" },
-      { id: "ai-resume", title: "Resume Optimization", category: "AI Prompt" },
-      { id: "ai-cover", title: "Cover Letter Generator", category: "AI Prompt" },
-      { id: "ai-interview", title: "Interview Preparation", category: "AI Prompt" },
-      { id: "ai-company", title: "Company Research Brief", category: "AI Prompt" },
-      { id: "ai-linkedin", title: "LinkedIn Profile Optimizer", category: "AI Prompt" },
-      { id: "ai-salary", title: "Salary Negotiation Script", category: "AI Prompt" },
-      { id: "ai-networking", title: "Networking Outreach Messages", category: "AI Prompt" },
-      { id: "ai-info-interview", title: "Informational Interview Prep", category: "AI Prompt" },
-      { id: "ai-strategy", title: "Job Search Strategy Plan", category: "AI Prompt" },
-      { id: "ai-opt-convo", title: "OPT Employer Conversation", category: "AI Prompt" },
-      { id: "ai-skills-gap", title: "Skills Gap Analysis", category: "AI Prompt" },
-      { id: "ai-offer-eval", title: "Offer Evaluation Framework", category: "AI Prompt" },
-      { id: "int-star", title: "STAR Story Generator", category: "Interview" },
-      { id: "int-case", title: "Case Interview Framework", category: "Interview" },
-      { id: "int-technical", title: "Technical Interview Prep", category: "Interview" },
-      { id: "int-questions", title: "Smart Questions to Ask", category: "Interview" },
-      { id: "net-elevator", title: "Problem-Solver Elevator Pitch", category: "Networking" },
-      { id: "net-referral", title: "Referral Request Template", category: "Networking" },
-      { id: "net-thank-you", title: "Post-Interview Thank You", category: "Networking" },
-      { id: "net-cold", title: "Cold Outreach to Hiring Manager", category: "Networking" },
-      { id: "net-icebreaker", title: "Networking Icebreaker Questions", category: "Networking" },
-      { id: "suf-careers", title: "Suffolk Career Center", category: "Suffolk" },
-      { id: "suf-isso", title: "ISSO", category: "Suffolk" },
-      { id: "suf-labor", title: "Labor Market Insights", category: "Suffolk" },
-      { id: "suf-handshake", title: "Handshake", category: "Suffolk" },
-      { id: "suf-dropin", title: "Career Center Drop-In Hours", category: "Suffolk" },
-    ];
-    resourceDefs.forEach((r) => { resourceMap[r.id] = { title: r.title, category: r.category }; });
-    return resourceMap;
-  }, []);
 
   const handleGenerate = async () => {
     if (!chain) return;
@@ -300,30 +261,6 @@ const Dashboard = () => {
         </div>
       </GlassCard>
 
-      {/* (d) Your Resources */}
-      <GlassCard>
-        <div className="flex items-center gap-2 mb-3">
-          <BookOpen className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-semibold text-foreground">Your Resources</h2>
-          <Badge variant="outline" className="ml-auto text-[10px]">{selectedResources.length} selected</Badge>
-        </div>
-        {selectedResources.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No resources selected yet. Visit Step 5 to add resources to your toolkit.</p>
-        ) : (
-          <div className="space-y-1.5">
-            {selectedResources.map((id) => {
-              const res = allResourceCards[id];
-              if (!res) return null;
-              return (
-                <div key={id} className="flex items-center gap-2 text-xs">
-                  <span className="text-foreground">{res.title}</span>
-                  <Badge variant="outline" className="text-[9px]">{res.category}</Badge>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </GlassCard>
 
       {/* (e) Next Actions */}
       {chain && (

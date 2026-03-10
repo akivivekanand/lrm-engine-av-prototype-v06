@@ -1,13 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Copy, Check, ChevronDown, ChevronUp, ExternalLink, X } from "lucide-react";
+import { Copy, Check, ChevronDown, ChevronUp, ExternalLink, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
-import { usePersistedState } from "@/hooks/usePersistedState";
 
 interface ResourceCard {
   id: string;
@@ -15,6 +14,7 @@ interface ResourceCard {
   category: string;
   description: string;
   content: string;
+  tag?: string;
 }
 
 const TEMPLATES: ResourceCard[] = [
@@ -22,6 +22,7 @@ const TEMPLATES: ResourceCard[] = [
     id: "tpl-info-interview",
     title: "Informational Interview Request",
     category: "Outreach",
+    tag: "networking",
     description: "Request a brief conversation with a professional in your target industry.",
     content: `Subject: Quick Question About Your Career in [Industry]
 
@@ -44,6 +45,7 @@ Best regards,
     id: "tpl-recruiter",
     title: "Recruiter Outreach",
     category: "Outreach",
+    tag: "job search",
     description: "Introduce yourself to a recruiter at your target company.",
     content: `Subject: Interest in [Role/Team] Opportunities at [Company]
 
@@ -66,6 +68,7 @@ Best regards,
     id: "tpl-follow-up",
     title: "Networking Follow-Up",
     category: "Outreach",
+    tag: "networking",
     description: "Follow up after meeting someone at an event or meeting.",
     content: `Subject: Great Connecting at [Event/Meeting] — Following Up
 
@@ -88,6 +91,7 @@ const AI_PROMPTS: ResourceCard[] = [
     id: "ai-resume",
     title: "Resume Optimization",
     category: "AI Prompt",
+    tag: "resume",
     description: "Optimize your resume for ATS systems and hiring managers.",
     content: `Role: You are an expert career coach specializing in resume optimization for international students seeking employment in the United States.
 Context: I am a Suffolk University graduate with a [degree] in [field], targeting [specific role type] positions in [industry]. My resume needs to be optimized for ATS systems and hiring managers.
@@ -99,6 +103,7 @@ Format: Provide the optimized resume in a clean format, followed by a summary of
     id: "ai-cover",
     title: "Cover Letter Generator",
     category: "AI Prompt",
+    tag: "job search",
     description: "Create a tailored cover letter for a specific role.",
     content: `Role: You are a hiring manager at a top [industry] company who has reviewed thousands of cover letters.
 Context: I am applying for [specific role] at [company]. My key qualifications are [2-3 strengths]. The job posting emphasizes [key requirements from posting].
@@ -110,6 +115,7 @@ Format: Provide the complete cover letter ready to send, followed by 3 alternati
     id: "ai-interview",
     title: "Interview Preparation",
     category: "AI Prompt",
+    tag: "interview",
     description: "Generate role-specific interview questions with STAR answers.",
     content: `Role: You are an interview coach who has prepared hundreds of candidates for [industry] interviews.
 Context: I have an upcoming interview for [role] at [company]. The role requires [key skills from job posting]. My relevant experience includes [brief background].
@@ -121,6 +127,7 @@ Format: Present each question with a model answer outline, key points to emphasi
     id: "ai-company",
     title: "Company Research Brief",
     category: "AI Prompt",
+    tag: "career strategy",
     description: "Build comprehensive intelligence on a target employer.",
     content: `Role: You are a competitive intelligence analyst specializing in employer research for job seekers.
 Context: I am preparing for an application and potential interview at [company name] for a [role type] position.
@@ -132,6 +139,7 @@ Format: Structured brief with sections for each topic, followed by interview que
     id: "ai-linkedin",
     title: "LinkedIn Profile Optimizer",
     category: "AI Prompt",
+    tag: "linkedin",
     description: "Maximize your LinkedIn visibility for recruiter searches.",
     content: `Role: You are a LinkedIn optimization specialist who has helped hundreds of professionals increase their profile visibility and recruiter outreach.
 Context: I am a recent Suffolk University graduate targeting [industry/role]. My current LinkedIn profile has [describe current state]. I want to attract recruiters searching for [target role] candidates.
@@ -143,6 +151,7 @@ Format: Provide each section separately with the optimized text ready to copy an
     id: "ai-salary",
     title: "Salary Negotiation Script",
     category: "AI Prompt",
+    tag: "job search",
     description: "Evaluate an offer and prepare a negotiation strategy.",
     content: `Role: You are a compensation negotiation expert with deep knowledge of [industry] salary ranges and benefits packages.
 Context: I have received an offer for [role] at [company] with a base salary of [amount] in [location]. I am on OPT work authorization.
@@ -154,6 +163,7 @@ Format: Market analysis summary, followed by a step-by-step negotiation script w
     id: "ai-networking",
     title: "Networking Outreach Messages",
     category: "AI Prompt",
+    tag: "networking",
     description: "Craft personalized outreach for LinkedIn, email, and follow-ups.",
     content: `Role: You are a networking strategist who specializes in helping international students build professional relationships in the United States.
 Context: I am a Suffolk University student/graduate targeting [industry]. I have identified [Name, Title, Company] as someone I want to connect with.
@@ -165,6 +175,7 @@ Format: Three separate messages labeled by type, each with a brief note explaini
     id: "ai-info-interview",
     title: "Informational Interview Prep",
     category: "AI Prompt",
+    tag: "networking",
     description: "Prepare strategic questions for an informational interview.",
     content: `Role: You are a career development expert who coaches students on conducting effective informational interviews.
 Context: I have an informational interview scheduled with [Name], who is a [Title] at [Company] in [industry]. My goal is to learn about [specific topic] and identify referral opportunities.
@@ -176,6 +187,7 @@ Format: Introduction script, categorized questions with strategy notes, and clos
     id: "ai-strategy",
     title: "Job Search Strategy Plan",
     category: "AI Prompt",
+    tag: "career strategy",
     description: "Create a 4-week action plan tailored to your OPT timeline.",
     content: `Role: You are a strategic career advisor who specializes in job search planning for international students with OPT work authorization.
 Context: I am a Suffolk University graduate with [degree] in [field]. My OPT start date is [date] and I have [X] days remaining before my 90-day unemployment limit. I am targeting [industry/role type] in [preferred locations].
@@ -187,6 +199,7 @@ Format: Week-by-week plan with daily action items, weekly goals, and success met
     id: "ai-opt-convo",
     title: "OPT Employer Conversation",
     category: "AI Prompt",
+    tag: "job search",
     description: "Prepare confident responses about your work authorization status.",
     content: `Role: You are an immigration-aware career coach who helps OPT holders navigate employer conversations about work authorization.
 Context: I am on [Initial OPT/STEM OPT] with an EAD valid through [date]. I am interviewing with [company] for [role]. The employer has asked about my work authorization status.
@@ -198,6 +211,7 @@ Format: Q&A format with the employer's likely question followed by 2-3 response 
     id: "ai-skills-gap",
     title: "Skills Gap Analysis",
     category: "AI Prompt",
+    tag: "career strategy",
     description: "Identify and close skills gaps for your target role.",
     content: `Role: You are a career development analyst who specializes in identifying and closing skills gaps for career transitions.
 Context: I have a [degree] from Suffolk University with coursework in [relevant courses]. My experience includes [brief summary]. I am targeting [specific role type] in [industry]. Here is a job description for my ideal role: [paste job description].
@@ -209,6 +223,7 @@ Format: Gap analysis table with columns for Required Skill, My Current Level, Ga
     id: "ai-offer-eval",
     title: "Offer Evaluation Framework",
     category: "AI Prompt",
+    tag: "job search",
     description: "Evaluate job offers holistically including visa implications.",
     content: `Role: You are a career decision advisor who helps early-career professionals evaluate job offers holistically.
 Context: I have received [one/multiple] offer(s). Offer details: [Company, Role, Salary, Location, Benefits, Start Date]. My priorities are [list 3-5 priorities such as growth potential, location, compensation, visa sponsorship].
@@ -223,6 +238,7 @@ const INTERVIEW_PREP: ResourceCard[] = [
     id: "int-star",
     title: "STAR Story Generator",
     category: "Interview",
+    tag: "interview",
     description: "Build structured behavioral interview answers using STAR method.",
     content: `Role: Act as an Interview Coach.
 Context: I am preparing for a behavioral interview for a [Job Title] role.
@@ -234,6 +250,7 @@ Format: A structured 4-paragraph response.`,
     id: "int-case",
     title: "Case Interview Framework",
     category: "Interview",
+    tag: "interview",
     description: "Structure your thinking for consulting-style case interviews.",
     content: `Role: Act as a Management Consultant.
 Context: I am preparing for a case interview regarding [Topic, e.g., Market Entry].
@@ -244,6 +261,7 @@ Format: A numbered list with 'Rationale' for each step.`,
     id: "int-technical",
     title: "Technical Interview Prep",
     category: "Interview",
+    tag: "interview",
     description: "Prepare for technical assessments in your field.",
     content: `Role: You are a senior technical interviewer at a [industry] company.
 Context: I am interviewing for a [role] position that requires [technical skills]. My background includes [relevant experience].
@@ -255,6 +273,7 @@ Format: Questions with difficulty ratings, ideal answer frameworks, and evaluati
     id: "int-questions",
     title: "Smart Questions to Ask",
     category: "Interview",
+    tag: "interview",
     description: "Thoughtful questions that demonstrate research and genuine interest.",
     content: `Role: You are a career strategist who specializes in interview preparation.
 Context: I am interviewing at [company] for [role]. I want to ask questions that show I have done my research and am genuinely evaluating the opportunity.
@@ -269,6 +288,7 @@ const NETWORKING: ResourceCard[] = [
     id: "net-elevator",
     title: "Problem-Solver Elevator Pitch",
     category: "Networking",
+    tag: "networking",
     description: "A concise pitch positioning you as a solution to employer needs.",
     content: `I am a [Major] student at Suffolk University specializing in [Skill A] and [Skill B]. I recently achieved [Result] by implementing [Method]. I am currently focusing on the [Industry] sector to solve [Specific Problem] through data-driven strategies. My goal is to bring my international perspective and technical background to a team like yours to help drive [Specific Outcome]. I have been following [Company's] work on [Project], and I would love to learn more about how your team handles [Related Challenge].`,
   },
@@ -276,6 +296,7 @@ const NETWORKING: ResourceCard[] = [
     id: "net-referral",
     title: "Referral Request Template",
     category: "Networking",
+    tag: "networking",
     description: "Ask a contact for a referral to an open position.",
     content: `Subject: Quick question about the [Job Title] role at [Company]
 
@@ -290,6 +311,7 @@ Thank you,
     id: "net-thank-you",
     title: "Post-Interview Thank You",
     category: "Networking",
+    tag: "interview",
     description: "Send a professional thank you after an interview.",
     content: `Subject: Thank you for the conversation about [Role]
 
@@ -302,6 +324,7 @@ Best regards,
     id: "net-cold",
     title: "Cold Outreach to Hiring Manager",
     category: "Networking",
+    tag: "job search",
     description: "Reach out directly to a hiring manager with a value proposition.",
     content: `Subject: Interest in [Position] - [Your Name], Suffolk University
 
@@ -316,6 +339,7 @@ Best regards,
     id: "net-icebreaker",
     title: "Networking Icebreaker Questions",
     category: "Networking",
+    tag: "networking",
     description: "Natural conversation starters for professional mixers and events.",
     content: `Role: Act as a Networking Expert.
 Context: I am attending a professional mixer for [Industry]. I want to approach a Senior Manager at [Company]. Based on their recent company news about [Insert News Item], draft 3 different natural-sounding opening questions that show I have done my research and am interested in their perspective.
@@ -328,6 +352,7 @@ const SUFFOLK_RESOURCES: ResourceCard[] = [
     id: "suf-careers",
     title: "Suffolk Career Center",
     category: "Suffolk",
+    tag: "career strategy",
     description: "Access career advising, job postings, workshops, and employer events.",
     content: "https://careers.suffolk.edu/",
   },
@@ -335,6 +360,7 @@ const SUFFOLK_RESOURCES: ResourceCard[] = [
     id: "suf-isso",
     title: "International Students & Scholars Office",
     category: "Suffolk",
+    tag: "career strategy",
     description: "OPT/CPT guidance, immigration advising, and compliance support.",
     content: "https://www.suffolk.edu/student-life/international-students-scholars",
   },
@@ -342,6 +368,7 @@ const SUFFOLK_RESOURCES: ResourceCard[] = [
     id: "suf-labor",
     title: "Labor Market Insights",
     category: "Suffolk",
+    tag: "job search",
     description: "Explore salary data, job trends, and industry outlooks for your target field.",
     content: "https://careers.suffolk.edu/labor-market-insights/",
   },
@@ -349,6 +376,7 @@ const SUFFOLK_RESOURCES: ResourceCard[] = [
     id: "suf-handshake",
     title: "Handshake",
     category: "Suffolk",
+    tag: "job search",
     description: "Suffolk's platform for job listings, scheduling Career Development advisor appointments, and booking LinkedIn headshot sessions.",
     content: "https://suffolk.joinhandshake.com/",
   },
@@ -356,6 +384,7 @@ const SUFFOLK_RESOURCES: ResourceCard[] = [
     id: "suf-dropin",
     title: "Career Center Drop-In Hours",
     category: "Suffolk",
+    tag: "career strategy",
     description: "Walk-in advising sessions — no appointment needed. Check the Career Center website for current hours.",
     content: "https://careers.suffolk.edu/",
   },
@@ -416,56 +445,44 @@ const CopyButton = ({ text, label = "Copy" }: { text: string; label?: string }) 
 
 const ResourceVault = () => {
   const navigate = useNavigate();
-  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
-  const [selectedResources, setSelectedResources] = usePersistedState<string[]>("selectedResources", []);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const toggleExpand = (id: string) => {
-    setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleCard = (id: string) => {
+    setExpandedCard(expandedCard === id ? null : id);
   };
 
-  const toggleSelect = (id: string) => {
-    setSelectedResources((prev) =>
-      prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
+  const matchesSearch = (card: ResourceCard) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      card.title?.toLowerCase().includes(query) ||
+      card.category?.toLowerCase().includes(query) ||
+      card.content?.toLowerCase().includes(query) ||
+      card.description?.toLowerCase().includes(query) ||
+      card.tag?.toLowerCase().includes(query)
     );
   };
 
-  const clearAll = () => setSelectedResources([]);
-
-  const allCards = ALL_TABS.flatMap((t) => t.cards);
-
-  const copyAllSelected = async () => {
-    const selected = selectedResources
-      .map((id) => allCards.find((c) => c.id === id))
-      .filter(Boolean) as ResourceCard[];
-    const text = selected
-      .map((c) => `--- ${c.title} [${c.category}] ---\n${c.content}`)
-      .join("\n\n");
-    await navigator.clipboard.writeText(text);
-  };
-
   const renderCard = (card: ResourceCard) => {
-    const isExpanded = expandedCards[card.id];
-    const isSelected = selectedResources.includes(card.id);
+    const isExpanded = expandedCard === card.id;
     const isSuffolk = card.category === "Suffolk";
 
     return (
-      <GlassCard key={card.id} className="relative p-4">
-        <div className="absolute top-3 right-3">
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={() => toggleSelect(card.id)}
-          />
-        </div>
-        <div className="pr-8">
+      <GlassCard key={card.id} className="p-4">
+        <div>
           <div className="flex items-center gap-2 mb-1">
             <h3 className="text-sm font-semibold text-foreground">{card.title}</h3>
           </div>
-          <Badge variant="outline" className="text-[10px] mb-2">{card.category}</Badge>
+          <div className="flex items-center gap-1.5 mb-2">
+            <Badge variant="outline" className="text-[10px]">{card.category}</Badge>
+            {card.tag && <Badge variant="secondary" className="text-[10px]">{card.tag}</Badge>}
+          </div>
           <p className="text-xs text-muted-foreground">{card.description}</p>
         </div>
         <button
           className="flex items-center gap-1 text-xs text-primary font-medium mt-2"
-          onClick={() => isSuffolk ? window.open(card.content, "_blank") : toggleExpand(card.id)}
+          onClick={() => isSuffolk ? window.open(card.content, "_blank") : toggleCard(card.id)}
         >
           {isSuffolk ? (
             <>Visit <ExternalLink className="h-3 w-3" /></>
@@ -488,6 +505,17 @@ const ResourceVault = () => {
       <h1 className="text-xl font-bold text-foreground">Step 5: Add Resources</h1>
       <p className="text-sm text-muted-foreground">Select the templates, prompts, and resources you want in your toolkit.</p>
 
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search resources, prompts, or templates"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
       <Tabs defaultValue="templates">
         <TabsList className="w-full flex-wrap h-auto gap-1 p-1">
           {ALL_TABS.map((tab) => (
@@ -497,13 +525,20 @@ const ResourceVault = () => {
           ))}
         </TabsList>
 
-        {ALL_TABS.map((tab) => (
-          <TabsContent key={tab.key} value={tab.key} className="mt-4 space-y-3">
-            <div className="grid gap-3">
-              {tab.cards.map(renderCard)}
-            </div>
-          </TabsContent>
-        ))}
+        {ALL_TABS.map((tab) => {
+          const filtered = tab.cards.filter(matchesSearch);
+          return (
+            <TabsContent key={tab.key} value={tab.key} className="mt-4 space-y-3">
+              <div className="grid gap-3">
+                {filtered.length > 0 ? (
+                  filtered.map(renderCard)
+                ) : (
+                  <p className="text-xs text-muted-foreground text-center py-4">No results found.</p>
+                )}
+              </div>
+            </TabsContent>
+          );
+        })}
       </Tabs>
 
       {/* Key Links — always visible */}
@@ -530,27 +565,8 @@ const ResourceVault = () => {
         </div>
       </div>
 
-      {/* Sticky Selection Bar */}
-      {selectedResources.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t shadow-lg p-3">
-          <div className="max-w-lg mx-auto flex items-center justify-between gap-3">
-            <span className="text-sm font-medium text-foreground">
-              {selectedResources.length} selected
-            </span>
-            <div className="flex gap-2">
-              <Button variant="ghost" size="sm" onClick={clearAll} className="text-xs">
-                <X className="h-3.5 w-3.5 mr-1" /> Clear All
-              </Button>
-              <Button size="sm" onClick={copyAllSelected} className="text-xs">
-                <Copy className="h-3.5 w-3.5 mr-1" /> Copy My Resources
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Navigation */}
-      <div className={`flex gap-3 ${selectedResources.length > 0 ? "pb-16" : ""}`}>
+      <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate("/my-plan")} className="flex-1">
           Back to Step 4: Strategy
         </Button>
