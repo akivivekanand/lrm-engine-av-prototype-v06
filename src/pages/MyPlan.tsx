@@ -132,8 +132,9 @@ const MyPlan = () => {
   };
 
   // Day cards data
+  const today = stripTime(new Date());
   const dayCards = Array.from({ length: visibleDays }, (_, i) => {
-    const date = addDays(startDate, i);
+    const date = addDays(today, i);
     const key = format(date, "yyyy-MM-dd");
     const label = i === 0 ? "Today" : i === 1 ? "Tomorrow" : format(date, "EEE, MMM d");
     return { date, key, label, index: i };
