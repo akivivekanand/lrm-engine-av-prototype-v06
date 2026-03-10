@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
-import { Info, Sparkles, CalendarDays, Clock, Shield, Briefcase, BookOpen, CheckSquare, AlertTriangle } from "lucide-react";
+import { Info, Sparkles, CalendarDays, Clock, Shield, Briefcase, CheckSquare, AlertTriangle } from "lucide-react";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
