@@ -132,20 +132,20 @@ const MyPlan = () => {
   };
 
   // Day cards data
-  const dayCards = Array.from({ length: 7 }, (_, i) => {
+  const dayCards = Array.from({ length: visibleDays }, (_, i) => {
     const date = addDays(startDate, i);
     const key = format(date, "yyyy-MM-dd");
     const label = i === 0 ? "Today" : i === 1 ? "Tomorrow" : format(date, "EEE, MMM d");
     return { date, key, label, index: i };
   });
 
-  const weekCards = Array.from({ length: 4 }, (_, i) => ({
+  const weekCards = Array.from({ length: visibleWeeks }, (_, i) => ({
     key: `week-${i + 1}`,
     label: `Week ${i + 1}`,
     index: i,
   }));
 
-  const monthCards = Array.from({ length: 3 }, (_, i) => ({
+  const monthCards = Array.from({ length: visibleMonths }, (_, i) => ({
     key: `month-${i + 1}`,
     label: `Month ${i + 1}`,
     index: i,
