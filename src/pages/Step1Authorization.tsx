@@ -16,9 +16,9 @@ import content from "@/data/content.json";
 
 const statusOptions = [
   { value: "notApplied", label: "Not Applied" },
-  { value: "waiting", label: "Applied and Waiting" },
+  { value: "waiting", label: "Applied" },
   { value: "approved", label: "Approved" },
-  { value: "rfe", label: "RFE" },
+  { value: "rfe", label: "RFE Received" },
   { value: "denied", label: "Denied" },
 ];
 
