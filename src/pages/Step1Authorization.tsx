@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { CalendarIcon, AlertTriangle, ExternalLink, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -113,6 +113,18 @@ const Step1Authorization = () => {
   const suggestedEstimatedDate = submissionDateObj ? addDays(stripTime(submissionDateObj), 135) : null;
 
   const isDeniedOrRfe = optStatus === "rfe" || optStatus === "denied";
+
+  // Auto-default start dates to earliest possible (program end date) when grad date is set
+  useEffect(() => {
+    if (!gradDateObj) return;
+    const earliest = stripTime(gradDateObj).toISOString();
+    if (optStatus === "approved" && !eadDate) {
+      setEadDate(earliest);
+    }
+    if (optStatus !== "approved" && optStatus !== "denied" && !chosenStartDate) {
+      setChosenStartDate(earliest);
+    }
+  }, [gradDate, optStatus]);
 
   const canContinue = (() => {
     if (optStatus === "denied") return false;
