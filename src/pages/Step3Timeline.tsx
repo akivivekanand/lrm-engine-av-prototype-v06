@@ -49,6 +49,10 @@ const Step3Timeline = () => {
     <StepLayout>
       <h1 className="text-xl font-bold text-foreground">Step 3: Timeline Review</h1>
 
+      <p className="text-xs text-muted-foreground leading-relaxed -mt-2">
+        This timeline shows how your preparation window, hiring cycle, and OPT buffer relate to your Last Responsible Moment (LRM).
+      </p>
+
       {/* Displayed Inputs */}
       <GlassCard>
         <h2 className="text-sm font-semibold text-foreground mb-3">Your Inputs</h2>
