@@ -379,14 +379,6 @@ const SUFFOLK_RESOURCES: ResourceCard[] = [
     description: "Suffolk's platform for job listings, scheduling Career Development advisor appointments, and booking LinkedIn headshot sessions.",
     content: "https://suffolk.joinhandshake.com/",
   },
-  {
-    id: "suf-dropin",
-    title: "Career Center Drop-In Hours",
-    category: "Suffolk",
-    tag: "career strategy",
-    description: "Walk-in advising sessions — no appointment needed. Check the Career Center website for current hours.",
-    content: "https://careers.suffolk.edu/",
-  },
 ];
 
 /* ── Key Links ── */
