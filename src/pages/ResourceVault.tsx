@@ -630,7 +630,7 @@ const ResourceVault = () => {
           <PromptBuilder />
 
           {/* Prompt Engineering Formula */}
-          <div className="rounded-xl border-2 border-purple-600 bg-purple-950/20 p-5">
+          <div className="rounded-xl border border-purple-200 bg-purple-50/50 dark:border-purple-800/30 dark:bg-purple-950/10 p-5">
             <div className="flex items-center gap-2 mb-2">
               <Lightbulb className="h-4 w-4 text-purple-400" />
               <h3 className="text-sm font-bold text-foreground">Prompt Engineering Formula</h3>
