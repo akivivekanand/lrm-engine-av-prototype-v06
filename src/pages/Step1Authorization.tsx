@@ -38,15 +38,17 @@ function DatePickerField({
   helperText,
   value,
   onChange,
+  hasError,
 }: {
   label: string;
   helperText?: string;
   value: Date | undefined;
   onChange: (d: Date | undefined) => void;
+  hasError?: boolean;
 }) {
   return (
     <>
-      <label className="text-sm font-medium text-foreground block mb-2">{label}</label>
+      <label className={cn("text-sm font-medium block mb-2", hasError ? "text-destructive" : "text-foreground")}>{label}</label>
       {helperText && (
         <p className="text-xs text-muted-foreground mb-2">{helperText}</p>
       )}
@@ -54,7 +56,7 @@ function DatePickerField({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className={cn("w-full justify-start text-left font-normal", !value && "text-muted-foreground")}
+            className={cn("w-full justify-start text-left font-normal", !value && "text-muted-foreground", hasError && "border-destructive")}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {value ? format(value, "PPP") : "Select date"}
