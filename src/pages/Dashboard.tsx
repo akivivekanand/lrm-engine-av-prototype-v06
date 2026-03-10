@@ -480,14 +480,43 @@ const Dashboard = () => {
 
       {/* ── 9. Post-click: My Toolkit ── */}
       {strategyGenerated && (
-        <Button
-          variant="outline"
-          className="w-full print:hidden"
-          onClick={() => navigate("/resource-vault")}
-        >
-          <Wrench className="h-4 w-4 mr-2" />
-          My Toolkit
-        </Button>
+        <>
+          <Button
+            variant={showToolkit ? "secondary" : "outline"}
+            className="w-full print:hidden"
+            onClick={() => setShowToolkit(!showToolkit)}
+          >
+            <Wrench className="h-4 w-4 mr-2" />
+            My Toolkit
+            {showToolkit ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
+          </Button>
+
+          {showToolkit && (
+            <GlassCard className="print:break-inside-avoid">
+              {toolkit.items.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  No items saved yet. Visit{" "}
+                  <button onClick={() => navigate("/resource-vault")} className="text-primary underline">
+                    Step 5: Resources
+                  </button>{" "}
+                  to add templates and AI prompts to your toolkit.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {toolkit.items.map((item) => {
+                    const isCustom = item.type === "customized-ai-prompt";
+                    const displayTitle = isCustom
+                      ? (toolkit.getCustomizedPromptLabel(item.id) || item.title)
+                      : item.title;
+                    return (
+                      <ToolkitItemCard key={item.id} title={displayTitle} tag={item.tag} type={item.type} content={item.content} />
+                    );
+                  })}
+                </div>
+              )}
+            </GlassCard>
+          )}
+        </>
       )}
 
       {/* ── 10. Post-click: Download PDF ── */}
