@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
-import { Sparkles, ChevronDown, ChevronUp, Download, Wrench, CalendarDays, Clock, AlertTriangle } from "lucide-react";
+import { useState, useMemo, useRef } from "react";
+import { Sparkles, ChevronDown, ChevronUp, Download, Wrench, CalendarDays, Clock, AlertTriangle, Copy, Check } from "lucide-react";
 import confetti from "canvas-confetti";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { calculateLRMChainV2, formatDate, getMilestoneStatus, daysBetween, strip
 import { generateCareerPlan, type CareerPlan } from "@/lib/generateCareerPlan";
 import { cn } from "@/lib/utils";
 import content from "@/data/content.json";
+import { useToolkit } from "@/hooks/useToolkit";
 
 const CONFETTI_COLORS = ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#9B59B6"];
 
@@ -36,6 +37,52 @@ const statusBadgeVariant: Record<DateStatus, string> = {
   Today: "bg-sky text-white",
   Upcoming: "bg-emerald text-white",
   Critical: "bg-destructive text-destructive-foreground",
+};
+
+/* ── Toolkit Item Card for dashboard display ── */
+const TAG_COLORS: Record<string, string> = {
+  networking: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  resume: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+  interview: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  linkedin: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300",
+  "job search": "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
+  "career strategy": "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
+};
+
+const ToolkitItemCard = ({ title, tag, type, content: itemContent }: { title: string; tag?: string; type: string; content: string }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const contentRef = useRef<HTMLParagraphElement>(null);
+  const tagClass = tag ? TAG_COLORS[tag] || "bg-muted text-muted-foreground" : "";
+  const typeLabel = type === "template" ? "Template" : type === "ai-prompt" ? "AI Prompt" : "Custom";
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(itemContent);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="border border-border rounded-lg p-3">
+      <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpanded(!expanded)}>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="text-sm font-medium text-foreground">{title}</span>
+          {tag && <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0 ${tagClass}`}>{tag}</span>}
+          <span className="text-[10px] text-muted-foreground shrink-0">{typeLabel}</span>
+        </div>
+        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform shrink-0 ml-2 ${expanded ? "rotate-180" : ""}`} />
+      </div>
+      {expanded && (
+        <div className="mt-2 pt-2 border-t border-border space-y-2">
+          <p ref={contentRef} className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">{itemContent}</p>
+          <button onClick={handleCopy} className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
 };
 
 const Dashboard = () => {
@@ -59,6 +106,7 @@ const Dashboard = () => {
   const [showTimelineIntel, setShowTimelineIntel] = useState(true);
   const [showStrategicGuidance, setShowStrategicGuidance] = useState(true);
   const [showActionPlan, setShowActionPlan] = useState(false);
+  const [showToolkit, setShowToolkit] = useState(false);
 
   // Read persisted tasks from Step 4
   const [selectedDailyTasks] = usePersistedState<Record<string, string[]>>("myPlanDailyTasks", {});
@@ -154,14 +202,10 @@ const Dashboard = () => {
   }, [strategyGenerated, chain]);
 
   const handleDownloadPDF = () => {
-    confetti({
-      particleCount: 150,
-      spread: 80,
-      origin: { y: 0.6 },
-      colors: CONFETTI_COLORS,
-    });
-    setTimeout(() => window.print(), 400);
+    window.print();
   };
+
+  const toolkit = useToolkit();
 
   // Gather action plan tasks
   const hasCuratedTasks = Object.keys(selectedDailyTasks).length > 0 || Object.keys(selectedWeeklyTasks).length > 0 || Object.keys(selectedMonthlyTasks).length > 0;
@@ -482,14 +526,43 @@ const Dashboard = () => {
 
       {/* ── 9. Post-click: My Toolkit ── */}
       {strategyGenerated && (
-        <Button
-          variant="outline"
-          className="w-full print:hidden"
-          onClick={() => navigate("/resource-vault")}
-        >
-          <Wrench className="h-4 w-4 mr-2" />
-          My Toolkit
-        </Button>
+        <>
+          <Button
+            variant={showToolkit ? "secondary" : "outline"}
+            className="w-full print:hidden"
+            onClick={() => setShowToolkit(!showToolkit)}
+          >
+            <Wrench className="h-4 w-4 mr-2" />
+            My Toolkit
+            {showToolkit ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
+          </Button>
+
+          {showToolkit && (
+            <GlassCard className="print:break-inside-avoid">
+              {toolkit.items.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  No items saved yet. Visit{" "}
+                  <button onClick={() => navigate("/resource-vault")} className="text-primary underline">
+                    Step 5: Resources
+                  </button>{" "}
+                  to add templates and AI prompts to your toolkit.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {toolkit.items.map((item) => {
+                    const isCustom = item.type === "customized-ai-prompt";
+                    const displayTitle = isCustom
+                      ? (toolkit.getCustomizedPromptLabel(item.id) || item.title)
+                      : item.title;
+                    return (
+                      <ToolkitItemCard key={item.id} title={displayTitle} tag={item.tag} type={item.type} content={item.content} />
+                    );
+                  })}
+                </div>
+              )}
+            </GlassCard>
+          )}
+        </>
       )}
 
       {/* ── 10. Post-click: Download PDF ── */}
