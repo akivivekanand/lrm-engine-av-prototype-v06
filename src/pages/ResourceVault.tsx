@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useCallback } from "react";
-import { Copy, Check, ChevronDown, ChevronUp, ExternalLink, Search, Sparkles, BookOpen, Lightbulb } from "lucide-react";
+import { Copy, Check, ChevronDown, ExternalLink, Search, Sparkles, BookOpen, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import GlassCard from "@/components/GlassCard";
@@ -357,11 +357,11 @@ const SUFFOLK_RESOURCES: ResourceCard[] = [
   },
   {
     id: "suf-isso",
-    title: "International Students & Scholars Office",
+    title: "International Student Services Office",
     category: "Suffolk",
     tag: "career strategy",
     description: "OPT/CPT guidance, immigration advising, and compliance support.",
-    content: "https://www.suffolk.edu/student-life/international-students-scholars",
+    content: "https://www.suffolk.edu/global/international-students/isso",
   },
   {
     id: "suf-labor",
@@ -379,21 +379,13 @@ const SUFFOLK_RESOURCES: ResourceCard[] = [
     description: "Suffolk's platform for job listings, scheduling Career Development advisor appointments, and booking LinkedIn headshot sessions.",
     content: "https://suffolk.joinhandshake.com/",
   },
-  {
-    id: "suf-dropin",
-    title: "Career Center Drop-In Hours",
-    category: "Suffolk",
-    tag: "career strategy",
-    description: "Walk-in advising sessions — no appointment needed. Check the Career Center website for current hours.",
-    content: "https://careers.suffolk.edu/",
-  },
 ];
 
 /* ── Key Links ── */
 const KEY_LINKS = [
   { id: "kl-uscis", title: "USCIS", url: "https://www.uscis.gov/", description: "Official source for OPT, CPT, and work authorization rules." },
   { id: "kl-myvisajobs", title: "MyVisaJobs", url: "https://www.myvisajobs.com/", description: "Search employers who have historically sponsored H-1B visas." },
-  { id: "kl-dol", title: "DOL Foreign Labor Certification", url: "https://www.dol.gov/agencies/eta/foreign-labor", description: "Wage data and employer certification info." },
+  { id: "kl-froghire", title: "FrogHire", url: "https://chromewebstore.google.com/detail/froghireai-ai-resume-job/jabnaledogdghdbckajlnbipcdicinom", description: "AI Chrome extension with sponsorship information about companies on different job search platforms." },
   { id: "kl-goingglobal", title: "Going Global", url: "https://online.goinglobal.com/", description: "Suffolk has institutional access. Find H-1B and OPT-friendly employers, US city career guides, and international job market guides." },
 ];
 
@@ -447,21 +439,17 @@ const ExpandableCard = ({ card, isExpanded, onToggle }: { card: ResourceCard; is
 
   return (
     <GlassCard className="p-4">
-      <div className="flex items-start justify-between cursor-pointer" onClick={onToggle}>
-        <div className="flex-1">
-          <h3 className="text-sm font-semibold text-foreground mb-1.5">{card.title}</h3>
-          <div className="flex items-center gap-1.5 mb-2">
-            <Badge variant="outline" className="text-[10px]">{card.category}</Badge>
-            {card.tag && (
-              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${tagClass}`}>
-                {card.tag}
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">{card.description}</p>
+      <div className="flex items-center justify-between cursor-pointer" onClick={onToggle}>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <h3 className="text-sm font-semibold text-foreground">{card.title}</h3>
+          {card.tag && (
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0 ${tagClass}`}>
+              {card.tag}
+            </span>
+          )}
         </div>
-        <div className="ml-2 mt-1 text-muted-foreground">
-          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        <div className="ml-2 text-muted-foreground shrink-0">
+          <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
         </div>
       </div>
       {isExpanded && (
