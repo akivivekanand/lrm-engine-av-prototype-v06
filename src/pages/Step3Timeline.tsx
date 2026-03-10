@@ -105,7 +105,26 @@ const Step3Timeline = () => {
 
           {/* Timeline Visualization */}
           <GlassCard>
-            <h2 className="text-sm font-semibold text-foreground mb-3">Timeline Markers</h2>
+            <div className="flex items-center gap-2 mb-3">
+              <h2 className="text-sm font-semibold text-foreground">Timeline Markers</h2>
+              <button
+                onClick={() => setShowExplanation(!showExplanation)}
+                className="inline-flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 transition-colors"
+              >
+                <Info className="h-3.5 w-3.5" />
+                How this works
+              </button>
+            </div>
+            {showExplanation && (
+              <div className="p-3 rounded-lg bg-muted/50 mb-3 space-y-2">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Your Last Responsible Moment (LRM) is the latest date you should begin your job search while still allowing enough time to realistically secure employment before your OPT unemployment deadline.
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  It is calculated using your start date, hiring cycle length, and preparation window.
+                </p>
+              </div>
+            )}
             <SegmentedTimeline chain={chain!} />
           </GlassCard>
 
