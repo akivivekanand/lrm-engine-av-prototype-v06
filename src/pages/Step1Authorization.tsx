@@ -39,12 +39,14 @@ function DatePickerField({
   value,
   onChange,
   hasError,
+  fromDate,
 }: {
   label: string;
   helperText?: string;
   value: Date | undefined;
   onChange: (d: Date | undefined) => void;
   hasError?: boolean;
+  fromDate?: Date;
 }) {
   return (
     <>
@@ -67,6 +69,7 @@ function DatePickerField({
             mode="single"
             selected={value}
             onSelect={onChange}
+            disabled={fromDate ? { before: fromDate } : undefined}
             className={cn("p-3 pointer-events-auto")}
           />
         </PopoverContent>
@@ -215,6 +218,7 @@ const Step1Authorization = () => {
               helperText="When you want to start working."
               value={chosenStartDateObj}
               onChange={(d) => setChosenStartDate(d ? d.toISOString() : null)}
+              fromDate={gradDateObj}
             />
           </GlassCard>
         </>
@@ -267,6 +271,7 @@ const Step1Authorization = () => {
               helperText="When you want to start working."
               value={chosenStartDateObj}
               onChange={(d) => setChosenStartDate(d ? d.toISOString() : null)}
+              fromDate={gradDateObj}
             />
           </GlassCard>
 
@@ -312,6 +317,7 @@ const Step1Authorization = () => {
               value={eadDateObj}
               onChange={(d) => setEadDate(d ? d.toISOString() : null)}
               hasError={validationError && !eadDateObj}
+              fromDate={gradDateObj}
             />
           </GlassCard>
         </>
@@ -341,6 +347,7 @@ const Step1Authorization = () => {
               helperText="Your intended start date for planning purposes."
               value={chosenStartDateObj}
               onChange={(d) => setChosenStartDate(d ? d.toISOString() : null)}
+              fromDate={gradDateObj}
             />
           </GlassCard>
         </>
