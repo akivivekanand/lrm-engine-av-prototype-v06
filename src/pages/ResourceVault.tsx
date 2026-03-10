@@ -439,21 +439,17 @@ const ExpandableCard = ({ card, isExpanded, onToggle }: { card: ResourceCard; is
 
   return (
     <GlassCard className="p-4">
-      <div className="flex items-start justify-between cursor-pointer" onClick={onToggle}>
-        <div className="flex-1">
-          <h3 className="text-sm font-semibold text-foreground mb-1.5">{card.title}</h3>
-          <div className="flex items-center gap-1.5 mb-2">
-            <Badge variant="outline" className="text-[10px]">{card.category}</Badge>
-            {card.tag && (
-              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${tagClass}`}>
-                {card.tag}
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">{card.description}</p>
+      <div className="flex items-center justify-between cursor-pointer" onClick={onToggle}>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <h3 className="text-sm font-semibold text-foreground">{card.title}</h3>
+          {card.tag && (
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0 ${tagClass}`}>
+              {card.tag}
+            </span>
+          )}
         </div>
-        <div className="ml-2 mt-1 text-muted-foreground">
-          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        <div className="ml-2 text-muted-foreground shrink-0">
+          <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
         </div>
       </div>
       {isExpanded && (
