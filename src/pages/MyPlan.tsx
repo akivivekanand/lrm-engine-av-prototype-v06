@@ -72,6 +72,7 @@ const MyPlan = () => {
   const getDailyTasks = (dayKey: string, dayIndex: number): string[] => {
     if (selectedDailyTasks[dayKey]) return selectedDailyTasks[dayKey];
     if (plan && plan.actionPlan.daily[dayIndex]) return plan.actionPlan.daily[dayIndex].tasks;
+    if (dayIndex === 0) return tasks.dailyOptions.slice(0, 2);
     return [];
   };
 
