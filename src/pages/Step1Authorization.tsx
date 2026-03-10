@@ -351,11 +351,6 @@ const Step1Authorization = () => {
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-foreground">Compliance Info</h2>
           <ContactCard
-      {/* Compliance Info */}
-      {optStatus !== "denied" && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">Compliance Info</h2>
-          <ContactCard
             contact={content.isso}
             disclaimer="Contact University DSO for official policy guidance."
           />
