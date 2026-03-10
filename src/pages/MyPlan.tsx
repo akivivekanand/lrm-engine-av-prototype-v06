@@ -43,6 +43,11 @@ const MyPlan = () => {
   // Expand toggles
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
 
+  // Dynamic card counts
+  const [visibleDays, setVisibleDays] = useState(1);
+  const [visibleWeeks, setVisibleWeeks] = useState(1);
+  const [visibleMonths, setVisibleMonths] = useState(1);
+
   const isApproved = optStatus === "approved";
   const chosenStartDateStr = isApproved ? eadDate : (targetWorkReadyDate || estimatedStartDate);
   const hasData = gradDate && chosenStartDateStr;
