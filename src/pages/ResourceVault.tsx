@@ -1,14 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useCallback } from "react";
-import { Copy, Check, ChevronDown, ExternalLink, Search, Sparkles, BookOpen, Lightbulb } from "lucide-react";
+import { Copy, Check, ChevronDown, ExternalLink, Search, Sparkles, BookOpen, Lightbulb, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import content from "@/data/content.json";
+import { useToolkit, type ToolkitItem } from "@/hooks/useToolkit";
 
 interface ResourceCard {
   id: string;
@@ -431,10 +430,41 @@ const CopyButton = ({ text, label = "Copy" }: { text: string; label?: string }) 
   );
 };
 
-/* ── Expandable Resource Card ── */
-const ExpandableCard = ({ card, isExpanded, onToggle }: { card: ResourceCard; isExpanded: boolean; onToggle: () => void }) => {
-  const contentRef = useRef<HTMLParagraphElement>(null);
+/* ── Toolkit Toggle Button ── */
+const ToolkitToggle = ({ inToolkit, onAdd, onRemove }: { inToolkit: boolean; onAdd: () => void; onRemove: () => void }) => (
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      inToolkit ? onRemove() : onAdd();
+    }}
+    className={`inline-flex items-center justify-center w-6 h-6 rounded-full shrink-0 transition-colors ${
+      inToolkit
+        ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
+        : "bg-emerald/10 text-emerald hover:bg-emerald/20"
+    }`}
+    title={inToolkit ? "Remove from toolkit" : "Add to toolkit"}
+  >
+    {inToolkit ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+  </button>
+);
 
+/* ── Expandable Resource Card ── */
+const ExpandableCard = ({
+  card,
+  isExpanded,
+  onToggle,
+  inToolkit,
+  onToolkitAdd,
+  onToolkitRemove,
+}: {
+  card: ResourceCard;
+  isExpanded: boolean;
+  onToggle: () => void;
+  inToolkit: boolean;
+  onToolkitAdd: () => void;
+  onToolkitRemove: () => void;
+}) => {
+  const contentRef = useRef<HTMLParagraphElement>(null);
   const tagClass = card.tag ? TAG_COLORS[card.tag] || "bg-muted text-muted-foreground" : "";
 
   return (
@@ -448,8 +478,11 @@ const ExpandableCard = ({ card, isExpanded, onToggle }: { card: ResourceCard; is
             </span>
           )}
         </div>
-        <div className="ml-2 text-muted-foreground shrink-0">
-          <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+        <div className="flex items-center gap-2 ml-2 shrink-0">
+          <ToolkitToggle inToolkit={inToolkit} onAdd={onToolkitAdd} onRemove={onToolkitRemove} />
+          <div className="text-muted-foreground">
+            <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+          </div>
         </div>
       </div>
       {isExpanded && (
@@ -466,9 +499,10 @@ const ExpandableCard = ({ card, isExpanded, onToggle }: { card: ResourceCard; is
 };
 
 /* ── Prompt Builder ── */
-const PromptBuilder = () => {
+const PromptBuilder = ({ onSaveToToolkit, toolkit }: { onSaveToToolkit: (prompt: string) => void; toolkit: ReturnType<typeof useToolkit> }) => {
   const [fields, setFields] = useState({ role: "", context: "", task: "", constraints: "", format: "" });
   const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const [savedPromptId, setSavedPromptId] = useState<string | null>(null);
   const outputRef = useRef<HTMLDivElement>(null);
 
   const updateField = (key: keyof typeof fields, value: string) => {
@@ -482,8 +516,33 @@ const PromptBuilder = () => {
     if (fields.task) parts.push(`complete the following task: ${fields.task}.`);
     if (fields.constraints) parts.push(`Follow these constraints: ${fields.constraints}.`);
     if (fields.format) parts.push(`Provide the response in the following format: ${fields.format}.`);
-    setGeneratedPrompt(parts.join(" "));
+    const prompt = parts.join(" ");
+    setGeneratedPrompt(prompt);
+    setSavedPromptId(null);
   };
+
+  const handleSave = () => {
+    if (!generatedPrompt) return;
+    const id = `custom-prompt-${Date.now()}`;
+    const num = toolkit.nextCustomizedNumber();
+    toolkit.addItem({
+      id,
+      title: `Customized AI Prompt ${num}`,
+      sourceTab: "ai-prompts",
+      type: "customized-ai-prompt",
+      content: generatedPrompt,
+    });
+    setSavedPromptId(id);
+  };
+
+  const handleRemove = () => {
+    if (savedPromptId) {
+      toolkit.removeItem(savedPromptId);
+      setSavedPromptId(null);
+    }
+  };
+
+  const isSaved = savedPromptId ? toolkit.hasItem(savedPromptId) : false;
 
   const inputFields = [
     { key: "role" as const, label: "Assign the AI assistant a role", placeholder: "Career advisor, recruiter, resume reviewer, etc." },
@@ -518,8 +577,11 @@ const PromptBuilder = () => {
       </Button>
       {generatedPrompt && (
         <div className="space-y-2">
-          <div ref={outputRef} className="rounded-lg border border-border bg-muted/50 p-3 text-xs text-foreground leading-relaxed whitespace-pre-wrap">
-            {generatedPrompt}
+          <div className="flex items-center gap-2">
+            <div ref={outputRef} className="flex-1 rounded-lg border border-border bg-muted/50 p-3 text-xs text-foreground leading-relaxed whitespace-pre-wrap">
+              {generatedPrompt}
+            </div>
+            <ToolkitToggle inToolkit={isSaved} onAdd={handleSave} onRemove={handleRemove} />
           </div>
           <div className="flex items-center gap-3">
             <SelectAllButton targetRef={outputRef} />
@@ -536,6 +598,7 @@ const ResourceVault = () => {
   const navigate = useNavigate();
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const toolkit = useToolkit();
 
   const toggleCard = useCallback((id: string) => {
     setExpandedCard((prev) => (prev === id ? null : id));
@@ -556,6 +619,15 @@ const ResourceVault = () => {
   const filteredTemplates = TEMPLATES.filter(matchesSearch);
   const filteredPrompts = AI_PROMPTS.filter(matchesSearch);
 
+  const makeToolkitItem = (card: ResourceCard, sourceTab: "templates" | "ai-prompts"): ToolkitItem => ({
+    id: card.id,
+    title: card.title,
+    sourceTab,
+    type: sourceTab === "templates" ? "template" : "ai-prompt",
+    tag: card.tag,
+    content: card.content,
+  });
+
   return (
     <StepLayout>
       <h1 className="text-xl font-bold text-foreground">Step 5: Resources</h1>
@@ -573,10 +645,7 @@ const ResourceVault = () => {
           This section contains templates and AI prompts that can help you create resumes, networking messages, and other career materials more efficiently.
         </p>
         <p className="text-xs text-muted-foreground leading-relaxed mt-2">
-          Expand any resource to copy and adapt it for your own job search.
-        </p>
-        <p className="text-xs text-muted-foreground leading-relaxed mt-2">
-          You can also add resources you discover over time so this page becomes your personal career toolkit.
+          Expand any resource to copy and adapt it for your own job search. Use the <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald/10 text-emerald align-middle mx-0.5"><Plus className="w-2.5 h-2.5" /></span> button to save resources to your personal toolkit, which you can access from the Dashboard.
         </p>
       </GlassCard>
 
@@ -617,6 +686,9 @@ const ResourceVault = () => {
                 card={card}
                 isExpanded={expandedCard === card.id}
                 onToggle={() => toggleCard(card.id)}
+                inToolkit={toolkit.hasItem(card.id)}
+                onToolkitAdd={() => toolkit.addItem(makeToolkitItem(card, "templates"))}
+                onToolkitRemove={() => toolkit.removeItem(card.id)}
               />
             ))
           ) : (
@@ -627,7 +699,10 @@ const ResourceVault = () => {
         {/* AI Prompts Tab */}
         <TabsContent value="prompts" className="mt-4 space-y-4">
           {/* Prompt Builder */}
-          <PromptBuilder />
+          <PromptBuilder
+            onSaveToToolkit={() => {}}
+            toolkit={toolkit}
+          />
 
           {/* Prompt Engineering Formula */}
           <div className="rounded-xl border border-purple-200 bg-purple-50/50 dark:border-purple-800/30 dark:bg-purple-950/10 p-5">
@@ -648,6 +723,9 @@ const ResourceVault = () => {
                 card={card}
                 isExpanded={expandedCard === card.id}
                 onToggle={() => toggleCard(card.id)}
+                inToolkit={toolkit.hasItem(card.id)}
+                onToolkitAdd={() => toolkit.addItem(makeToolkitItem(card, "ai-prompts"))}
+                onToolkitRemove={() => toolkit.removeItem(card.id)}
               />
             ))
           ) : (
