@@ -43,6 +43,10 @@
     --rose: 350 89% 60%;
     --rose-foreground: 0 0% 100%;
 
+    --sky: 199 89% 48%;
+    --slate: 215 16% 47%;
+    --critical: 0 72% 51%;
+
     --glass-bg: 0 0% 100% / 0.7;
     --glass-border: 0 0% 100% / 0.3;
     --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
