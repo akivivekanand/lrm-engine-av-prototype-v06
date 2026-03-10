@@ -442,6 +442,15 @@ const MyPlan = () => {
                 </div>
               );
             })}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full text-xs mt-1"
+              disabled={visibleWeeks >= 12}
+              onClick={() => setVisibleWeeks(prev => Math.min(prev + 1, 12))}
+            >
+              <Plus className="h-3 w-3 mr-1" /> Add Week
+            </Button>
           </TabsContent>
 
           {/* MONTHLY TAB */}
