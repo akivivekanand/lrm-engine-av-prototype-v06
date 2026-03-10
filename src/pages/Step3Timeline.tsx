@@ -289,7 +289,7 @@ const Step3Timeline = () => {
 
           {/* Timeline Visualization */}
           <GlassCard>
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
               <h2 className="text-sm font-semibold text-foreground">Timeline</h2>
               <button
                 onClick={() => setShowExplanation(!showExplanation)}
