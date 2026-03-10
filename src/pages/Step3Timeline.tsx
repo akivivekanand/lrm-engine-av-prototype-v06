@@ -117,7 +117,7 @@ const Step3Timeline = () => {
           Back
         </Button>
         <Button onClick={() => navigate("/my-plan")} className="flex-1" disabled={!hasData}>
-          Continue to My Plan
+          Continue to Step 4: Strategy
         </Button>
       </div>
     </StepLayout>
