@@ -348,11 +348,30 @@ const Step1Authorization = () => {
         </div>
       )}
 
+      {validationError && !canContinue && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription className="text-sm">
+            Please complete all required fields to continue.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate("/cover")} className="flex-1">
           Back
         </Button>
-        <Button onClick={() => navigate("/step-2-strategy")} className="flex-1" disabled={!canContinue}>
+        <Button
+          onClick={() => {
+            if (!canContinue) {
+              setValidationError(true);
+              return;
+            }
+            setValidationError(false);
+            navigate("/step-2-strategy");
+          }}
+          className="flex-1"
+        >
           Continue to Step 2
         </Button>
       </div>

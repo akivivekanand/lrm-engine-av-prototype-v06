@@ -210,7 +210,7 @@ const Step2Strategy = () => {
         {prepMode === "suggested" && (
           <div className="p-3 rounded-lg bg-muted/50">
             <p className="text-sm font-medium text-foreground">{prepWindowDays} days</p>
-            <p className="text-[10px] text-muted-foreground mt-1">Accepted from AI suggestion</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Accepted from suggestion</p>
           </div>
         )}
         {prepMode === "custom" && (
