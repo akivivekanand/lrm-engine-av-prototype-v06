@@ -516,6 +516,15 @@ const MyPlan = () => {
                 </div>
               );
             })}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full text-xs mt-1"
+              disabled={visibleMonths >= 12}
+              onClick={() => setVisibleMonths(prev => Math.min(prev + 1, 12))}
+            >
+              <Plus className="h-3 w-3 mr-1" /> Add Month
+            </Button>
           </TabsContent>
         </Tabs>
       </GlassCard>
