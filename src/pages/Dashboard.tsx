@@ -300,30 +300,6 @@ const Dashboard = () => {
         </div>
       </GlassCard>
 
-      {/* (d) Your Resources */}
-      <GlassCard>
-        <div className="flex items-center gap-2 mb-3">
-          <BookOpen className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-semibold text-foreground">Your Resources</h2>
-          <Badge variant="outline" className="ml-auto text-[10px]">{selectedResources.length} selected</Badge>
-        </div>
-        {selectedResources.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No resources selected yet. Visit Step 5 to add resources to your toolkit.</p>
-        ) : (
-          <div className="space-y-1.5">
-            {selectedResources.map((id) => {
-              const res = allResourceCards[id];
-              if (!res) return null;
-              return (
-                <div key={id} className="flex items-center gap-2 text-xs">
-                  <span className="text-foreground">{res.title}</span>
-                  <Badge variant="outline" className="text-[9px]">{res.category}</Badge>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </GlassCard>
 
       {/* (e) Next Actions */}
       {chain && (
