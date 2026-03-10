@@ -291,14 +291,16 @@ const Step1Authorization = () => {
               helperText="Found on page 1 of your current I-20."
               value={gradDateObj}
               onChange={(d) => setGradDate(d ? d.toISOString() : null)}
+              hasError={validationError && !gradDateObj}
             />
           </GlassCard>
           <GlassCard>
             <DatePickerField
-              label="Chosen Start Date (EAD Start Date)"
-              helperText="The start date on your Employment Authorization Document."
+              label="EAD Start Date"
+              helperText="The start date on your Employment Authorization Document. This date may occur after the 60-day filing window due to USCIS processing delays. Timeline calculations will use this date."
               value={eadDateObj}
               onChange={(d) => setEadDate(d ? d.toISOString() : null)}
+              hasError={validationError && !eadDateObj}
             />
           </GlassCard>
         </>
