@@ -2,9 +2,9 @@ import { useLocation } from "react-router-dom";
 
 const steps = [
   { label: "Authorization", path: "/step-1-authorization" },
-  { label: "Strategy", path: "/step-2-strategy" },
+  { label: "Market Reality", path: "/step-2-strategy" },
   { label: "Timeline", path: "/step-3-timeline" },
-  { label: "My Plan", path: "/my-plan" },
+  { label: "Strategy", path: "/my-plan" },
   { label: "Resources", path: "/resource-vault" },
   { label: "Dashboard", path: "/dashboard" },
 ];

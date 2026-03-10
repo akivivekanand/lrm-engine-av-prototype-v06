@@ -147,7 +147,7 @@ const MyPlan = () => {
 
   return (
     <StepLayout>
-      <h1 className="text-xl font-bold text-foreground">My Plan</h1>
+      <h1 className="text-xl font-bold text-foreground">Step 4: Strategy</h1>
 
       {/* SECTION 1: Career Strategy Timeline */}
       <GlassCard>
@@ -501,7 +501,7 @@ const MyPlan = () => {
           Back to Timeline
         </Button>
         <Button onClick={() => navigate("/resource-vault")} className="flex-1">
-          Continue to Resource Vault
+          Continue to Step 5: Add Resources
         </Button>
       </div>
     </StepLayout>
