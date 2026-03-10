@@ -121,3 +121,37 @@
     box-shadow: var(--glass-shadow);
   }
 }
+
+/* Print-friendly styles for PDF export */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:break-inside-avoid {
+    break-inside: avoid;
+  }
+
+  .print\:text-2xl {
+    font-size: 1.5rem;
+  }
+
+  .glass-card {
+    background: white !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important;
+    break-inside: avoid;
+  }
+
+  nav, header, footer {
+    display: none !important;
+  }
+}
