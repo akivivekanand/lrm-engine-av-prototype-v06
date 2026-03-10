@@ -27,7 +27,7 @@ const Dashboard = () => {
   const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
   const [industryText] = usePersistedState<string>("industryText", "");
   const [careerPlanStartDate] = usePersistedState<string>("careerPlanStartDate", new Date().toISOString().split("T")[0]);
-  const [selectedResources] = usePersistedState<string[]>("selectedResources", []);
+  
   const [completedActions, setCompletedActions] = usePersistedState<string[]>("dashboardCompletedActions", []);
 
   const isApproved = optStatus === "approved";
