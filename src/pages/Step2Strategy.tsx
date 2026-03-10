@@ -119,7 +119,7 @@ const Step2Strategy = () => {
         <GlassCard className="border-primary/20">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">AI Market Assessment</h2>
+            <h2 className="text-sm font-semibold text-foreground">Market Assessment</h2>
             <Badge variant="outline" className="text-[10px]">{suggestion.industryKey}</Badge>
           </div>
           <div className="space-y-2 mb-3">
