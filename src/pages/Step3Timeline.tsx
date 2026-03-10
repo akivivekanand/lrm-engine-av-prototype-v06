@@ -1,13 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Info } from "lucide-react";
+import { Info, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import TimelineMilestone from "@/components/TimelineMilestone";
 import SegmentedTimeline from "@/components/SegmentedTimeline";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePersistedState } from "@/hooks/usePersistedState";
-import { calculateLRMChainV2, getMilestoneStatus, formatDate } from "@/lib/calculations";
+import { calculateLRMChainV2, getMilestoneStatus, formatDate, stripTime, addDays } from "@/lib/calculations";
 
 const Step3Timeline = () => {
   const navigate = useNavigate();
@@ -18,10 +22,11 @@ const Step3Timeline = () => {
   const [optStatus] = usePersistedState<string>("optStatus", "notApplied");
   const [hiringWeeks] = usePersistedState<number>("hiringWeeks", 6);
   const [prepWindowDays] = usePersistedState<number>("prepWindowDays", 14);
-  const [targetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
+  const [targetWorkReadyDate, setTargetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
   const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
 
   const isApproved = optStatus === "approved";
+  const isNotApplied = optStatus === "notApplied";
   const chosenStartDateStr = isApproved ? eadDate : (targetWorkReadyDate || estimatedStartDate);
   const gradDateObj = gradDate ? new Date(gradDate) : undefined;
   const chosenStartDateObj = chosenStartDateStr ? new Date(chosenStartDateStr) : undefined;
@@ -35,6 +40,14 @@ const Step3Timeline = () => {
         prepWindowDays,
       })
     : null;
+
+  // Date constraints for Not Applied interactive editing
+  const minChosenDate = gradDateObj ? stripTime(gradDateObj) : undefined;
+  const maxChosenDate = gradDateObj ? addDays(stripTime(gradDateObj), 60) : undefined;
+
+  const handleChosenStartChange = (d: Date | undefined) => {
+    setTargetWorkReadyDate(d ? d.toISOString() : null);
+  };
 
   const milestones = chain
     ? [
@@ -61,9 +74,32 @@ const Step3Timeline = () => {
             <span className="text-muted-foreground">Program End Date</span>
             <span className="font-medium text-foreground">{gradDateObj ? formatDate(gradDateObj) : "Not set"}</span>
           </div>
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Chosen Start Date</span>
-            <span className="font-medium text-foreground">{chosenStartDateObj ? formatDate(chosenStartDateObj) : "Not set"}</span>
+            {isNotApplied && gradDateObj ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5">
+                    <CalendarIcon className="h-3 w-3" />
+                    {chosenStartDateObj ? format(chosenStartDateObj, "PPP") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={chosenStartDateObj}
+                    onSelect={handleChosenStartChange}
+                    disabled={(date) => {
+                      const d = stripTime(date);
+                      return d.getTime() < minChosenDate!.getTime() || d.getTime() > maxChosenDate!.getTime();
+                    }}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <span className="font-medium text-foreground">{chosenStartDateObj ? formatDate(chosenStartDateObj) : "Not set"}</span>
+            )}
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Hiring Cycle</span>
@@ -74,6 +110,11 @@ const Step3Timeline = () => {
             <span className="font-medium text-foreground">{prepWindowDays} days</span>
           </div>
         </div>
+        {isNotApplied && (
+          <p className="text-[10px] text-muted-foreground mt-3">
+            Adjust the Chosen Start Date above to see how it affects your timeline in real time.
+          </p>
+        )}
       </GlassCard>
 
       {/* Calculated Dates */}

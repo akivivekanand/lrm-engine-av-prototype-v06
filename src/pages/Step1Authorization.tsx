@@ -1,13 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, AlertTriangle, ExternalLink } from "lucide-react";
+import { CalendarIcon, AlertTriangle, ExternalLink, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import ContactCard from "@/components/ContactCard";
@@ -50,7 +51,7 @@ function DatePickerField({
 }) {
   return (
     <>
-      <label className={cn("text-sm font-medium block mb-2", hasError ? "text-destructive" : "text-foreground")}>{label}</label>
+      {label && <label className={cn("text-sm font-medium block mb-2", hasError ? "text-destructive" : "text-foreground")}>{label}</label>}
       {helperText && (
         <p className="text-xs text-muted-foreground mb-2">{helperText}</p>
       )}
@@ -99,6 +100,11 @@ const Step1Authorization = () => {
   const earliestOptDate = gradDateObj ? subtractDays(stripTime(gradDateObj), 90) : null;
   const optFilingDeadline = gradDateObj ? addDays(stripTime(gradDateObj), 60) : null;
 
+  // Validate chosen start date is within 60-day grace period for "Not Applied"
+  const chosenStartOutOfRange = optStatus === "notApplied" && gradDateObj && chosenStartDateObj &&
+    (stripTime(chosenStartDateObj).getTime() < stripTime(gradDateObj).getTime() ||
+     stripTime(chosenStartDateObj).getTime() > addDays(stripTime(gradDateObj), 60).getTime());
+
   // Special case: waiting + chosen start date has passed
   const today = stripTime(new Date());
   const startDatePassed = optStatus === "waiting" && chosenStartDateObj && stripTime(chosenStartDateObj).getTime() < today.getTime();
@@ -111,7 +117,7 @@ const Step1Authorization = () => {
   const canContinue = (() => {
     if (optStatus === "denied") return false;
     if (!gradDateObj) return false;
-    if (optStatus === "notApplied" && !chosenStartDateObj) return false;
+    if (optStatus === "notApplied" && (!chosenStartDateObj || chosenStartOutOfRange)) return false;
     if (optStatus === "waiting") {
       if (startDatePassed && !estimatedStartDateObj) return false;
       if (!startDatePassed && !chosenStartDateObj) return false;
@@ -213,13 +219,50 @@ const Step1Authorization = () => {
             )}
           </GlassCard>
           <GlassCard>
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <label className="text-sm font-medium text-foreground block">Chosen Start Date</label>
+                <p className="text-xs text-muted-foreground">When you want to start working.</p>
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors">
+                    <Info className="h-3.5 w-3.5" />
+                    Learn More
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>OPT Start Date Window</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+                    <p>OPT start dates must fall between your program end date and the end of the 60 day grace period.</p>
+                    <p>Students may apply for OPT up to 90 days before their program end date, but their employment start date must fall within the 60 day window following program completion.</p>
+                    <p>For official guidance, students should consult their Designated School Official.</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full mt-2"
+                    onClick={() => window.open('https://www.suffolk.edu/global/international-students/isso/immigration-resources/employment/opt', '_blank')}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Learn More About OPT Timeline
+                  </Button>
+                </DialogContent>
+              </Dialog>
+            </div>
             <DatePickerField
-              label="Chosen Start Date"
-              helperText="When you want to start working."
+              label=""
               value={chosenStartDateObj}
               onChange={(d) => setChosenStartDate(d ? d.toISOString() : null)}
               fromDate={gradDateObj}
+              hasError={!!chosenStartOutOfRange}
             />
+            {chosenStartOutOfRange && (
+              <p className="text-xs text-destructive mt-2">
+                Chosen start dates for OPT must fall within the 60 day grace period following your program end date.
+              </p>
+            )}
           </GlassCard>
         </>
       )}
