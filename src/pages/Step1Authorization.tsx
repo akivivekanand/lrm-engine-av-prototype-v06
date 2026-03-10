@@ -51,7 +51,7 @@ function DatePickerField({
 }) {
   return (
     <>
-      <label className={cn("text-sm font-medium block mb-2", hasError ? "text-destructive" : "text-foreground")}>{label}</label>
+      {label && <label className={cn("text-sm font-medium block mb-2", hasError ? "text-destructive" : "text-foreground")}>{label}</label>}
       {helperText && (
         <p className="text-xs text-muted-foreground mb-2">{helperText}</p>
       )}
