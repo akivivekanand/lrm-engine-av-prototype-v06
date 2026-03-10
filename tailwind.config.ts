@@ -59,6 +59,15 @@ export default {
           DEFAULT: "hsl(var(--rose))",
           foreground: "hsl(var(--rose-foreground))",
         },
+        sky: {
+          DEFAULT: "hsl(var(--sky))",
+        },
+        slate: {
+          DEFAULT: "hsl(var(--slate))",
+        },
+        critical: {
+          DEFAULT: "hsl(var(--critical))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
