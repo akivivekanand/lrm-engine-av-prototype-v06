@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { format } from "date-fns";
 import { CalendarIcon, AlertTriangle, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,15 +38,17 @@ function DatePickerField({
   helperText,
   value,
   onChange,
+  hasError,
 }: {
   label: string;
   helperText?: string;
   value: Date | undefined;
   onChange: (d: Date | undefined) => void;
+  hasError?: boolean;
 }) {
   return (
     <>
-      <label className="text-sm font-medium text-foreground block mb-2">{label}</label>
+      <label className={cn("text-sm font-medium block mb-2", hasError ? "text-destructive" : "text-foreground")}>{label}</label>
       {helperText && (
         <p className="text-xs text-muted-foreground mb-2">{helperText}</p>
       )}
@@ -53,7 +56,7 @@ function DatePickerField({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className={cn("w-full justify-start text-left font-normal", !value && "text-muted-foreground")}
+            className={cn("w-full justify-start text-left font-normal", !value && "text-muted-foreground", hasError && "border-destructive")}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {value ? format(value, "PPP") : "Select date"}
@@ -74,6 +77,7 @@ function DatePickerField({
 
 const Step1Authorization = () => {
   const navigate = useNavigate();
+  const [validationError, setValidationError] = useState(false);
   const [gradDate, setGradDate] = usePersistedState<string | null>("gradDate", null);
   const [optStatus, setOptStatus] = usePersistedState<string>("optStatus", "notApplied");
   const [eadDate, setEadDate] = usePersistedState<string | null>("eadDate", null);
@@ -289,14 +293,16 @@ const Step1Authorization = () => {
               helperText="Found on page 1 of your current I-20."
               value={gradDateObj}
               onChange={(d) => setGradDate(d ? d.toISOString() : null)}
+              hasError={validationError && !gradDateObj}
             />
           </GlassCard>
           <GlassCard>
             <DatePickerField
-              label="Chosen Start Date (EAD Start Date)"
-              helperText="The start date on your Employment Authorization Document."
+              label="EAD Start Date"
+              helperText="The start date on your Employment Authorization Document. This date may occur after the 60-day filing window due to USCIS processing delays. Timeline calculations will use this date."
               value={eadDateObj}
               onChange={(d) => setEadDate(d ? d.toISOString() : null)}
+              hasError={validationError && !eadDateObj}
             />
           </GlassCard>
         </>
@@ -342,11 +348,30 @@ const Step1Authorization = () => {
         </div>
       )}
 
+      {validationError && !canContinue && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription className="text-sm">
+            Please complete all required fields to continue.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate("/cover")} className="flex-1">
           Back
         </Button>
-        <Button onClick={() => navigate("/step-2-strategy")} className="flex-1" disabled={!canContinue}>
+        <Button
+          onClick={() => {
+            if (!canContinue) {
+              setValidationError(true);
+              return;
+            }
+            setValidationError(false);
+            navigate("/step-2-strategy");
+          }}
+          className="flex-1"
+        >
           Continue to Step 2
         </Button>
       </div>

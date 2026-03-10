@@ -49,7 +49,7 @@ const Step2Strategy = () => {
   };
 
   const modeLabel = (mode: Mode) =>
-    mode === "ai" ? "AI Assessment" : mode === "suggested" ? "Accepted" : "Custom";
+    mode === "ai" ? "Assessment" : mode === "suggested" ? "Accepted" : "Custom";
 
   const ModeToggle = ({
     mode,
@@ -85,6 +85,10 @@ const Step2Strategy = () => {
     <StepLayout>
       <h1 className="text-xl font-bold text-foreground">Step 2: Market Reality</h1>
 
+      <p className="text-xs text-muted-foreground leading-relaxed -mt-2">
+        These estimates are suggestions based on common hiring cycles. Students may adjust preparation days or hiring cycle length if their industry follows a different timeline.
+      </p>
+
       {/* Target Industry */}
       <GlassCard>
         <label className="text-sm font-medium text-foreground block mb-2">Target Industry or Role</label>
@@ -97,7 +101,7 @@ const Step2Strategy = () => {
           />
           <Button onClick={handleAssess} size="sm" className="shrink-0">
             <Sparkles className="h-4 w-4 mr-1" />
-            Get AI Assessment
+            Get Assessment
           </Button>
         </div>
         <a
@@ -115,7 +119,7 @@ const Step2Strategy = () => {
         <GlassCard className="border-primary/20">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">AI Market Assessment</h2>
+            <h2 className="text-sm font-semibold text-foreground">Market Assessment</h2>
             <Badge variant="outline" className="text-[10px]">{suggestion.industryKey}</Badge>
           </div>
           <div className="space-y-2 mb-3">
@@ -152,12 +156,12 @@ const Step2Strategy = () => {
         <ModeToggle mode={hiringMode} onSelect={setHiringMode} hasAssessment={assessed} />
 
         {hiringMode === "ai" && !assessed && (
-          <p className="text-xs text-muted-foreground">Run an AI Assessment above to get a suggested value.</p>
+          <p className="text-xs text-muted-foreground">Run an assessment above to get a suggested value.</p>
         )}
         {hiringMode === "ai" && assessed && suggestion && (
           <div className="p-3 rounded-lg bg-muted/50">
             <p className="text-sm font-medium text-foreground">{suggestion.weeks} weeks</p>
-            <p className="text-[10px] text-muted-foreground mt-1">AI-suggested based on {suggestion.industryKey} market data</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Suggested based on {suggestion.industryKey} market data</p>
             <Button size="sm" variant="outline" className="mt-2" onClick={handleAcceptHiring}>
               Accept This Value
             </Button>
@@ -166,7 +170,7 @@ const Step2Strategy = () => {
         {hiringMode === "suggested" && (
           <div className="p-3 rounded-lg bg-muted/50">
             <p className="text-sm font-medium text-foreground">{hiringWeeks} weeks</p>
-            <p className="text-[10px] text-muted-foreground mt-1">Accepted from AI suggestion</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Accepted from suggestion</p>
           </div>
         )}
         {hiringMode === "custom" && (
@@ -192,12 +196,12 @@ const Step2Strategy = () => {
         <ModeToggle mode={prepMode} onSelect={setPrepMode} hasAssessment={assessed} />
 
         {prepMode === "ai" && !assessed && (
-          <p className="text-xs text-muted-foreground">Run an AI Assessment above to get a suggested value.</p>
+          <p className="text-xs text-muted-foreground">Run an assessment above to get a suggested value.</p>
         )}
         {prepMode === "ai" && assessed && suggestion && (
           <div className="p-3 rounded-lg bg-muted/50">
             <p className="text-sm font-medium text-foreground">{suggestion.prepWindowDays} days</p>
-            <p className="text-[10px] text-muted-foreground mt-1">AI-suggested based on {suggestion.industryKey} market data</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Suggested based on {suggestion.industryKey} market data</p>
             <Button size="sm" variant="outline" className="mt-2" onClick={handleAcceptPrep}>
               Accept This Value
             </Button>
@@ -206,7 +210,7 @@ const Step2Strategy = () => {
         {prepMode === "suggested" && (
           <div className="p-3 rounded-lg bg-muted/50">
             <p className="text-sm font-medium text-foreground">{prepWindowDays} days</p>
-            <p className="text-[10px] text-muted-foreground mt-1">Accepted from AI suggestion</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Accepted from suggestion</p>
           </div>
         )}
         {prepMode === "custom" && (
