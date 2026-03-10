@@ -85,6 +85,10 @@ const Step2Strategy = () => {
     <StepLayout>
       <h1 className="text-xl font-bold text-foreground">Step 2: Market Reality</h1>
 
+      <p className="text-xs text-muted-foreground leading-relaxed -mt-2">
+        These estimates are suggestions based on common hiring cycles. Students may adjust preparation days or hiring cycle length if their industry follows a different timeline.
+      </p>
+
       {/* Target Industry */}
       <GlassCard>
         <label className="text-sm font-medium text-foreground block mb-2">Target Industry or Role</label>
