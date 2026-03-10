@@ -39,12 +39,14 @@ function DatePickerField({
   value,
   onChange,
   hasError,
+  fromDate,
 }: {
   label: string;
   helperText?: string;
   value: Date | undefined;
   onChange: (d: Date | undefined) => void;
   hasError?: boolean;
+  fromDate?: Date;
 }) {
   return (
     <>
@@ -67,6 +69,7 @@ function DatePickerField({
             mode="single"
             selected={value}
             onSelect={onChange}
+            disabled={fromDate ? { before: fromDate } : undefined}
             className={cn("p-3 pointer-events-auto")}
           />
         </PopoverContent>
