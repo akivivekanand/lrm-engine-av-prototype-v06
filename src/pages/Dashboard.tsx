@@ -39,6 +39,52 @@ const statusBadgeVariant: Record<DateStatus, string> = {
   Critical: "bg-destructive text-destructive-foreground",
 };
 
+/* ── Toolkit Item Card for dashboard display ── */
+const TAG_COLORS: Record<string, string> = {
+  networking: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  resume: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+  interview: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  linkedin: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300",
+  "job search": "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
+  "career strategy": "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
+};
+
+const ToolkitItemCard = ({ title, tag, type, content: itemContent }: { title: string; tag?: string; type: string; content: string }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const contentRef = useRef<HTMLParagraphElement>(null);
+  const tagClass = tag ? TAG_COLORS[tag] || "bg-muted text-muted-foreground" : "";
+  const typeLabel = type === "template" ? "Template" : type === "ai-prompt" ? "AI Prompt" : "Custom";
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(itemContent);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="border border-border rounded-lg p-3">
+      <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpanded(!expanded)}>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="text-sm font-medium text-foreground">{title}</span>
+          {tag && <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0 ${tagClass}`}>{tag}</span>}
+          <span className="text-[10px] text-muted-foreground shrink-0">{typeLabel}</span>
+        </div>
+        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform shrink-0 ml-2 ${expanded ? "rotate-180" : ""}`} />
+      </div>
+      {expanded && (
+        <div className="mt-2 pt-2 border-t border-border space-y-2">
+          <p ref={contentRef} className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">{itemContent}</p>
+          <button onClick={handleCopy} className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [plan, setPlan] = useState<CareerPlan | null>(null);
