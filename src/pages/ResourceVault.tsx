@@ -1,12 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { Copy, Check, ChevronDown, ChevronUp, ExternalLink, Search } from "lucide-react";
+import { useState, useRef, useCallback } from "react";
+import { Copy, Check, ChevronDown, ChevronUp, ExternalLink, Search, Sparkles, BookOpen, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
+import content from "@/data/content.json";
 
 interface ResourceCard {
   id: string;
@@ -17,6 +19,7 @@ interface ResourceCard {
   tag?: string;
 }
 
+/* ── All Templates (outreach + networking + interview) ── */
 const TEMPLATES: ResourceCard[] = [
   {
     id: "tpl-info-interview",
@@ -84,8 +87,117 @@ Warm regards,
 [Your Name]
 [LinkedIn Profile URL]`,
   },
+  {
+    id: "net-elevator",
+    title: "Problem-Solver Elevator Pitch",
+    category: "Networking",
+    tag: "networking",
+    description: "A concise pitch positioning you as a solution to employer needs.",
+    content: `I am a [Major] student at Suffolk University specializing in [Skill A] and [Skill B]. I recently achieved [Result] by implementing [Method]. I am currently focusing on the [Industry] sector to solve [Specific Problem] through data-driven strategies. My goal is to bring my international perspective and technical background to a team like yours to help drive [Specific Outcome]. I have been following [Company's] work on [Project], and I would love to learn more about how your team handles [Related Challenge].`,
+  },
+  {
+    id: "net-referral",
+    title: "Referral Request Template",
+    category: "Networking",
+    tag: "networking",
+    description: "Ask a contact for a referral to an open position.",
+    content: `Subject: Quick question about the [Job Title] role at [Company]
+
+Hi [Name],
+
+I am applying for the [Job Title] role at [Company]. Would you be open to sharing advice on team priorities and whether a referral might be appropriate? I want to make sure my application highlights the right strengths.
+
+Thank you,
+[Your Name]`,
+  },
+  {
+    id: "net-thank-you",
+    title: "Post-Interview Thank You",
+    category: "Networking",
+    tag: "interview",
+    description: "Send a professional thank you after an interview.",
+    content: `Subject: Thank you for the conversation about [Role]
+
+Thank you for the opportunity to interview for [Role]. I appreciated our discussion about [Topic] and am excited about the possibility of contributing to [Company's] work in [Area]. Please do not hesitate to reach out if you need any additional information.
+
+Best regards,
+[Your Name]`,
+  },
+  {
+    id: "net-cold",
+    title: "Cold Outreach to Hiring Manager",
+    category: "Networking",
+    tag: "job search",
+    description: "Reach out directly to a hiring manager with a value proposition.",
+    content: `Subject: Interest in [Position] - [Your Name], Suffolk University
+
+Hi [Name],
+
+I am a graduate student at Suffolk University with a background in [Skill]. I noticed your team is working on [Challenge or Project], and I believe my experience with [Relevant Experience] could contribute meaningfully to your efforts. I would welcome the chance to learn more about your team's priorities. Would you be open to a brief conversation?
+
+Best regards,
+[Your Name]`,
+  },
+  {
+    id: "net-icebreaker",
+    title: "Networking Icebreaker Questions",
+    category: "Networking",
+    tag: "networking",
+    description: "Natural conversation starters for professional mixers and events.",
+    content: `Role: Act as a Networking Expert.
+Context: I am attending a professional mixer for [Industry]. I want to approach a Senior Manager at [Company]. Based on their recent company news about [Insert News Item], draft 3 different natural-sounding opening questions that show I have done my research and am interested in their perspective.
+Format: 3 distinct options with brief explanations of why each works.`,
+  },
+  {
+    id: "int-star",
+    title: "STAR Story Generator",
+    category: "Interview",
+    tag: "interview",
+    description: "Build structured behavioral interview answers using STAR method.",
+    content: `Role: Act as an Interview Coach.
+Context: I am preparing for a behavioral interview for a [Job Title] role.
+Task: Using the STAR method (Situation, Task, Action, Result), help me draft a story that demonstrates my ability to solve complex problems under pressure. Use the following context: [Insert Brief Scenario].
+Constraints: Ensure the 'Action' section highlights my specific contributions and the 'Result' is quantified with data or metrics.
+Format: A structured 4-paragraph response.`,
+  },
+  {
+    id: "int-case",
+    title: "Case Interview Framework",
+    category: "Interview",
+    tag: "interview",
+    description: "Structure your thinking for consulting-style case interviews.",
+    content: `Role: Act as a Management Consultant.
+Context: I am preparing for a case interview regarding [Topic, e.g., Market Entry].
+Task: Provide a 5-step framework I can use to structure my thoughts during the interview. For each step, provide 2 probing questions I should ask the interviewer.
+Format: A numbered list with 'Rationale' for each step.`,
+  },
+  {
+    id: "int-technical",
+    title: "Technical Interview Prep",
+    category: "Interview",
+    tag: "interview",
+    description: "Prepare for technical assessments in your field.",
+    content: `Role: You are a senior technical interviewer at a [industry] company.
+Context: I am interviewing for a [role] position that requires [technical skills]. My background includes [relevant experience].
+Task: Create a practice technical assessment with 5 questions that mirror what I would encounter in a real interview. Include questions of varying difficulty. For each question, provide the ideal answer approach and common mistakes.
+Constraints: Questions should be relevant to entry-level/early-career candidates. Include time estimates for each question.
+Format: Questions with difficulty ratings, ideal answer frameworks, and evaluation criteria.`,
+  },
+  {
+    id: "int-questions",
+    title: "Smart Questions to Ask",
+    category: "Interview",
+    tag: "interview",
+    description: "Thoughtful questions that demonstrate research and genuine interest.",
+    content: `Role: You are a career strategist who specializes in interview preparation.
+Context: I am interviewing at [company] for [role]. I want to ask questions that show I have done my research and am genuinely evaluating the opportunity.
+Task: Generate 10 strategic questions organized by category: role clarity, team dynamics, growth trajectory, and company direction. Each question should demonstrate specific knowledge about the company.
+Constraints: No questions that can be answered from the company website. Each question should serve a dual purpose — gathering information while demonstrating competence.
+Format: Categorized questions with notes on what each question signals to the interviewer.`,
+  },
 ];
 
+/* ── AI Prompts ── */
 const AI_PROMPTS: ResourceCard[] = [
   {
     id: "ai-resume",
@@ -233,120 +345,7 @@ Format: Evaluation scorecard with weighted categories, followed by specific ques
   },
 ];
 
-const INTERVIEW_PREP: ResourceCard[] = [
-  {
-    id: "int-star",
-    title: "STAR Story Generator",
-    category: "Interview",
-    tag: "interview",
-    description: "Build structured behavioral interview answers using STAR method.",
-    content: `Role: Act as an Interview Coach.
-Context: I am preparing for a behavioral interview for a [Job Title] role.
-Task: Using the STAR method (Situation, Task, Action, Result), help me draft a story that demonstrates my ability to solve complex problems under pressure. Use the following context: [Insert Brief Scenario].
-Constraints: Ensure the 'Action' section highlights my specific contributions and the 'Result' is quantified with data or metrics.
-Format: A structured 4-paragraph response.`,
-  },
-  {
-    id: "int-case",
-    title: "Case Interview Framework",
-    category: "Interview",
-    tag: "interview",
-    description: "Structure your thinking for consulting-style case interviews.",
-    content: `Role: Act as a Management Consultant.
-Context: I am preparing for a case interview regarding [Topic, e.g., Market Entry].
-Task: Provide a 5-step framework I can use to structure my thoughts during the interview. For each step, provide 2 probing questions I should ask the interviewer.
-Format: A numbered list with 'Rationale' for each step.`,
-  },
-  {
-    id: "int-technical",
-    title: "Technical Interview Prep",
-    category: "Interview",
-    tag: "interview",
-    description: "Prepare for technical assessments in your field.",
-    content: `Role: You are a senior technical interviewer at a [industry] company.
-Context: I am interviewing for a [role] position that requires [technical skills]. My background includes [relevant experience].
-Task: Create a practice technical assessment with 5 questions that mirror what I would encounter in a real interview. Include questions of varying difficulty. For each question, provide the ideal answer approach and common mistakes.
-Constraints: Questions should be relevant to entry-level/early-career candidates. Include time estimates for each question.
-Format: Questions with difficulty ratings, ideal answer frameworks, and evaluation criteria.`,
-  },
-  {
-    id: "int-questions",
-    title: "Smart Questions to Ask",
-    category: "Interview",
-    tag: "interview",
-    description: "Thoughtful questions that demonstrate research and genuine interest.",
-    content: `Role: You are a career strategist who specializes in interview preparation.
-Context: I am interviewing at [company] for [role]. I want to ask questions that show I have done my research and am genuinely evaluating the opportunity.
-Task: Generate 10 strategic questions organized by category: role clarity, team dynamics, growth trajectory, and company direction. Each question should demonstrate specific knowledge about the company.
-Constraints: No questions that can be answered from the company website. Each question should serve a dual purpose — gathering information while demonstrating competence.
-Format: Categorized questions with notes on what each question signals to the interviewer.`,
-  },
-];
-
-const NETWORKING: ResourceCard[] = [
-  {
-    id: "net-elevator",
-    title: "Problem-Solver Elevator Pitch",
-    category: "Networking",
-    tag: "networking",
-    description: "A concise pitch positioning you as a solution to employer needs.",
-    content: `I am a [Major] student at Suffolk University specializing in [Skill A] and [Skill B]. I recently achieved [Result] by implementing [Method]. I am currently focusing on the [Industry] sector to solve [Specific Problem] through data-driven strategies. My goal is to bring my international perspective and technical background to a team like yours to help drive [Specific Outcome]. I have been following [Company's] work on [Project], and I would love to learn more about how your team handles [Related Challenge].`,
-  },
-  {
-    id: "net-referral",
-    title: "Referral Request Template",
-    category: "Networking",
-    tag: "networking",
-    description: "Ask a contact for a referral to an open position.",
-    content: `Subject: Quick question about the [Job Title] role at [Company]
-
-Hi [Name],
-
-I am applying for the [Job Title] role at [Company]. Would you be open to sharing advice on team priorities and whether a referral might be appropriate? I want to make sure my application highlights the right strengths.
-
-Thank you,
-[Your Name]`,
-  },
-  {
-    id: "net-thank-you",
-    title: "Post-Interview Thank You",
-    category: "Networking",
-    tag: "interview",
-    description: "Send a professional thank you after an interview.",
-    content: `Subject: Thank you for the conversation about [Role]
-
-Thank you for the opportunity to interview for [Role]. I appreciated our discussion about [Topic] and am excited about the possibility of contributing to [Company's] work in [Area]. Please do not hesitate to reach out if you need any additional information.
-
-Best regards,
-[Your Name]`,
-  },
-  {
-    id: "net-cold",
-    title: "Cold Outreach to Hiring Manager",
-    category: "Networking",
-    tag: "job search",
-    description: "Reach out directly to a hiring manager with a value proposition.",
-    content: `Subject: Interest in [Position] - [Your Name], Suffolk University
-
-Hi [Name],
-
-I am a graduate student at Suffolk University with a background in [Skill]. I noticed your team is working on [Challenge or Project], and I believe my experience with [Relevant Experience] could contribute meaningfully to your efforts. I would welcome the chance to learn more about your team's priorities. Would you be open to a brief conversation?
-
-Best regards,
-[Your Name]`,
-  },
-  {
-    id: "net-icebreaker",
-    title: "Networking Icebreaker Questions",
-    category: "Networking",
-    tag: "networking",
-    description: "Natural conversation starters for professional mixers and events.",
-    content: `Role: Act as a Networking Expert.
-Context: I am attending a professional mixer for [Industry]. I want to approach a Senior Manager at [Company]. Based on their recent company news about [Insert News Item], draft 3 different natural-sounding opening questions that show I have done my research and am interested in their perspective.
-Format: 3 distinct options with brief explanations of why each works.`,
-  },
-];
-
+/* ── Suffolk Resources ── */
 const SUFFOLK_RESOURCES: ResourceCard[] = [
   {
     id: "suf-careers",
@@ -390,40 +389,40 @@ const SUFFOLK_RESOURCES: ResourceCard[] = [
   },
 ];
 
+/* ── Key Links ── */
 const KEY_LINKS = [
-  {
-    id: "kl-uscis",
-    title: "USCIS",
-    url: "https://www.uscis.gov/",
-    description: "Official source for OPT, CPT, and work authorization rules.",
-  },
-  {
-    id: "kl-myvisajobs",
-    title: "MyVisaJobs",
-    url: "https://www.myvisajobs.com/",
-    description: "Search employers who have historically sponsored H-1B visas.",
-  },
-  {
-    id: "kl-dol",
-    title: "DOL Foreign Labor Certification",
-    url: "https://www.dol.gov/agencies/eta/foreign-labor",
-    description: "Wage data and employer certification info.",
-  },
-  {
-    id: "kl-goingglobal",
-    title: "Going Global",
-    url: "https://online.goinglobal.com/",
-    description: "Suffolk has institutional access. Find H-1B and OPT-friendly employers, US city career guides, and international job market guides.",
-  },
+  { id: "kl-uscis", title: "USCIS", url: "https://www.uscis.gov/", description: "Official source for OPT, CPT, and work authorization rules." },
+  { id: "kl-myvisajobs", title: "MyVisaJobs", url: "https://www.myvisajobs.com/", description: "Search employers who have historically sponsored H-1B visas." },
+  { id: "kl-dol", title: "DOL Foreign Labor Certification", url: "https://www.dol.gov/agencies/eta/foreign-labor", description: "Wage data and employer certification info." },
+  { id: "kl-goingglobal", title: "Going Global", url: "https://online.goinglobal.com/", description: "Suffolk has institutional access. Find H-1B and OPT-friendly employers, US city career guides, and international job market guides." },
 ];
 
-const ALL_TABS: { key: string; label: string; cards: ResourceCard[] }[] = [
-  { key: "templates", label: "Templates", cards: TEMPLATES },
-  { key: "prompts", label: "AI Prompts", cards: AI_PROMPTS },
-  { key: "interview", label: "Interview Prep", cards: INTERVIEW_PREP },
-  { key: "networking", label: "Networking", cards: NETWORKING },
-  { key: "suffolk", label: "Suffolk Resources", cards: SUFFOLK_RESOURCES },
-];
+/* ── Tag color map ── */
+const TAG_COLORS: Record<string, string> = {
+  networking: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  resume: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+  interview: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  linkedin: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300",
+  "job search": "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
+  "career strategy": "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
+};
+
+/* ── Shared action buttons ── */
+const SelectAllButton = ({ targetRef }: { targetRef: React.RefObject<HTMLElement | null> }) => {
+  const handleSelectAll = () => {
+    if (!targetRef.current) return;
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(targetRef.current);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  };
+  return (
+    <button onClick={handleSelectAll} className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+      Select All
+    </button>
+  );
+};
 
 const CopyButton = ({ text, label = "Copy" }: { text: string; label?: string }) => {
   const [copied, setCopied] = useState(false);
@@ -433,24 +432,126 @@ const CopyButton = ({ text, label = "Copy" }: { text: string; label?: string }) 
     setTimeout(() => setCopied(false), 2000);
   };
   return (
-    <button
-      onClick={handleCopy}
-      className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-    >
+    <button onClick={handleCopy} className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
       {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
       {copied ? "Copied" : label}
     </button>
   );
 };
 
+/* ── Expandable Resource Card ── */
+const ExpandableCard = ({ card, isExpanded, onToggle }: { card: ResourceCard; isExpanded: boolean; onToggle: () => void }) => {
+  const contentRef = useRef<HTMLParagraphElement>(null);
+
+  const tagClass = card.tag ? TAG_COLORS[card.tag] || "bg-muted text-muted-foreground" : "";
+
+  return (
+    <GlassCard className="p-4">
+      <div className="flex items-start justify-between cursor-pointer" onClick={onToggle}>
+        <div className="flex-1">
+          <h3 className="text-sm font-semibold text-foreground mb-1.5">{card.title}</h3>
+          <div className="flex items-center gap-1.5 mb-2">
+            <Badge variant="outline" className="text-[10px]">{card.category}</Badge>
+            {card.tag && (
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${tagClass}`}>
+                {card.tag}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">{card.description}</p>
+        </div>
+        <div className="ml-2 mt-1 text-muted-foreground">
+          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </div>
+      </div>
+      {isExpanded && (
+        <div className="mt-3 border-t border-border pt-3 space-y-3">
+          <p ref={contentRef} className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">{card.content}</p>
+          <div className="flex items-center gap-3">
+            <SelectAllButton targetRef={contentRef} />
+            <CopyButton text={card.content} />
+          </div>
+        </div>
+      )}
+    </GlassCard>
+  );
+};
+
+/* ── Prompt Builder ── */
+const PromptBuilder = () => {
+  const [fields, setFields] = useState({ role: "", context: "", task: "", constraints: "", format: "" });
+  const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const outputRef = useRef<HTMLDivElement>(null);
+
+  const updateField = (key: keyof typeof fields, value: string) => {
+    setFields((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const generatePrompt = () => {
+    const parts: string[] = [];
+    if (fields.role) parts.push(`You are a ${fields.role}.`);
+    if (fields.context) parts.push(`Based on the following context: ${fields.context},`);
+    if (fields.task) parts.push(`complete the following task: ${fields.task}.`);
+    if (fields.constraints) parts.push(`Follow these constraints: ${fields.constraints}.`);
+    if (fields.format) parts.push(`Provide the response in the following format: ${fields.format}.`);
+    setGeneratedPrompt(parts.join(" "));
+  };
+
+  const inputFields = [
+    { key: "role" as const, label: "Assign the AI assistant a role", placeholder: "Career advisor, recruiter, resume reviewer, etc." },
+    { key: "context" as const, label: "Provide context", placeholder: "Describe your situation, background, or goal" },
+    { key: "task" as const, label: "Define the task", placeholder: "What do you want the AI to help you do?" },
+    { key: "constraints" as const, label: "Add constraints or guidance", placeholder: "Focus on measurable results, use PAR format, etc." },
+    { key: "format" as const, label: "Specify output format", placeholder: "Bullet points, table, paragraph, etc." },
+  ];
+
+  return (
+    <div className="rounded-xl border-2 border-purple-600 bg-purple-950/20 p-5 space-y-4">
+      <div className="flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-purple-400" />
+        <h3 className="text-sm font-bold text-foreground">Build Your Own AI Prompt</h3>
+      </div>
+      <div className="space-y-3">
+        {inputFields.map((f) => (
+          <div key={f.key}>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">{f.label}</label>
+            <Input
+              placeholder={f.placeholder}
+              value={fields[f.key]}
+              onChange={(e) => updateField(f.key, e.target.value)}
+              className="text-sm"
+            />
+          </div>
+        ))}
+      </div>
+      <Button onClick={generatePrompt} className="bg-purple-600 hover:bg-purple-700 text-white">
+        <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+        Generate Prompt
+      </Button>
+      {generatedPrompt && (
+        <div className="space-y-2">
+          <div ref={outputRef} className="rounded-lg border border-border bg-muted/50 p-3 text-xs text-foreground leading-relaxed whitespace-pre-wrap">
+            {generatedPrompt}
+          </div>
+          <div className="flex items-center gap-3">
+            <SelectAllButton targetRef={outputRef} />
+            <CopyButton text={generatedPrompt} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ── Main Component ── */
 const ResourceVault = () => {
   const navigate = useNavigate();
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const toggleCard = (id: string) => {
-    setExpandedCard(expandedCard === id ? null : id);
-  };
+  const toggleCard = useCallback((id: string) => {
+    setExpandedCard((prev) => (prev === id ? null : id));
+  }, []);
 
   const matchesSearch = (card: ResourceCard) => {
     const query = searchQuery.trim().toLowerCase();
@@ -464,46 +565,32 @@ const ResourceVault = () => {
     );
   };
 
-  const renderCard = (card: ResourceCard) => {
-    const isExpanded = expandedCard === card.id;
-    const isSuffolk = card.category === "Suffolk";
-
-    return (
-      <GlassCard key={card.id} className="p-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-sm font-semibold text-foreground">{card.title}</h3>
-          </div>
-          <div className="flex items-center gap-1.5 mb-2">
-            <Badge variant="outline" className="text-[10px]">{card.category}</Badge>
-            {card.tag && <Badge variant="secondary" className="text-[10px]">{card.tag}</Badge>}
-          </div>
-          <p className="text-xs text-muted-foreground">{card.description}</p>
-        </div>
-        <button
-          className="flex items-center gap-1 text-xs text-primary font-medium mt-2"
-          onClick={() => isSuffolk ? window.open(card.content, "_blank") : toggleCard(card.id)}
-        >
-          {isSuffolk ? (
-            <>Visit <ExternalLink className="h-3 w-3" /></>
-          ) : (
-            <>{isExpanded ? "Collapse" : "Expand"} {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}</>
-          )}
-        </button>
-        {isExpanded && !isSuffolk && (
-          <div className="mt-3 border-t pt-3 space-y-2">
-            <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">{card.content}</p>
-            <CopyButton text={card.content} />
-          </div>
-        )}
-      </GlassCard>
-    );
-  };
+  const filteredTemplates = TEMPLATES.filter(matchesSearch);
+  const filteredPrompts = AI_PROMPTS.filter(matchesSearch);
 
   return (
     <StepLayout>
-      <h1 className="text-xl font-bold text-foreground">Step 5: Add Resources</h1>
-      <p className="text-sm text-muted-foreground">Select the templates, prompts, and resources you want in your toolkit.</p>
+      <h1 className="text-xl font-bold text-foreground">Step 5: Resources</h1>
+      <p className="text-sm text-muted-foreground">
+        This step provides templates and AI prompts that can help you create resumes, networking messages, and other job search materials. Expand each resource to copy and adapt it for your own strategy.
+      </p>
+
+      {/* Instruction Card */}
+      <GlassCard className="border-l-4 border-l-purple-500">
+        <div className="flex items-center gap-2 mb-2">
+          <BookOpen className="h-4 w-4 text-purple-500" />
+          <h2 className="text-sm font-bold text-foreground">Build Your Career Resource Library</h2>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          This section contains templates and AI prompts that can help you create resumes, networking messages, and other career materials more efficiently.
+        </p>
+        <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+          Expand any resource to copy and adapt it for your own job search.
+        </p>
+        <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+          You can also add resources you discover over time so this page becomes your personal career toolkit.
+        </p>
+      </GlassCard>
 
       {/* Search */}
       <div className="relative">
@@ -516,43 +603,95 @@ const ResourceVault = () => {
         />
       </div>
 
+      {/* Two Tabs */}
       <Tabs defaultValue="templates">
-        <TabsList className="w-full flex-wrap h-auto gap-1 p-1">
-          {ALL_TABS.map((tab) => (
-            <TabsTrigger key={tab.key} value={tab.key} className="flex-1 text-xs min-w-[80px]">
-              {tab.label}
-            </TabsTrigger>
-          ))}
+        <TabsList className="w-full h-auto gap-1 p-1 bg-muted">
+          <TabsTrigger
+            value="templates"
+            className="flex-1 text-sm font-medium data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700 dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-300"
+          >
+            Templates
+          </TabsTrigger>
+          <TabsTrigger
+            value="prompts"
+            className="flex-1 text-sm font-medium data-[state=active]:bg-purple-700 data-[state=active]:text-white dark:data-[state=active]:bg-purple-800 dark:data-[state=active]:text-purple-100"
+          >
+            AI Prompts
+          </TabsTrigger>
         </TabsList>
 
-        {ALL_TABS.map((tab) => {
-          const filtered = tab.cards.filter(matchesSearch);
-          return (
-            <TabsContent key={tab.key} value={tab.key} className="mt-4 space-y-3">
-              <div className="grid gap-3">
-                {filtered.length > 0 ? (
-                  filtered.map(renderCard)
-                ) : (
-                  <p className="text-xs text-muted-foreground text-center py-4">No results found.</p>
-                )}
-              </div>
-            </TabsContent>
-          );
-        })}
+        {/* Templates Tab */}
+        <TabsContent value="templates" className="mt-4 space-y-3">
+          {filteredTemplates.length > 0 ? (
+            filteredTemplates.map((card) => (
+              <ExpandableCard
+                key={card.id}
+                card={card}
+                isExpanded={expandedCard === card.id}
+                onToggle={() => toggleCard(card.id)}
+              />
+            ))
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-4">No templates match your search.</p>
+          )}
+        </TabsContent>
+
+        {/* AI Prompts Tab */}
+        <TabsContent value="prompts" className="mt-4 space-y-4">
+          {/* Prompt Builder */}
+          <PromptBuilder />
+
+          {/* Prompt Engineering Formula */}
+          <div className="rounded-xl border-2 border-purple-600 bg-purple-950/20 p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <Lightbulb className="h-4 w-4 text-purple-400" />
+              <h3 className="text-sm font-bold text-foreground">Prompt Engineering Formula</h3>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {content.promptGuide}
+            </p>
+          </div>
+
+          {/* AI Prompt Cards */}
+          {filteredPrompts.length > 0 ? (
+            filteredPrompts.map((card) => (
+              <ExpandableCard
+                key={card.id}
+                card={card}
+                isExpanded={expandedCard === card.id}
+                onToggle={() => toggleCard(card.id)}
+              />
+            ))
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-4">No prompts match your search.</p>
+          )}
+        </TabsContent>
       </Tabs>
 
-      {/* Key Links — always visible */}
-      <div className="mt-6">
-        <h2 className="text-sm font-semibold text-foreground mb-3">Key Links</h2>
+      {/* Suffolk Career Resources — outside tabs */}
+      <div className="mt-6 space-y-3">
+        <h2 className="text-sm font-semibold text-foreground">Suffolk Career Resources</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {SUFFOLK_RESOURCES.map((res) => (
+            <a key={res.id} href={res.content} target="_blank" rel="noopener noreferrer" className="block">
+              <GlassCard className="p-4 hover:border-primary/50 transition-colors h-full">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                  {res.title}
+                  <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">{res.description}</p>
+              </GlassCard>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* Key Links */}
+      <div className="space-y-3">
+        <h2 className="text-sm font-semibold text-foreground">Key Links</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {KEY_LINKS.map((link) => (
-            <a
-              key={link.id}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
+            <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="block">
               <GlassCard className="p-4 hover:border-primary/50 transition-colors h-full">
                 <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
                   {link.title}
