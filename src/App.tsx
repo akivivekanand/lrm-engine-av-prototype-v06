@@ -24,6 +24,11 @@ function RouteTracker() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Scroll to top on every route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   useEffect(() => {
     if (VALID_ROUTES.includes(location.pathname)) {
       localStorage.setItem(ROUTE_KEY, location.pathname);

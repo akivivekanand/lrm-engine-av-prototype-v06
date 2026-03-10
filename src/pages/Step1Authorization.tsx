@@ -131,8 +131,8 @@ const Step1Authorization = () => {
         </Select>
       </GlassCard>
 
-      {/* RFE / Denied Warning */}
-      {isDeniedOrRfe && (
+      {/* RFE Warning */}
+      {optStatus === "rfe" && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-sm">
@@ -141,22 +141,33 @@ const Step1Authorization = () => {
         </Alert>
       )}
 
-      {/* Denied: DSO contact only, no timeline */}
+      {/* Denied: full block with buttons, no continuation */}
       {optStatus === "denied" && (
-        <>
-          <GlassCard>
+        <GlassCard className="border-destructive/50">
+          <div className="space-y-4">
+            <h2 className="text-base font-bold text-destructive">OPT Application Denied</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Students should immediately contact their DSO and career center to discuss next steps and contingency planning. Timeline calculations should not proceed until this status is resolved.
+              Your OPT application has been denied. Please contact your university's Designated School Official immediately.
             </p>
-          </GlassCard>
-          <ContactCard
-            contact={content.isso}
-            disclaimer="Contact University DSO for official policy guidance."
-          />
-          <ContactCard
-            contact={content.careerCenter}
-          />
-        </>
+            <div className="flex gap-3">
+              <Button
+                variant="destructive"
+                className="flex-1"
+                onClick={() => window.open(`mailto:${content.isso.email}`, '_blank')}
+              >
+                Contact ISSO
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => window.open('https://www.suffolk.edu/global/international-students/isso', '_blank')}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View OPT Resources
+              </Button>
+            </div>
+          </div>
+        </GlassCard>
       )}
 
       {/* ===== NOT APPLIED ===== */}
