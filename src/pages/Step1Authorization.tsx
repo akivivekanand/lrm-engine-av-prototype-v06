@@ -317,6 +317,7 @@ const Step1Authorization = () => {
               value={eadDateObj}
               onChange={(d) => setEadDate(d ? d.toISOString() : null)}
               hasError={validationError && !eadDateObj}
+              fromDate={gradDateObj}
             />
           </GlassCard>
         </>
