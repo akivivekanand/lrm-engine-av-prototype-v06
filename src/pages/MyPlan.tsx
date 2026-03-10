@@ -154,6 +154,7 @@ const MyPlan = () => {
   return (
     <StepLayout>
       <h1 className="text-xl font-bold text-foreground">Step 4: Strategy</h1>
+      <p className="text-xs text-muted-foreground">Your action strategy helps you translate your preparation window and hiring cycle into manageable daily, weekly, and monthly activities.</p>
 
       {/* SECTION 1: Career Strategy Timeline */}
       <GlassCard>
