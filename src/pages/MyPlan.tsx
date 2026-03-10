@@ -147,7 +147,7 @@ const MyPlan = () => {
 
   return (
     <StepLayout>
-      <h1 className="text-xl font-bold text-foreground">My Plan</h1>
+      <h1 className="text-xl font-bold text-foreground">Step 4: Strategy</h1>
 
       {/* SECTION 1: Career Strategy Timeline */}
       <GlassCard>
