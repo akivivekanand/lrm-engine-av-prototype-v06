@@ -11,6 +11,7 @@ import { calculateLRMChainV2, getMilestoneStatus, formatDate } from "@/lib/calcu
 
 const Step3Timeline = () => {
   const navigate = useNavigate();
+  const [showExplanation, setShowExplanation] = useState(false);
 
   const [gradDate] = usePersistedState<string | null>("gradDate", null);
   const [eadDate] = usePersistedState<string | null>("eadDate", null);
