@@ -1,23 +1,49 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
-import { Info, Sparkles, CalendarDays, Clock, Shield, Briefcase, CheckSquare, AlertTriangle } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, Download, Wrench, CalendarDays, Clock, AlertTriangle } from "lucide-react";
 import confetti from "canvas-confetti";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import ContactCard from "@/components/ContactCard";
+import SegmentedTimeline from "@/components/SegmentedTimeline";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { calculateLRMChainV2, formatDate, getMilestoneStatus, daysBetween, stripTime, addDays } from "@/lib/calculations";
 import { generateCareerPlan, type CareerPlan } from "@/lib/generateCareerPlan";
+import { cn } from "@/lib/utils";
 import content from "@/data/content.json";
+
+const CONFETTI_COLORS = ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#9B59B6"];
+
+type DateStatus = "Passed" | "Today" | "Upcoming" | "Critical";
+
+function getDateStatus(date: Date): DateStatus {
+  const today = stripTime(new Date());
+  const diff = daysBetween(today, date);
+  if (diff < 0) return "Passed";
+  if (diff === 0) return "Today";
+  if (diff <= 14) return "Critical";
+  return "Upcoming";
+}
+
+const statusBadgeVariant: Record<DateStatus, string> = {
+  Passed: "bg-muted text-muted-foreground",
+  Today: "bg-sky text-white",
+  Upcoming: "bg-emerald text-white",
+  Critical: "bg-destructive text-destructive-foreground",
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [plan, setPlan] = useState<CareerPlan | null>(null);
   const [generating, setGenerating] = useState(false);
 
+  // Persisted inputs
   const [gradDate] = usePersistedState<string | null>("gradDate", null);
   const [eadDate] = usePersistedState<string | null>("eadDate", null);
   const [optStatus] = usePersistedState<string>("optStatus", "notApplied");
@@ -27,13 +53,22 @@ const Dashboard = () => {
   const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
   const [industryText] = usePersistedState<string>("industryText", "");
   const [careerPlanStartDate] = usePersistedState<string>("careerPlanStartDate", new Date().toISOString().split("T")[0]);
-  
-  const [completedActions, setCompletedActions] = usePersistedState<string[]>("dashboardCompletedActions", []);
+
+  // Strategy state
+  const [strategyGenerated, setStrategyGenerated] = usePersistedState<boolean>("strategyGenerated", false);
+  const [showTimelineIntel, setShowTimelineIntel] = useState(true);
+  const [showStrategicGuidance, setShowStrategicGuidance] = useState(true);
+  const [showActionPlan, setShowActionPlan] = useState(false);
+
+  // Read persisted tasks from Step 4
+  const [selectedDailyTasks] = usePersistedState<Record<string, string[]>>("myPlanDailyTasks", {});
+  const [selectedWeeklyTasks] = usePersistedState<Record<string, string[]>>("myPlanWeeklyTasks", {});
+  const [selectedMonthlyTasks] = usePersistedState<Record<string, string[]>>("myPlanMonthlyTasks", {});
 
   const isApproved = optStatus === "approved";
   const chosenStartDateStr = isApproved ? eadDate : (targetWorkReadyDate || estimatedStartDate);
-
   const hasData = gradDate && chosenStartDateStr;
+
   const chain = hasData
     ? calculateLRMChainV2({
         programEndDate: new Date(gradDate),
@@ -45,8 +80,10 @@ const Dashboard = () => {
 
   const lrmStatus = chain ? getMilestoneStatus(chain.lrmDate) : null;
   const today = stripTime(new Date());
+  const daysToLRM = chain ? daysBetween(today, chain.lrmDate) : 0;
+  const startLabel = isApproved ? "EAD Start Date" : "Chosen Start Date";
 
-  // Hiring bands from Step 4 data
+  // Step 4 swimlane calculations
   const startDate = stripTime(new Date(careerPlanStartDate));
   const prepEnd = addDays(startDate, prepWindowDays);
   const hiringEnd = addDays(prepEnd, hiringWeeks * 7);
@@ -61,51 +98,27 @@ const Dashboard = () => {
   const hiringPct = (hiringDays / totalBandDays) * 100;
   const bufferPct = (bufferDays / totalBandDays) * 100;
 
-  // Unemployment clock
-  const chosenStartDate = chosenStartDateStr ? stripTime(new Date(chosenStartDateStr)) : null;
-  const showUnemploymentClock = isApproved && chosenStartDate && today.getTime() >= chosenStartDate.getTime();
-  const unemploymentDays = showUnemploymentClock ? Math.min(90, daysBetween(chosenStartDate!, today)) : 0;
+  // Status badge
+  const statusColor = lrmStatus === "crisis" ? "destructive" : lrmStatus === "compression" ? "secondary" : "outline";
+  const statusLabel = lrmStatus === "crisis" ? "Past Due" : lrmStatus === "compression" ? "Soon" : "On Track";
+  const statusBadgeClass = lrmStatus === "crisis"
+    ? "bg-destructive text-destructive-foreground"
+    : lrmStatus === "compression"
+      ? "bg-amber text-amber-foreground"
+      : "bg-emerald text-emerald-foreground";
 
-  // Next actions generation
-  const daysToLRM = chain ? daysBetween(today, chain.lrmDate) : 0;
-  const nextActions = useMemo(() => {
-    const actions: { id: string; text: string }[] = [];
-    if (!chain) return actions;
+  // Key dates for Step 3 timeline section
+  const keyDates = chain
+    ? [
+        { label: "Program End Date", date: chain.programEndDate },
+        { label: "Today", date: today },
+        { label: "LRM", date: chain.lrmDate },
+        { label: startLabel, date: chain.chosenStartDate },
+        { label: "Last Day to Start Working", date: chain.lastDayToWork },
+      ].sort((a, b) => a.date.getTime() - b.date.getTime())
+    : [];
 
-    if (optStatus === "notApplied") {
-      actions.push({ id: "na-1", text: "File your OPT application immediately — the earliest you can apply is 90 days before your program end date." });
-    }
-    if (optStatus === "waiting") {
-      actions.push({ id: "na-2", text: "Check your OPT application status on the USCIS Case Status page." });
-    }
-    if (daysToLRM > 14) {
-      actions.push({ id: "na-3", text: `Update your resume and LinkedIn profile for ${industryText || "your target industry"}.` });
-      actions.push({ id: "na-4", text: "Schedule an appointment with the Suffolk Career Center for a resume review." });
-      actions.push({ id: "na-5", text: `Identify 10 target companies in ${industryText || "your target industry"} and research their hiring processes.` });
-      actions.push({ id: "na-6", text: "Connect with 3 Suffolk alumni on LinkedIn with personalized connection requests." });
-      actions.push({ id: "na-7", text: "Set up job alerts on Handshake, LinkedIn, and Indeed for your target roles." });
-    } else if (daysToLRM > 0) {
-      actions.push({ id: "na-8", text: "Begin submitting applications immediately — your LRM is approaching." });
-      actions.push({ id: "na-9", text: `Apply to 3-5 positions in ${industryText || "your target industry"} this week.` });
-      actions.push({ id: "na-10", text: "Reach out to any warm contacts for referrals at target companies." });
-      actions.push({ id: "na-11", text: "Attend the next Career Center drop-in session for last-minute strategy advice." });
-      actions.push({ id: "na-12", text: "Prepare for interviews by practicing STAR method answers for common behavioral questions." });
-    } else {
-      actions.push({ id: "na-13", text: "Your LRM has passed — dedicate 3-4 hours daily to active job search." });
-      actions.push({ id: "na-14", text: "Apply to positions daily and expand your target to include adjacent roles." });
-      actions.push({ id: "na-15", text: "Contact the Career Center for expedited support and priority advising." });
-      actions.push({ id: "na-16", text: "Leverage every available contact — alumni, professors, and professional networks." });
-      actions.push({ id: "na-17", text: "Consider contract or part-time positions that could convert to full-time and stop your unemployment clock." });
-    }
-    return actions.slice(0, 7);
-  }, [chain, optStatus, daysToLRM, industryText]);
-
-  const toggleAction = (id: string) => {
-    setCompletedActions((prev) =>
-      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
-    );
-  };
-
+  // Generate plan on first click or regenerate
   const handleGenerate = async () => {
     if (!chain) return;
     setGenerating(true);
@@ -118,11 +131,12 @@ const Dashboard = () => {
         optStatus,
       });
       setPlan(result);
+      setStrategyGenerated(true);
       confetti({
         particleCount: 150,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ["hsl(262,83%,58%)", "hsl(210,40%,98%)", "hsl(262,83%,78%)"],
+        colors: CONFETTI_COLORS,
       });
     } catch (err) {
       console.error("Career plan generation failed:", err);
@@ -131,220 +145,367 @@ const Dashboard = () => {
     }
   };
 
-  const statusColor = lrmStatus === "crisis" ? "destructive" : lrmStatus === "compression" ? "secondary" : "outline";
-  const statusLabel = lrmStatus === "crisis" ? "Past Due" : lrmStatus === "compression" ? "Soon" : "On Track";
+  // Ensure plan exists if strategyGenerated was persisted
+  useMemo(() => {
+    if (strategyGenerated && !plan && chain) {
+      const result = generateCareerPlan({ chain, industryText, hiringWeeks, prepWindowDays, optStatus });
+      setPlan(result);
+    }
+  }, [strategyGenerated, chain]);
+
+  const handleDownloadPDF = () => {
+    confetti({
+      particleCount: 150,
+      spread: 80,
+      origin: { y: 0.6 },
+      colors: CONFETTI_COLORS,
+    });
+    setTimeout(() => window.print(), 400);
+  };
+
+  // Gather action plan tasks
+  const hasCuratedTasks = Object.keys(selectedDailyTasks).length > 0 || Object.keys(selectedWeeklyTasks).length > 0 || Object.keys(selectedMonthlyTasks).length > 0;
+
+  const actionPlanDaily = useMemo(() => {
+    if (hasCuratedTasks && Object.keys(selectedDailyTasks).length > 0) {
+      return Object.entries(selectedDailyTasks).slice(0, 3).map(([key, tasks]) => ({ key, tasks }));
+    }
+    if (plan) {
+      return plan.actionPlan.daily.slice(0, 3).map((d) => ({ key: d.date, tasks: d.tasks }));
+    }
+    return [];
+  }, [selectedDailyTasks, plan, hasCuratedTasks]);
+
+  const actionPlanWeekly = useMemo(() => {
+    if (hasCuratedTasks && Object.keys(selectedWeeklyTasks).length > 0) {
+      return Object.entries(selectedWeeklyTasks).slice(0, 3).map(([key, tasks]) => ({ key, tasks }));
+    }
+    if (plan) {
+      return plan.actionPlan.weekly.slice(0, 3).map((w) => ({ key: w.period, tasks: w.tasks }));
+    }
+    return [];
+  }, [selectedWeeklyTasks, plan, hasCuratedTasks]);
+
+  const actionPlanMonthly = useMemo(() => {
+    if (hasCuratedTasks && Object.keys(selectedMonthlyTasks).length > 0) {
+      return Object.entries(selectedMonthlyTasks).slice(0, 3).map(([key, tasks]) => ({ key, tasks }));
+    }
+    if (plan) {
+      return plan.actionPlan.monthly.slice(0, 3).map((m) => ({ key: m.period, tasks: m.tasks }));
+    }
+    return [];
+  }, [selectedMonthlyTasks, plan, hasCuratedTasks]);
+
+  // Dot color helper for key dates
+  const dotColor = (label: string) => {
+    if (label === "Today") return "bg-sky";
+    if (label === "Program End Date") return "bg-slate";
+    if (label === "LRM") return "bg-amber";
+    if (label === "Last Day to Start Working") return "bg-critical";
+    return "bg-primary";
+  };
 
   return (
     <StepLayout>
-      <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
+      <h1 className="text-xl font-bold text-foreground print:text-2xl">Dashboard</h1>
 
-      {/* (a) Your Timeline — Hiring Bands + Key Dates */}
+      {/* ── 1. LRM Card ── */}
       {chain && (
-        <GlassCard>
-          <div className="flex items-center gap-2 mb-4">
-            <CalendarDays className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">Your Timeline</h2>
-            <Badge variant={statusColor} className="ml-auto">{statusLabel}</Badge>
-          </div>
-
-          {/* Hiring Bands */}
-          <div className="space-y-2 mb-5">
-            <p className="text-xs font-medium text-muted-foreground">Career Strategy Bands</p>
-            <div className="flex rounded-lg overflow-hidden h-8">
-              {prepPct > 0 && (
-                <div
-                  className="bg-emerald-500 flex items-center justify-center text-[9px] font-semibold text-white"
-                  style={{ width: `${Math.max(prepPct, 8)}%` }}
-                >
-                  Prep
-                </div>
-              )}
-              {hiringPct > 0 && (
-                <div
-                  className="bg-amber-500 flex items-center justify-center text-[9px] font-semibold text-white"
-                  style={{ width: `${Math.max(hiringPct, 8)}%` }}
-                >
-                  Hiring
-                </div>
-              )}
-              {bufferPct > 0 && (
-                <div
-                  className="bg-purple-500 flex items-center justify-center text-[9px] font-semibold text-white"
-                  style={{ width: `${Math.max(bufferPct, 8)}%` }}
-                >
-                  OPT Buffer
-                </div>
-              )}
-            </div>
-            <div className="flex justify-between text-[9px] text-muted-foreground">
-              <span>{formatDate(startDate)}</span>
-              <span>{formatDate(prepEnd)}</span>
-              <span>{formatDate(hiringEnd)}</span>
-              <span>{formatDate(lastDayToWork)}</span>
-            </div>
-          </div>
-
-          {/* Key Dates Timeline */}
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Key Dates</p>
-            {[
-              { label: "LRM", date: chain.lrmDate, color: "bg-rose-500" },
-              { label: "Chosen Start Date", date: chain.chosenStartDate, color: "bg-amber-500" },
-              { label: "Program End Date", date: chain.programEndDate, color: "bg-emerald-500" },
-              { label: "Last Day to Start Working", date: chain.lastDayToWork, color: "bg-indigo-500" },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${item.color} inline-block`} />
-                  <span className="text-muted-foreground text-xs">{item.label}</span>
-                </div>
-                <span className="font-medium text-foreground text-xs">{formatDate(item.date)}</span>
-              </div>
-            ))}
-          </div>
-        </GlassCard>
-      )}
-
-      {/* (b) Your Authorization Window */}
-      {chain && (
-        <GlassCard>
-          <div className="flex items-center gap-2 mb-3">
-            <Shield className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">Your Authorization Window</h2>
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground text-xs">OPT Status</span>
-              <Badge variant="outline" className="text-[10px]">
-                {optStatus === "approved" ? "Approved" : optStatus === "waiting" ? "Pending" : "Not Applied"}
-              </Badge>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground text-xs">Chosen Start Date</span>
-              <span className="font-medium text-foreground text-xs">{formatDate(chain.chosenStartDate)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground text-xs">Last Day to Start Working</span>
-              <span className="font-medium text-foreground text-xs">{formatDate(chain.lastDayToWork)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground text-xs">Program End Date</span>
-              <span className="font-medium text-foreground text-xs">{formatDate(chain.programEndDate)}</span>
-            </div>
-          </div>
-        </GlassCard>
-      )}
-
-      {/* (c) Your Strategy Summary */}
-      <GlassCard>
-        <div className="flex items-center gap-2 mb-3">
-          <Briefcase className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-semibold text-foreground">Your Strategy Summary</h2>
-        </div>
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground text-xs">Target Industry</span>
-            <span className="font-medium text-foreground text-xs">{industryText || "Not set"}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground text-xs">Hiring Cycle</span>
-            <span className="font-medium text-foreground text-xs">{hiringWeeks} weeks</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground text-xs">Preparation Window</span>
-            <span className="font-medium text-foreground text-xs">{prepWindowDays} days</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground text-xs">Career Plan Start Date</span>
-            <span className="font-medium text-foreground text-xs">{formatDate(new Date(careerPlanStartDate))}</span>
-          </div>
-        </div>
-      </GlassCard>
-
-
-      {/* (e) Next Actions */}
-      {chain && (
-        <GlassCard>
-          <div className="flex items-center gap-2 mb-3">
-            <CheckSquare className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">Next Actions</h2>
-          </div>
-          <div className="space-y-2">
-            {nextActions.map((action) => (
-              <label key={action.id} className="flex items-start gap-2 cursor-pointer">
-                <Checkbox
-                  className="mt-0.5"
-                  checked={completedActions.includes(action.id)}
-                  onCheckedChange={() => toggleAction(action.id)}
-                />
-                <span className={`text-xs leading-relaxed ${completedActions.includes(action.id) ? "text-muted-foreground line-through" : "text-foreground"}`}>
-                  {action.text}
-                </span>
-              </label>
-            ))}
-          </div>
-        </GlassCard>
-      )}
-
-      {/* (f) Unemployment Clock */}
-      {showUnemploymentClock && (
-        <GlassCard className={unemploymentDays >= 75 ? "border-2 border-destructive/30" : ""}>
+        <GlassCard className="print:break-inside-avoid">
           <div className="flex items-center gap-2 mb-3">
             <Clock className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">Unemployment Clock</h2>
+            <h2 className="text-sm font-semibold text-foreground">Last Responsible Moment</h2>
+            <Badge className={cn("ml-auto text-[10px] border-0", statusBadgeClass)}>
+              {statusLabel}
+            </Badge>
           </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-3xl font-bold text-foreground">{unemploymentDays}</p>
-              <p className="text-xs text-muted-foreground">days elapsed since OPT start</p>
-            </div>
-            <div className="text-right">
-              <p className="text-lg font-semibold text-foreground">{90 - unemploymentDays}</p>
-              <p className="text-xs text-muted-foreground">days remaining</p>
-            </div>
-          </div>
-          <div className="mt-3 h-3 rounded-full bg-muted overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all ${unemploymentDays >= 75 ? "bg-destructive" : unemploymentDays >= 60 ? "bg-amber-500" : "bg-emerald-500"}`}
-              style={{ width: `${(unemploymentDays / 90) * 100}%` }}
-            />
-          </div>
-          {unemploymentDays >= 75 && (
+          <p className="text-2xl font-bold text-foreground mb-1">{formatDate(chain.lrmDate)}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+            {daysToLRM > 0
+              ? `${daysToLRM} days from today`
+              : daysToLRM === 0
+                ? "Today is your LRM"
+                : `${Math.abs(daysToLRM)} days past`}
+          </p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Your Last Responsible Moment is the latest date you should begin your job search while still allowing enough time to realistically secure employment before your OPT unemployment deadline. It is calculated as: Last Day to Start Working − Hiring Cycle − Preparation Window.
+          </p>
+          {lrmStatus === "crisis" && (
             <div className="flex items-start gap-2 mt-3 p-2 rounded bg-destructive/10">
               <AlertTriangle className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
-              <p className="text-[10px] text-destructive font-medium">You are approaching the 90-day unemployment limit. Secure employment immediately.</p>
+              <p className="text-[10px] text-destructive font-medium">Your LRM has passed. Shift to an accelerated job search cadence immediately.</p>
             </div>
           )}
         </GlassCard>
       )}
 
-      {/* Generate Button */}
-      {chain && !plan && (
+      {/* ── 2. Step 3 Timeline + Key Dates ── */}
+      {chain && (
+        <>
+          <GlassCard className="print:break-inside-avoid">
+            <h2 className="text-sm font-semibold text-foreground mb-1">Timeline Intelligence</h2>
+            <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+              This timeline shows how your preparation window, hiring cycle, and OPT timing affect your Last Responsible Moment (LRM).
+            </p>
+            <SegmentedTimeline chain={chain} startLabel={startLabel} />
+          </GlassCard>
+
+          <GlassCard className="print:break-inside-avoid">
+            <h2 className="text-sm font-semibold text-foreground mb-4">Key Dates</h2>
+            <div className="space-y-3">
+              {keyDates.map((m) => {
+                const isPast = m.date.getTime() < today.getTime() && m.label !== "Today";
+                const status = getDateStatus(m.date);
+                return (
+                  <div key={m.label} className={cn("flex items-center justify-between", isPast && "opacity-40")}>
+                    <div className="flex items-center gap-3">
+                      <div className={cn("w-3 h-3 rounded-full shrink-0", dotColor(m.label))} />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{m.label}</p>
+                        <p className="text-xs text-primary/70">{formatDate(m.date)}</p>
+                      </div>
+                    </div>
+                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", statusBadgeVariant[status])}>
+                      {status}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </GlassCard>
+        </>
+      )}
+
+      {/* ── 3. Step 4 Timeline + Key Time Frames ── */}
+      {chain && (
+        <>
+          <GlassCard className="print:break-inside-avoid">
+            <h2 className="text-sm font-semibold text-foreground mb-4">Career Strategy Timeline</h2>
+            {/* Swimlane bar */}
+            <div className="space-y-2">
+              <div className="flex rounded-lg overflow-hidden h-8">
+                {prepPct > 0 && (
+                  <div
+                    className="bg-emerald flex items-center justify-center text-[9px] font-semibold text-emerald-foreground"
+                    style={{ width: `${Math.max(prepPct, 8)}%` }}
+                  >
+                    Prep
+                  </div>
+                )}
+                {hiringPct > 0 && (
+                  <div
+                    className="bg-amber flex items-center justify-center text-[9px] font-semibold text-amber-foreground"
+                    style={{ width: `${Math.max(hiringPct, 8)}%` }}
+                  >
+                    Hiring
+                  </div>
+                )}
+                {bufferPct > 0 && (
+                  <div
+                    className="bg-primary flex items-center justify-center text-[9px] font-semibold text-primary-foreground"
+                    style={{ width: `${Math.max(bufferPct, 8)}%` }}
+                  >
+                    OPT Buffer
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-between text-[9px] text-muted-foreground">
+                <span>{formatDate(startDate)}</span>
+                {prepDays > 0 && <span>{formatDate(prepEnd)}</span>}
+                <span>{formatDate(hiringEnd)}</span>
+                <span>{formatDate(lastDayToWork)}</span>
+              </div>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="print:break-inside-avoid">
+            <h2 className="text-sm font-semibold text-foreground mb-4">Key Time Frames</h2>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full shrink-0 bg-emerald" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Prep Window</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(startDate)} — {formatDate(prepEnd)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full shrink-0 bg-amber" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Hiring Cycle</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(prepEnd)} — {formatDate(hiringEnd)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full shrink-0 bg-primary" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">OPT Buffer</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(hiringEnd)} — {formatDate(lastDayToWork)}</p>
+                </div>
+              </div>
+            </div>
+          </GlassCard>
+        </>
+      )}
+
+      {/* ── 4. Generate My Career Strategy ── */}
+      {chain && (
         <Button
           onClick={handleGenerate}
           disabled={generating}
-          className="w-full h-14 text-base font-semibold"
-          size="lg"
+          variant={strategyGenerated ? "outline" : "default"}
+          className={cn("w-full print:hidden", !strategyGenerated && "h-14 text-base font-semibold")}
+          size={strategyGenerated ? "default" : "lg"}
         >
-          <Sparkles className="h-5 w-5 mr-2" />
-          {generating ? "Generating..." : "Generate My Career Strategy"}
+          <Sparkles className={cn("mr-2", strategyGenerated ? "h-4 w-4" : "h-5 w-5")} />
+          {generating
+            ? (strategyGenerated ? "Regenerating..." : "Generating...")
+            : (strategyGenerated ? "Regenerate Career Strategy" : "Generate My Career Strategy")}
         </Button>
       )}
 
-      {chain && plan && (
+      {/* ── 5. Career Center Contact ── */}
+      <div className="space-y-3 print:break-inside-avoid">
+        <ContactCard contact={content.careerCenter} />
+      </div>
+
+      {/* ── 6. Post-click: Timeline Intelligence ── */}
+      {strategyGenerated && plan && (
+        <Collapsible open={showTimelineIntel} onOpenChange={setShowTimelineIntel}>
+          <GlassCard className="print:break-inside-avoid">
+            <CollapsibleTrigger className="flex items-center justify-between w-full">
+              <h2 className="text-sm font-semibold text-foreground">Timeline Intelligence</h2>
+              {showTimelineIntel ? <ChevronUp className="h-4 w-4 text-muted-foreground print:hidden" /> : <ChevronDown className="h-4 w-4 text-muted-foreground print:hidden" />}
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3 space-y-3">
+              {plan.timelineIntelligence.map((p, i) => (
+                <p key={i} className="text-xs text-muted-foreground leading-relaxed">{p}</p>
+              ))}
+            </CollapsibleContent>
+          </GlassCard>
+        </Collapsible>
+      )}
+
+      {/* ── 7. Post-click: Strategic Guidance ── */}
+      {strategyGenerated && plan && (
+        <Collapsible open={showStrategicGuidance} onOpenChange={setShowStrategicGuidance}>
+          <GlassCard className="print:break-inside-avoid">
+            <CollapsibleTrigger className="flex items-center justify-between w-full">
+              <h2 className="text-sm font-semibold text-foreground">Strategic Guidance</h2>
+              {showStrategicGuidance ? <ChevronUp className="h-4 w-4 text-muted-foreground print:hidden" /> : <ChevronDown className="h-4 w-4 text-muted-foreground print:hidden" />}
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3 space-y-3">
+              {plan.strategicGuidance.map((p, i) => (
+                <p key={i} className="text-xs text-muted-foreground leading-relaxed">{p}</p>
+              ))}
+            </CollapsibleContent>
+          </GlassCard>
+        </Collapsible>
+      )}
+
+      {/* ── 8. Post-click: My Action Plan ── */}
+      {strategyGenerated && plan && (
+        <>
+          <Button
+            variant={showActionPlan ? "secondary" : "outline"}
+            className="w-full print:hidden"
+            onClick={() => setShowActionPlan(!showActionPlan)}
+          >
+            <CalendarDays className="h-4 w-4 mr-2" />
+            My Action Plan
+            {showActionPlan ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
+          </Button>
+
+          {showActionPlan && (
+            <GlassCard className="print:break-inside-avoid">
+              <Tabs defaultValue="daily">
+                <TabsList className="w-full print:hidden">
+                  <TabsTrigger value="daily" className="flex-1 text-xs">Daily</TabsTrigger>
+                  <TabsTrigger value="weekly" className="flex-1 text-xs">Weekly</TabsTrigger>
+                  <TabsTrigger value="monthly" className="flex-1 text-xs">Monthly</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="daily" className="mt-3 space-y-3">
+                  {actionPlanDaily.map((day) => (
+                    <div key={day.key} className="space-y-1.5">
+                      <h4 className="text-xs font-semibold text-foreground">{day.key}</h4>
+                      {day.tasks.map((task, ti) => (
+                        <div key={ti} className="flex items-start gap-2">
+                          <Checkbox className="mt-0.5" disabled />
+                          <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                  {actionPlanDaily.length === 0 && (
+                    <p className="text-xs text-muted-foreground">No daily tasks available. Complete Step 4 to curate your action plan.</p>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="weekly" className="mt-3 space-y-3">
+                  {actionPlanWeekly.map((week) => (
+                    <div key={week.key} className="space-y-1.5">
+                      <h4 className="text-xs font-semibold text-foreground">{week.key}</h4>
+                      {week.tasks.map((task, ti) => (
+                        <div key={ti} className="flex items-start gap-2">
+                          <Checkbox className="mt-0.5" disabled />
+                          <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                  {actionPlanWeekly.length === 0 && (
+                    <p className="text-xs text-muted-foreground">No weekly tasks available. Complete Step 4 to curate your action plan.</p>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="monthly" className="mt-3 space-y-3">
+                  {actionPlanMonthly.map((month) => (
+                    <div key={month.key} className="space-y-1.5">
+                      <h4 className="text-xs font-semibold text-foreground">{month.key}</h4>
+                      {month.tasks.map((task, ti) => (
+                        <div key={ti} className="flex items-start gap-2">
+                          <Checkbox className="mt-0.5" disabled />
+                          <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                  {actionPlanMonthly.length === 0 && (
+                    <p className="text-xs text-muted-foreground">No monthly tasks available. Complete Step 4 to curate your action plan.</p>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </GlassCard>
+          )}
+        </>
+      )}
+
+      {/* ── 9. Post-click: My Toolkit ── */}
+      {strategyGenerated && (
         <Button
-          onClick={handleGenerate}
-          disabled={generating}
           variant="outline"
-          className="w-full"
+          className="w-full print:hidden"
+          onClick={() => navigate("/resource-vault")}
         >
-          <Sparkles className="h-4 w-4 mr-2" />
-          {generating ? "Regenerating..." : "Regenerate Career Strategy"}
+          <Wrench className="h-4 w-4 mr-2" />
+          My Toolkit
         </Button>
       )}
 
-      {/* Compliance Info */}
-      <div className="space-y-3">
+      {/* ── 10. Post-click: Download PDF ── */}
+      {strategyGenerated && (
+        <Button
+          variant="outline"
+          className="w-full print:hidden"
+          onClick={handleDownloadPDF}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Download PDF
+        </Button>
+      )}
+
+      {/* ── 11. Compliance Info ── */}
+      <div className="space-y-3 print:break-inside-avoid">
         <h2 className="text-sm font-semibold text-foreground">Compliance Info</h2>
         <ContactCard
           contact={content.isso}
@@ -352,12 +513,12 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Disclaimers */}
-      <GlassCard>
+      <GlassCard className="print:break-inside-avoid">
         <p className="text-xs text-muted-foreground leading-relaxed">{content.disclaimers.legal}</p>
       </GlassCard>
 
-      <Button variant="outline" onClick={() => navigate("/step-1-authorization")} className="w-full">
+      {/* ── 12. Edit Inputs ── */}
+      <Button variant="outline" onClick={() => navigate("/step-1-authorization")} className="w-full print:hidden">
         Edit Inputs
       </Button>
     </StepLayout>

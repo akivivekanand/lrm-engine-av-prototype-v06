@@ -1,73 +1,71 @@
 
 
-# Updated Dashboard Refactor Plan
+# Events Integration: Admin Calendar PDF Upload
 
-## Files to Change
+## Overview
 
-### 1. `src/data/content.json` (line 3)
-Update career center name to: `"Center for Career Equity, Development and Success"`
+Add an admin events management page where administrators can upload semester calendar PDFs from the Career Center or International Student Office. The system extracts event details and displays them on the student dashboard after timeline generation.
 
-### 2. `src/pages/Dashboard.tsx` — Major Refactor
+## New Files
 
-**Remove** these existing sections:
-- Your Timeline card (lines 141–206)
-- Authorization Window card (lines 208–236)
-- Strategy Summary card (lines 238–262)
-- Next Actions checklist (lines 265–287)
-- Unemployment Clock (lines 289–319)
+### 1. `src/pages/AdminEvents.tsx`
+Admin-only page at route `/admin/events` with:
+- Two upload zones: "Career Center Calendar" and "International Student Office Calendar"
+- File input accepting PDFs only
+- On upload: parse PDF using `document--parse_document` approach -- but since there's no backend, we'll use a client-side PDF text extraction library (`pdfjs-dist`) to extract raw text, then parse it with heuristics to find events
+- Extracted events displayed in an editable table (title, date, host office, location/link)
+- Admin can edit/delete extracted events before saving
+- "Save Events" button persists to localStorage under key `semesterEvents`
 
-**Keep/reuse:**
-- All persisted state reads (gradDate, eadDate, optStatus, hiringWeeks, prepWindowDays, etc.)
-- `calculateLRMChainV2` chain computation
-- `generateCareerPlan` call
-- `confetti` import
-- `ContactCard`, `GlassCard`, `StepLayout` components
-- `content` import
+### 2. `src/lib/parseCalendarPdf.ts`
+Client-side PDF parsing utility:
+- Uses `pdfjs-dist` to extract text from uploaded PDF
+- Regex/heuristic parser to identify event patterns (date patterns, titles, locations)
+- Returns array of `CalendarEvent` objects
+- Fallback: if extraction fails, admin can manually add events
 
-**New imports:**
-- `SegmentedTimeline` from components
-- `Tabs, TabsList, TabsTrigger, TabsContent` for action plan
-- `ChevronDown, ChevronUp, Download, Wrench` icons
-- `Collapsible, CollapsibleTrigger, CollapsibleContent`
+### 3. `src/components/EventCard.tsx`
+Simple card component displaying: event title, date (formatted), host office badge (Career Center / ISSO), location or meeting link (clickable if URL)
 
-**New state:**
-- `strategyGenerated` — persisted boolean via `usePersistedState`
-- `showTimelineIntel` — local toggle
-- `showStrategicGuidance` — local toggle
-- `showActionPlan` — local toggle
-- Read `myPlanDailyTasks`, `myPlanWeeklyTasks`, `myPlanMonthlyTasks` from persisted state (same keys as MyPlan.tsx)
-- No `showToolkit` state needed (button navigates away)
-
-**Layout order:**
-
-1. **LRM Card** — GlassCard with LRM date, status badge (green "On Track" / yellow "Soon" / red "Past Due"), LRM description text, days remaining count
-
-2. **Step 3 Timeline** — GlassCard with `<SegmentedTimeline>` and Key Dates section (chronological list with colored dots: Program End Date, Today, LRM, Start Date, Last Day to Start Working — replicate Step3Timeline pattern)
-
-3. **Step 4 Timeline** — GlassCard with Prep/Hiring/OPT Buffer swimlane bar (reuse existing band calculation logic) + "Key Time Frames" section listing Prep Window, Hiring Cycle, OPT Buffer with date ranges
-
-4. **Generate My Career Strategy button** — Full-width prominent button. If not yet generated: primary style with Sparkles icon. If already generated: outline "Regenerate" variant. On click: generate plan, set `strategyGenerated(true)`, fire confetti with colors `["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#9B59B6"]`
-
-5. **Career Center Contact** — `<ContactCard contact={content.careerCenter} />` using updated name
-
-6. **Post-click: Timeline Intelligence** — Collapsible GlassCard, only visible when `strategyGenerated`. Shows `plan.timelineIntelligence` paragraphs
-
-7. **Post-click: Strategic Guidance** — Collapsible GlassCard, same pattern. Shows `plan.strategicGuidance` paragraphs
-
-8. **Post-click: My Action Plan** — Toggle button to expand. When expanded: Tabs (Daily/Weekly/Monthly). Reads persisted tasks from `myPlanDailyTasks`, `myPlanWeeklyTasks`, `myPlanMonthlyTasks`. If all empty, generate fallback: slice first 3 entries from `plan.actionPlan.daily/weekly/monthly`. Display as read-only checklist
-
-9. **Post-click: My Toolkit** — Button that calls `navigate("/resource-vault")`. No local state, no content reveal on dashboard
-
-10. **Post-click: Download PDF** — Button that fires confetti (same colorful palette) then calls `window.print()`. Add `@media print` styles to hide nav/buttons and show content cleanly. User saves as PDF from browser dialog
-
-11. **Compliance Info** — ISSO contact + disclaimers at very bottom, below everything including post-click sections
-
-12. **Edit Inputs button** — Keep at bottom
-
-**Confetti colors** for both Generate and Download PDF:
-```ts
-colors: ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#9B59B6"]
+### 4. `src/types/events.ts`
+```
+interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string; // ISO date
+  hostOffice: "Career Center" | "International Student Office";
+  location: string; // physical address or meeting URL
+}
 ```
 
-**Print styles:** Add a `print:hidden` class to nav, buttons, and non-content elements. Add minimal print CSS in `src/index.css` or inline `@media print` block.
+## Modified Files
+
+### 5. `src/App.tsx`
+Add route: `/admin/events` pointing to `AdminEvents` page.
+
+### 6. `src/pages/Dashboard.tsx`
+After the timeline is generated (below existing content), add an "Upcoming Events" section:
+- Read `semesterEvents` from localStorage
+- Filter to events with date >= today
+- Sort chronologically
+- Render each with `EventCard`
+- Only visible after the plan/timeline data exists (i.e., `chain` is not null)
+
+## Dependencies
+
+Add `pdfjs-dist` for client-side PDF text extraction.
+
+## Admin Access
+
+Since there's no auth backend, the admin page is simply an unlisted route (`/admin/events`). A small "Admin" link can be added to the Cover page footer for access. No student-facing upload UI.
+
+## Event Extraction Heuristics
+
+The parser will look for:
+- Date patterns (Month Day, YYYY or MM/DD/YYYY variants)
+- Lines adjacent to dates treated as event titles
+- Keywords like "Room", "Zoom", "http", "Building" to identify location
+- Host office determined by which upload zone was used (Career Center vs ISSO)
+
+If extraction quality is low, the admin sees a warning and can manually edit all fields in the table before saving.
 
