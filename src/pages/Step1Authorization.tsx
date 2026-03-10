@@ -347,6 +347,7 @@ const Step1Authorization = () => {
               helperText="Your intended start date for planning purposes."
               value={chosenStartDateObj}
               onChange={(d) => setChosenStartDate(d ? d.toISOString() : null)}
+              fromDate={gradDateObj}
             />
           </GlassCard>
         </>
