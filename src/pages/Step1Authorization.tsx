@@ -271,6 +271,7 @@ const Step1Authorization = () => {
               helperText="When you want to start working."
               value={chosenStartDateObj}
               onChange={(d) => setChosenStartDate(d ? d.toISOString() : null)}
+              fromDate={gradDateObj}
             />
           </GlassCard>
 
