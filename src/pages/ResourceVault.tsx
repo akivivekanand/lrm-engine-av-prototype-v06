@@ -3,7 +3,7 @@ import { useState, useRef, useCallback } from "react";
 import { Copy, Check, ChevronDown, ExternalLink, Search, Sparkles, BookOpen, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import GlassCard from "@/components/GlassCard";
