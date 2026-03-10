@@ -289,7 +289,7 @@ const Step3Timeline = () => {
 
           {/* Timeline Visualization */}
           <GlassCard>
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
               <h2 className="text-sm font-semibold text-foreground">Timeline</h2>
               <button
                 onClick={() => setShowExplanation(!showExplanation)}
@@ -317,16 +317,23 @@ const Step3Timeline = () => {
             <h2 className="text-sm font-semibold text-foreground mb-4">Key Dates</h2>
             <div className="space-y-3">
               {keyDates.map((m) => {
-                const status = getDateStatus(m.date);
+                const dotColor = m.label === "Today"
+                  ? "bg-sky"
+                  : m.label === "Program End Date"
+                    ? "bg-slate"
+                    : m.label === "LRM"
+                      ? "bg-amber"
+                      : m.label === "Last Day to Start Working"
+                        ? "bg-critical"
+                        : "bg-primary";
+                const isPast = m.date.getTime() < today.getTime() && m.label !== "Today";
                 return (
-                  <div key={m.label} className="flex items-center justify-between">
+                  <div key={m.label} className={cn("flex items-center gap-3", isPast && "opacity-40")}>
+                    <div className={cn("w-3 h-3 rounded-full shrink-0", dotColor)} />
                     <div>
                       <p className="text-sm font-medium text-foreground">{m.label}</p>
-                      <p className="text-xs text-muted-foreground">{formatDate(m.date)}</p>
+                      <p className="text-xs text-primary/70">{formatDate(m.date)}</p>
                     </div>
-                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", statusBadgeVariant[status])}>
-                      {status}
-                    </span>
                   </div>
                 );
               })}
