@@ -13,20 +13,17 @@ const Cover = () => {
       <div className="max-w-lg w-full space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-foreground leading-tight">
-            Strategic Career Timeline Mapping Engine
+            LRM Engine
           </h1>
-          <p className="text-sm font-medium text-muted-foreground">For International Students</p>
+          <p className="text-sm font-medium text-muted-foreground">Career Strategy Intelligence for International Students</p>
         </div>
 
         <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
           <p>
-            This tool helps international students backward map their job search from a desired start date while accounting for industry hiring timelines and OPT regulatory constraints.
+            LRM Engine helps international students build a structured job search strategy based on hiring cycles, preparation time, and OPT timelines.
           </p>
           <p>
-            Unlike a standard job search, international career planning requires careful timing around government processing periods, strict filing windows, and the 90 day unemployment limit after program completion.
-          </p>
-          <p>
-            The engine calculates your Last Responsible Moment (LRM). This is the final date you can begin preparing and launching your job search while maintaining a realistic hiring timeline and a safety buffer for your legal status.
+            The tool calculates your Last Responsible Moment (LRM), which is the latest realistic date to begin your job search while still allowing enough time to secure employment before your OPT unemployment deadline.
           </p>
         </div>
 
@@ -37,7 +34,7 @@ const Cover = () => {
               <span className="font-semibold text-foreground">LRM Calculation:</span> A calculated date indicating when you should begin preparing your job search based on hiring cycles in your target industry.
             </li>
             <li>
-              <span className="font-semibold text-foreground">Regulatory Anchors:</span> Visibility into your OPT timeline including your filing window and the absolute Last Day to Start Working, calculated as Chosen Start Date plus 90 days (unemployment days).
+              <span className="font-semibold text-foreground">Regulatory Anchors:</span> Visibility into your OPT timeline including your filing window and the Last Day to Start Working, calculated as Start Date plus 90 days of OPT unemployment allowance.
             </li>
             <li>
               <span className="font-semibold text-foreground">Strategic Timeline Map:</span> A visual timeline comparing industry hiring cycles with regulatory timing constraints so you can understand when preparation, networking, and interviews should begin.
@@ -66,6 +63,7 @@ const Cover = () => {
           </div>
         </GlassCard>
 
+        <p className="text-xs text-muted-foreground text-center">Estimated completion time: 3–5 minutes.</p>
         <Button
           onClick={() => navigate("/step-1-authorization")}
           className="w-full h-12 text-sm font-semibold"
