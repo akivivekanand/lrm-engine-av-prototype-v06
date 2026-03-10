@@ -147,31 +147,40 @@ const Step1Authorization = () => {
 
       {/* Denied: full block with buttons, no continuation */}
       {optStatus === "denied" && (
-        <GlassCard className="border-destructive/50">
-          <div className="space-y-4">
-            <h2 className="text-base font-bold text-destructive">OPT Application Denied</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Your OPT application has been denied. Please contact your university's Designated School Official immediately.
-            </p>
-            <div className="flex gap-3">
-              <Button
-                variant="destructive"
-                className="flex-1"
-                onClick={() => window.open(`mailto:${content.isso.email}`, '_blank')}
-              >
-                Contact ISSO
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => window.open('https://www.suffolk.edu/global/international-students/isso', '_blank')}
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                View OPT Resources
-              </Button>
+        <>
+          <GlassCard className="border-destructive/50">
+            <div className="space-y-4">
+              <h2 className="text-base font-bold text-destructive">OPT Application Denied</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Your OPT application has been denied. Please contact your university's Designated School Official immediately.
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={() => window.open(`mailto:${content.isso.email}`, '_blank')}
+                >
+                  Contact ISSO
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => window.open('https://www.suffolk.edu/global/international-students/isso/immigration-resources/employment/opt', '_blank')}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  View OPT Resources
+                </Button>
+              </div>
             </div>
+          </GlassCard>
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-foreground">Compliance Info</h2>
+            <ContactCard
+              contact={content.isso}
+              disclaimer="Contact University DSO for official policy guidance."
+            />
           </div>
-        </GlassCard>
+        </>
       )}
 
       {/* ===== NOT APPLIED ===== */}
@@ -352,7 +361,9 @@ const Step1Authorization = () => {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-sm">
-            Please complete all required fields to continue.
+            {optStatus === "denied"
+              ? "Please contact ISSO or your DSO."
+              : "Please complete all required fields to continue."}
           </AlertDescription>
         </Alert>
       )}
@@ -371,6 +382,7 @@ const Step1Authorization = () => {
             navigate("/step-2-strategy");
           }}
           className="flex-1"
+          disabled={optStatus === "denied"}
         >
           Continue to Step 2
         </Button>
