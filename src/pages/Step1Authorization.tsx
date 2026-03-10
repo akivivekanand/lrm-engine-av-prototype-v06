@@ -114,6 +114,18 @@ const Step1Authorization = () => {
 
   const isDeniedOrRfe = optStatus === "rfe" || optStatus === "denied";
 
+  // Auto-default start dates to earliest possible (program end date) when grad date is set
+  useEffect(() => {
+    if (!gradDateObj) return;
+    const earliest = stripTime(gradDateObj).toISOString();
+    if (optStatus === "approved" && !eadDate) {
+      setEadDate(earliest);
+    }
+    if (optStatus !== "approved" && optStatus !== "denied" && !chosenStartDate) {
+      setChosenStartDate(earliest);
+    }
+  }, [gradDate, optStatus]);
+
   const canContinue = (() => {
     if (optStatus === "denied") return false;
     if (!gradDateObj) return false;
