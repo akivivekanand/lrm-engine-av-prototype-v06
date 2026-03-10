@@ -469,64 +469,110 @@ const Dashboard = () => {
 
           {showActionPlan && (
             <GlassCard className="print:break-inside-avoid">
-              <Tabs defaultValue="daily">
-                <TabsList className="w-full print:hidden">
-                  <TabsTrigger value="daily" className="flex-1 text-xs">Daily</TabsTrigger>
-                  <TabsTrigger value="weekly" className="flex-1 text-xs">Weekly</TabsTrigger>
-                  <TabsTrigger value="monthly" className="flex-1 text-xs">Monthly</TabsTrigger>
-                </TabsList>
+              {/* Interactive tabs for screen */}
+              <div className={isPrinting ? "hidden" : ""}>
+                <Tabs defaultValue="daily">
+                  <TabsList className="w-full print:hidden">
+                    <TabsTrigger value="daily" className="flex-1 text-xs">Daily</TabsTrigger>
+                    <TabsTrigger value="weekly" className="flex-1 text-xs">Weekly</TabsTrigger>
+                    <TabsTrigger value="monthly" className="flex-1 text-xs">Monthly</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="daily" className="mt-3 space-y-3">
+                    {actionPlanDaily.map((day) => (
+                      <div key={day.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{day.key}</h4>
+                        {day.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <Checkbox className="mt-0.5" disabled />
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    {actionPlanDaily.length === 0 && <p className="text-xs text-muted-foreground">No daily tasks available.</p>}
+                  </TabsContent>
+                  <TabsContent value="weekly" className="mt-3 space-y-3">
+                    {actionPlanWeekly.map((week) => (
+                      <div key={week.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{week.key}</h4>
+                        {week.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <Checkbox className="mt-0.5" disabled />
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    {actionPlanWeekly.length === 0 && <p className="text-xs text-muted-foreground">No weekly tasks available.</p>}
+                  </TabsContent>
+                  <TabsContent value="monthly" className="mt-3 space-y-3">
+                    {actionPlanMonthly.map((month) => (
+                      <div key={month.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{month.key}</h4>
+                        {month.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <Checkbox className="mt-0.5" disabled />
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    {actionPlanMonthly.length === 0 && <p className="text-xs text-muted-foreground">No monthly tasks available.</p>}
+                  </TabsContent>
+                </Tabs>
+              </div>
 
-                <TabsContent value="daily" className="mt-3 space-y-3">
-                  {actionPlanDaily.map((day) => (
-                    <div key={day.key} className="space-y-1.5">
-                      <h4 className="text-xs font-semibold text-foreground">{day.key}</h4>
-                      {day.tasks.map((task, ti) => (
-                        <div key={ti} className="flex items-start gap-2">
-                          <Checkbox className="mt-0.5" disabled />
-                          <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                  {actionPlanDaily.length === 0 && (
-                    <p className="text-xs text-muted-foreground">No daily tasks available. Complete Step 4 to curate your action plan.</p>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="weekly" className="mt-3 space-y-3">
-                  {actionPlanWeekly.map((week) => (
-                    <div key={week.key} className="space-y-1.5">
-                      <h4 className="text-xs font-semibold text-foreground">{week.key}</h4>
-                      {week.tasks.map((task, ti) => (
-                        <div key={ti} className="flex items-start gap-2">
-                          <Checkbox className="mt-0.5" disabled />
-                          <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                  {actionPlanWeekly.length === 0 && (
-                    <p className="text-xs text-muted-foreground">No weekly tasks available. Complete Step 4 to curate your action plan.</p>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="monthly" className="mt-3 space-y-3">
-                  {actionPlanMonthly.map((month) => (
-                    <div key={month.key} className="space-y-1.5">
-                      <h4 className="text-xs font-semibold text-foreground">{month.key}</h4>
-                      {month.tasks.map((task, ti) => (
-                        <div key={ti} className="flex items-start gap-2">
-                          <Checkbox className="mt-0.5" disabled />
-                          <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                  {actionPlanMonthly.length === 0 && (
-                    <p className="text-xs text-muted-foreground">No monthly tasks available. Complete Step 4 to curate your action plan.</p>
-                  )}
-                </TabsContent>
-              </Tabs>
+              {/* Print-only: all sections expanded inline */}
+              <div className={isPrinting ? "space-y-4" : "hidden"}>
+                {actionPlanDaily.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">Daily</h3>
+                    {actionPlanDaily.map((day) => (
+                      <div key={day.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{day.key}</h4>
+                        {day.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {actionPlanWeekly.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">Weekly</h3>
+                    {actionPlanWeekly.map((week) => (
+                      <div key={week.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{week.key}</h4>
+                        {week.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {actionPlanMonthly.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">Monthly</h3>
+                    {actionPlanMonthly.map((month) => (
+                      <div key={month.key} className="space-y-1.5">
+                        <h4 className="text-xs font-semibold text-foreground">{month.key}</h4>
+                        {month.tasks.map((task, ti) => (
+                          <div key={ti} className="flex items-start gap-2">
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground leading-relaxed">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </GlassCard>
           )}
         </>
@@ -550,20 +596,21 @@ const Dashboard = () => {
               {toolkit.items.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
                   No items saved yet. Visit{" "}
-                  <button onClick={() => navigate("/resource-vault")} className="text-primary underline">
+                  <button onClick={() => navigate("/resource-vault")} className="text-primary underline print:hidden">
                     Step 5: Resources
                   </button>{" "}
                   to add templates and AI prompts to your toolkit.
                 </p>
               ) : (
                 <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-foreground hidden print:block">My Toolkit</h3>
                   {toolkit.items.map((item) => {
                     const isCustom = item.type === "customized-ai-prompt";
                     const displayTitle = isCustom
                       ? (toolkit.getCustomizedPromptLabel(item.id) || item.title)
                       : item.title;
                     return (
-                      <ToolkitItemCard key={item.id} title={displayTitle} tag={item.tag} type={item.type} content={item.content} />
+                      <ToolkitItemCard key={item.id} title={displayTitle} tag={item.tag} type={item.type} content={item.content} forceExpanded={isPrinting} />
                     );
                   })}
                 </div>
@@ -584,6 +631,11 @@ const Dashboard = () => {
           Download PDF
         </Button>
       )}
+
+      {/* ── Career Center Contact ── */}
+      <div className="space-y-3 print:break-inside-avoid">
+        <ContactCard contact={content.careerCenter} />
+      </div>
 
       {/* ── 11. Compliance Info ── */}
       <div className="space-y-3 print:break-inside-avoid">
