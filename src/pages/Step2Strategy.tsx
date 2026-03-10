@@ -49,7 +49,7 @@ const Step2Strategy = () => {
   };
 
   const modeLabel = (mode: Mode) =>
-    mode === "ai" ? "AI Assessment" : mode === "suggested" ? "Accepted" : "Custom";
+    mode === "ai" ? "Assessment" : mode === "suggested" ? "Accepted" : "Custom";
 
   const ModeToggle = ({
     mode,
