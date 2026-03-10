@@ -63,6 +63,7 @@ const Cover = () => {
           </div>
         </GlassCard>
 
+        <p className="text-xs text-muted-foreground text-center">Estimated completion time: 3–5 minutes.</p>
         <Button
           onClick={() => navigate("/step-1-authorization")}
           className="w-full h-12 text-sm font-semibold"
