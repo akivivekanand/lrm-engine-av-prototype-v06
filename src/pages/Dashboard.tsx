@@ -49,8 +49,9 @@ const TAG_COLORS: Record<string, string> = {
   "career strategy": "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
 };
 
-const ToolkitItemCard = ({ title, tag, type, content: itemContent }: { title: string; tag?: string; type: string; content: string }) => {
+const ToolkitItemCard = ({ title, tag, type, content: itemContent, forceExpanded = false }: { title: string; tag?: string; type: string; content: string; forceExpanded?: boolean }) => {
   const [expanded, setExpanded] = useState(false);
+  const isExpanded = forceExpanded || expanded;
   const [copied, setCopied] = useState(false);
   const contentRef = useRef<HTMLParagraphElement>(null);
   const tagClass = tag ? TAG_COLORS[tag] || "bg-muted text-muted-foreground" : "";
