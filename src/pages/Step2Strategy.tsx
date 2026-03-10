@@ -101,7 +101,7 @@ const Step2Strategy = () => {
           />
           <Button onClick={handleAssess} size="sm" className="shrink-0">
             <Sparkles className="h-4 w-4 mr-1" />
-            Get AI Assessment
+            Get Assessment
           </Button>
         </div>
         <a
