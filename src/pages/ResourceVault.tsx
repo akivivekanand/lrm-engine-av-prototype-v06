@@ -357,11 +357,11 @@ const SUFFOLK_RESOURCES: ResourceCard[] = [
   },
   {
     id: "suf-isso",
-    title: "International Students & Scholars Office",
+    title: "International Student Services Office",
     category: "Suffolk",
     tag: "career strategy",
     description: "OPT/CPT guidance, immigration advising, and compliance support.",
-    content: "https://www.suffolk.edu/student-life/international-students-scholars",
+    content: "https://www.suffolk.edu/global/international-students/isso",
   },
   {
     id: "suf-labor",
