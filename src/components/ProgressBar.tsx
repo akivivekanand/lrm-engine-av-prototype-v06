@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const steps = [
   { label: "Authorization", path: "/step-1-authorization" },
@@ -11,21 +11,25 @@ const steps = [
 
 const ProgressBar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentIndex = steps.findIndex((s) => s.path === location.pathname);
 
   return (
-    <div className="w-full px-4 py-3">
+    <div className="w-full px-4 py-3 print:hidden">
       <div className="flex items-center justify-between max-w-lg mx-auto">
         {steps.map((step, i) => {
           const isActive = i === currentIndex;
           const isComplete = i < currentIndex;
           return (
             <div key={step.path} className="flex items-center flex-1 last:flex-none">
-              <div className="flex flex-col items-center">
+              <div
+                className={`flex flex-col items-center ${isComplete ? "cursor-pointer" : ""}`}
+                onClick={isComplete ? () => navigate(step.path) : undefined}
+              >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                     isComplete
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-primary text-primary-foreground hover:bg-primary/80"
                       : isActive
                       ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
                       : "bg-muted text-muted-foreground"
