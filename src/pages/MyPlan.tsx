@@ -368,6 +368,15 @@ const MyPlan = () => {
                 </div>
               );
             })}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full text-xs mt-1"
+              disabled={visibleDays >= 12}
+              onClick={() => setVisibleDays(prev => Math.min(prev + 1, 12))}
+            >
+              <Plus className="h-3 w-3 mr-1" /> Add Day
+            </Button>
           </TabsContent>
 
           {/* WEEKLY TAB */}
