@@ -13,7 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import AdminEvents from "./pages/AdminEvents";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const queryClient = new QueryClient();
 
