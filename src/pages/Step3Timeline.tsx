@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Info } from "lucide-react";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import TimelineMilestone from "@/components/TimelineMilestone";
