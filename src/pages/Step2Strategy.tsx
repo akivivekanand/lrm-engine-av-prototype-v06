@@ -196,12 +196,12 @@ const Step2Strategy = () => {
         <ModeToggle mode={prepMode} onSelect={setPrepMode} hasAssessment={assessed} />
 
         {prepMode === "ai" && !assessed && (
-          <p className="text-xs text-muted-foreground">Run an AI Assessment above to get a suggested value.</p>
+          <p className="text-xs text-muted-foreground">Run an assessment above to get a suggested value.</p>
         )}
         {prepMode === "ai" && assessed && suggestion && (
           <div className="p-3 rounded-lg bg-muted/50">
             <p className="text-sm font-medium text-foreground">{suggestion.prepWindowDays} days</p>
-            <p className="text-[10px] text-muted-foreground mt-1">AI-suggested based on {suggestion.industryKey} market data</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Suggested based on {suggestion.industryKey} market data</p>
             <Button size="sm" variant="outline" className="mt-2" onClick={handleAcceptPrep}>
               Accept This Value
             </Button>
