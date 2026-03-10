@@ -6,8 +6,10 @@ interface SegmentedTimelineProps {
 }
 
 const SegmentedTimeline = ({ chain }: SegmentedTimelineProps) => {
-  // Sort the four dates chronologically for display
+  const today = stripTime(new Date());
+
   const markers: { label: string; date: Date; color: string }[] = [
+    { label: "Today", date: today, color: "bg-sky-500" },
     { label: "LRM", date: chain.lrmDate, color: "bg-rose-500" },
     { label: "Chosen Start", date: chain.chosenStartDate, color: "bg-amber-500" },
     { label: "Program End", date: chain.programEndDate, color: "bg-emerald-500" },
