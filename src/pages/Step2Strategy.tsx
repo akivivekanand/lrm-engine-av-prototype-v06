@@ -156,7 +156,7 @@ const Step2Strategy = () => {
         <ModeToggle mode={hiringMode} onSelect={setHiringMode} hasAssessment={assessed} />
 
         {hiringMode === "ai" && !assessed && (
-          <p className="text-xs text-muted-foreground">Run an AI Assessment above to get a suggested value.</p>
+          <p className="text-xs text-muted-foreground">Run an assessment above to get a suggested value.</p>
         )}
         {hiringMode === "ai" && assessed && suggestion && (
           <div className="p-3 rounded-lg bg-muted/50">
