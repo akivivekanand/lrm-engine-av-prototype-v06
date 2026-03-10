@@ -386,7 +386,7 @@ const KEY_LINKS = [
   { id: "kl-uscis", title: "USCIS", url: "https://www.uscis.gov/", description: "Official source for OPT, CPT, and work authorization rules." },
   { id: "kl-myvisajobs", title: "MyVisaJobs", url: "https://www.myvisajobs.com/", description: "Search employers who have historically sponsored H-1B visas." },
   { id: "kl-froghire", title: "FrogHire", url: "https://chromewebstore.google.com/detail/froghireai-ai-resume-job/jabnaledogdghdbckajlnbipcdicinom", description: "AI Chrome extension with sponsorship information about companies on different job search platforms." },
-  { id: "kl-goingglobal", title: "Going Global", url: "https://online.goinglobal.com/", description: "Suffolk has institutional access. Find H-1B and OPT-friendly employers, US city career guides, and international job market guides." },
+  { id: "kl-goingglobal", title: "GoinGlobal", url: "https://online.goinglobal.com/", description: "Suffolk has institutional access. Find H-1B and OPT-friendly employers, US city career guides, and international job market guides." },
 ];
 
 /* ── Tag color map ── */
