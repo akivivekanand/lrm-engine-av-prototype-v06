@@ -387,6 +387,7 @@ const Step1Authorization = () => {
             navigate("/step-2-strategy");
           }}
           className="flex-1"
+          disabled={optStatus === "denied"}
         >
           Continue to Step 2
         </Button>
