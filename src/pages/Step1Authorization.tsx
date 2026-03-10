@@ -75,6 +75,7 @@ function DatePickerField({
 
 const Step1Authorization = () => {
   const navigate = useNavigate();
+  const [validationError, setValidationError] = useState(false);
   const [gradDate, setGradDate] = usePersistedState<string | null>("gradDate", null);
   const [optStatus, setOptStatus] = usePersistedState<string>("optStatus", "notApplied");
   const [eadDate, setEadDate] = usePersistedState<string | null>("eadDate", null);
