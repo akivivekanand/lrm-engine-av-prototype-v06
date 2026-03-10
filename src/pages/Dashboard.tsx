@@ -156,14 +156,10 @@ const Dashboard = () => {
   }, [strategyGenerated, chain]);
 
   const handleDownloadPDF = () => {
-    confetti({
-      particleCount: 150,
-      spread: 80,
-      origin: { y: 0.6 },
-      colors: CONFETTI_COLORS,
-    });
-    setTimeout(() => window.print(), 400);
+    window.print();
   };
+
+  const toolkit = useToolkit();
 
   // Gather action plan tasks
   const hasCuratedTasks = Object.keys(selectedDailyTasks).length > 0 || Object.keys(selectedWeeklyTasks).length > 0 || Object.keys(selectedMonthlyTasks).length > 0;
