@@ -106,45 +106,6 @@ const Dashboard = () => {
     );
   };
 
-  // Resource labels
-  const allResourceCards = useMemo(() => {
-    // Inline mapping of resource IDs to titles/categories
-    const resourceMap: Record<string, { title: string; category: string }> = {};
-    const resourceDefs = [
-      { id: "tpl-info-interview", title: "Informational Interview Request", category: "Template" },
-      { id: "tpl-recruiter", title: "Recruiter Outreach", category: "Template" },
-      { id: "tpl-follow-up", title: "Networking Follow-Up", category: "Template" },
-      { id: "ai-resume", title: "Resume Optimization", category: "AI Prompt" },
-      { id: "ai-cover", title: "Cover Letter Generator", category: "AI Prompt" },
-      { id: "ai-interview", title: "Interview Preparation", category: "AI Prompt" },
-      { id: "ai-company", title: "Company Research Brief", category: "AI Prompt" },
-      { id: "ai-linkedin", title: "LinkedIn Profile Optimizer", category: "AI Prompt" },
-      { id: "ai-salary", title: "Salary Negotiation Script", category: "AI Prompt" },
-      { id: "ai-networking", title: "Networking Outreach Messages", category: "AI Prompt" },
-      { id: "ai-info-interview", title: "Informational Interview Prep", category: "AI Prompt" },
-      { id: "ai-strategy", title: "Job Search Strategy Plan", category: "AI Prompt" },
-      { id: "ai-opt-convo", title: "OPT Employer Conversation", category: "AI Prompt" },
-      { id: "ai-skills-gap", title: "Skills Gap Analysis", category: "AI Prompt" },
-      { id: "ai-offer-eval", title: "Offer Evaluation Framework", category: "AI Prompt" },
-      { id: "int-star", title: "STAR Story Generator", category: "Interview" },
-      { id: "int-case", title: "Case Interview Framework", category: "Interview" },
-      { id: "int-technical", title: "Technical Interview Prep", category: "Interview" },
-      { id: "int-questions", title: "Smart Questions to Ask", category: "Interview" },
-      { id: "net-elevator", title: "Problem-Solver Elevator Pitch", category: "Networking" },
-      { id: "net-referral", title: "Referral Request Template", category: "Networking" },
-      { id: "net-thank-you", title: "Post-Interview Thank You", category: "Networking" },
-      { id: "net-cold", title: "Cold Outreach to Hiring Manager", category: "Networking" },
-      { id: "net-icebreaker", title: "Networking Icebreaker Questions", category: "Networking" },
-      { id: "suf-careers", title: "Suffolk Career Center", category: "Suffolk" },
-      { id: "suf-isso", title: "ISSO", category: "Suffolk" },
-      { id: "suf-labor", title: "Labor Market Insights", category: "Suffolk" },
-      { id: "suf-handshake", title: "Handshake", category: "Suffolk" },
-      { id: "suf-dropin", title: "Career Center Drop-In Hours", category: "Suffolk" },
-    ];
-    resourceDefs.forEach((r) => { resourceMap[r.id] = { title: r.title, category: r.category }; });
-    return resourceMap;
-  }, []);
-
   const handleGenerate = async () => {
     if (!chain) return;
     setGenerating(true);
