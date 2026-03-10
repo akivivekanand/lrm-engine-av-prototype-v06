@@ -100,6 +100,11 @@ const Step1Authorization = () => {
   const earliestOptDate = gradDateObj ? subtractDays(stripTime(gradDateObj), 90) : null;
   const optFilingDeadline = gradDateObj ? addDays(stripTime(gradDateObj), 60) : null;
 
+  // Validate chosen start date is within 60-day grace period for "Not Applied"
+  const chosenStartOutOfRange = optStatus === "notApplied" && gradDateObj && chosenStartDateObj &&
+    (stripTime(chosenStartDateObj).getTime() < stripTime(gradDateObj).getTime() ||
+     stripTime(chosenStartDateObj).getTime() > addDays(stripTime(gradDateObj), 60).getTime());
+
   // Special case: waiting + chosen start date has passed
   const today = stripTime(new Date());
   const startDatePassed = optStatus === "waiting" && chosenStartDateObj && stripTime(chosenStartDateObj).getTime() < today.getTime();
@@ -112,7 +117,7 @@ const Step1Authorization = () => {
   const canContinue = (() => {
     if (optStatus === "denied") return false;
     if (!gradDateObj) return false;
-    if (optStatus === "notApplied" && !chosenStartDateObj) return false;
+    if (optStatus === "notApplied" && (!chosenStartDateObj || chosenStartOutOfRange)) return false;
     if (optStatus === "waiting") {
       if (startDatePassed && !estimatedStartDateObj) return false;
       if (!startDatePassed && !chosenStartDateObj) return false;
