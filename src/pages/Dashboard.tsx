@@ -65,15 +65,15 @@ const ToolkitItemCard = ({ title, tag, type, content: itemContent, forceExpanded
 
   return (
     <div className="border border-border rounded-lg p-3">
-      <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpanded(!expanded)}>
+      <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpanded(!isExpanded)}>
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="text-sm font-medium text-foreground">{title}</span>
           {tag && <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0 ${tagClass}`}>{tag}</span>}
           <span className="text-[10px] text-muted-foreground shrink-0">{typeLabel}</span>
         </div>
-        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform shrink-0 ml-2 ${expanded ? "rotate-180" : ""}`} />
+        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform shrink-0 ml-2 print:hidden ${isExpanded ? "rotate-180" : ""}`} />
       </div>
-      {expanded && (
+      {isExpanded && (
         <div className="mt-2 pt-2 border-t border-border space-y-2">
           <p ref={contentRef} className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">{itemContent}</p>
           <button onClick={handleCopy} className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
