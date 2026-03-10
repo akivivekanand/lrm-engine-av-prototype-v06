@@ -201,8 +201,19 @@ const Dashboard = () => {
     }
   }, [strategyGenerated, chain]);
 
+  const [isPrinting, setIsPrinting] = useState(false);
+
   const handleDownloadPDF = () => {
-    window.print();
+    setShowActionPlan(true);
+    setShowToolkit(true);
+    setIsPrinting(true);
+    // Allow React to re-render with expanded state before printing
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+        setIsPrinting(false);
+      });
+    });
   };
 
   const toolkit = useToolkit();
