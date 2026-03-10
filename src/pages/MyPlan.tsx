@@ -43,6 +43,11 @@ const MyPlan = () => {
   // Expand toggles
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
 
+  // Dynamic card counts
+  const [visibleDays, setVisibleDays] = useState(1);
+  const [visibleWeeks, setVisibleWeeks] = useState(1);
+  const [visibleMonths, setVisibleMonths] = useState(1);
+
   const isApproved = optStatus === "approved";
   const chosenStartDateStr = isApproved ? eadDate : (targetWorkReadyDate || estimatedStartDate);
   const hasData = gradDate && chosenStartDateStr;
@@ -67,6 +72,7 @@ const MyPlan = () => {
   const getDailyTasks = (dayKey: string, dayIndex: number): string[] => {
     if (selectedDailyTasks[dayKey]) return selectedDailyTasks[dayKey];
     if (plan && plan.actionPlan.daily[dayIndex]) return plan.actionPlan.daily[dayIndex].tasks;
+    if (dayIndex === 0) return tasks.dailyOptions.slice(0, 2);
     return [];
   };
 
@@ -126,20 +132,20 @@ const MyPlan = () => {
   };
 
   // Day cards data
-  const dayCards = Array.from({ length: 7 }, (_, i) => {
+  const dayCards = Array.from({ length: visibleDays }, (_, i) => {
     const date = addDays(startDate, i);
     const key = format(date, "yyyy-MM-dd");
     const label = i === 0 ? "Today" : i === 1 ? "Tomorrow" : format(date, "EEE, MMM d");
     return { date, key, label, index: i };
   });
 
-  const weekCards = Array.from({ length: 4 }, (_, i) => ({
+  const weekCards = Array.from({ length: visibleWeeks }, (_, i) => ({
     key: `week-${i + 1}`,
     label: `Week ${i + 1}`,
     index: i,
   }));
 
-  const monthCards = Array.from({ length: 3 }, (_, i) => ({
+  const monthCards = Array.from({ length: visibleMonths }, (_, i) => ({
     key: `month-${i + 1}`,
     label: `Month ${i + 1}`,
     index: i,
@@ -148,6 +154,7 @@ const MyPlan = () => {
   return (
     <StepLayout>
       <h1 className="text-xl font-bold text-foreground">Step 4: Strategy</h1>
+      <p className="text-xs text-muted-foreground">Your action strategy helps you translate your preparation window and hiring cycle into manageable daily, weekly, and monthly activities.</p>
 
       {/* SECTION 1: Career Strategy Timeline */}
       <GlassCard>
@@ -289,10 +296,10 @@ const MyPlan = () => {
                         <Checkbox className="mt-0.5" checked />
                         <span className="text-xs text-foreground leading-relaxed">{task}</span>
                         <button
-                          className="ml-auto text-muted-foreground hover:text-destructive text-xs shrink-0"
+                          className="ml-auto text-destructive hover:text-destructive/80 shrink-0"
                           onClick={() => toggleTaskInList(day.key, task, currentTasks, setSelectedDailyTasks)}
                         >
-                          ×
+                          <Minus className="h-3 w-3" />
                         </button>
                       </label>
                     ))}
@@ -361,6 +368,15 @@ const MyPlan = () => {
                 </div>
               );
             })}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full text-xs mt-1"
+              disabled={visibleDays >= 12}
+              onClick={() => setVisibleDays(prev => Math.min(prev + 1, 12))}
+            >
+              <Plus className="h-3 w-3 mr-1" /> Add Day
+            </Button>
           </TabsContent>
 
           {/* WEEKLY TAB */}
@@ -377,10 +393,10 @@ const MyPlan = () => {
                         <Checkbox className="mt-0.5" checked />
                         <span className="text-xs text-foreground leading-relaxed">{task}</span>
                         <button
-                          className="ml-auto text-muted-foreground hover:text-destructive text-xs shrink-0"
+                          className="ml-auto text-destructive hover:text-destructive/80 shrink-0"
                           onClick={() => toggleTaskInList(week.key, task, currentTasks, setSelectedWeeklyTasks)}
                         >
-                          ×
+                          <Minus className="h-3 w-3" />
                         </button>
                       </label>
                     ))}
@@ -426,6 +442,15 @@ const MyPlan = () => {
                 </div>
               );
             })}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full text-xs mt-1"
+              disabled={visibleWeeks >= 12}
+              onClick={() => setVisibleWeeks(prev => Math.min(prev + 1, 12))}
+            >
+              <Plus className="h-3 w-3 mr-1" /> Add Week
+            </Button>
           </TabsContent>
 
           {/* MONTHLY TAB */}
@@ -442,10 +467,10 @@ const MyPlan = () => {
                         <Checkbox className="mt-0.5" checked />
                         <span className="text-xs text-foreground leading-relaxed">{task}</span>
                         <button
-                          className="ml-auto text-muted-foreground hover:text-destructive text-xs shrink-0"
+                          className="ml-auto text-destructive hover:text-destructive/80 shrink-0"
                           onClick={() => toggleTaskInList(month.key, task, currentTasks, setSelectedMonthlyTasks)}
                         >
-                          ×
+                          <Minus className="h-3 w-3" />
                         </button>
                       </label>
                     ))}
@@ -491,6 +516,15 @@ const MyPlan = () => {
                 </div>
               );
             })}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full text-xs mt-1"
+              disabled={visibleMonths >= 12}
+              onClick={() => setVisibleMonths(prev => Math.min(prev + 1, 12))}
+            >
+              <Plus className="h-3 w-3 mr-1" /> Add Month
+            </Button>
           </TabsContent>
         </Tabs>
       </GlassCard>
