@@ -17,7 +17,8 @@ import { calculateLRMChainV2, formatDate, getMilestoneStatus, daysBetween, strip
 import { generateCareerPlan, type CareerPlan } from "@/lib/generateCareerPlan";
 import { cn } from "@/lib/utils";
 import content from "@/data/content.json";
-import { useToolkit } from "@/hooks/useToolkit";
+import { useToolkit, type ToolkitItem } from "@/hooks/useToolkit";
+import { TEMPLATES, AI_PROMPTS } from "@/pages/ResourceVault";
 
 const CONFETTI_COLORS = ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#9B59B6"];
 
