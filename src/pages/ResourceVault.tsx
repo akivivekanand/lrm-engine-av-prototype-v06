@@ -721,30 +721,36 @@ const PromptBuilder = ({ onSaveToToolkit, toolkit }: { onSaveToToolkit: (prompt:
 };
 
 /* ── Main Component ── */
+const ALL_TAGS = Array.from(
+  new Set([...TEMPLATES, ...AI_PROMPTS].map((c) => c.tag).filter(Boolean))
+) as string[];
+
 const ResourceVault = () => {
   const navigate = useNavigate();
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const toolkit = useToolkit();
 
   const toggleCard = useCallback((id: string) => {
     setExpandedCard((prev) => (prev === id ? null : id));
   }, []);
 
-  const matchesSearch = (card: ResourceCard) => {
+  const matchesFilters = (card: ResourceCard) => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return true;
-    return (
+    const matchesText = !query || (
       card.title?.toLowerCase().includes(query) ||
       card.category?.toLowerCase().includes(query) ||
       card.content?.toLowerCase().includes(query) ||
       card.description?.toLowerCase().includes(query) ||
       card.tag?.toLowerCase().includes(query)
     );
+    const matchesTag = !selectedTag || card.tag === selectedTag;
+    return matchesText && matchesTag;
   };
 
-  const filteredTemplates = TEMPLATES.filter(matchesSearch);
-  const filteredPrompts = AI_PROMPTS.filter(matchesSearch);
+  const filteredTemplates = TEMPLATES.filter(matchesFilters);
+  const filteredPrompts = AI_PROMPTS.filter(matchesFilters);
 
   const makeToolkitItem = (card: ResourceCard, sourceTab: "templates" | "ai-prompts"): ToolkitItem => ({
     id: card.id,
@@ -777,14 +783,41 @@ const ResourceVault = () => {
       </GlassCard>
 
       {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search resources, prompts, or templates"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
-        />
+      <div className="space-y-2">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search resources, prompts, or templates"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <button
+            onClick={() => setSelectedTag(null)}
+            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+              !selectedTag
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+          >
+            All
+          </button>
+          {ALL_TAGS.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                selectedTag === tag
+                  ? TAG_COLORS[tag] || "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Two Tabs */}
