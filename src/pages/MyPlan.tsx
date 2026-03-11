@@ -536,7 +536,7 @@ const MyPlan = () => {
           Back to Timeline
         </Button>
         <Button onClick={() => navigate("/resource-vault")} className="flex-1">
-          Continue to Step 5: Add Resources
+          Continue to Step 5: Resources
         </Button>
       </div>
     </StepLayout>
