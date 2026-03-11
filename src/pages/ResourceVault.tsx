@@ -721,30 +721,36 @@ const PromptBuilder = ({ onSaveToToolkit, toolkit }: { onSaveToToolkit: (prompt:
 };
 
 /* ── Main Component ── */
+const ALL_TAGS = Array.from(
+  new Set([...TEMPLATES, ...AI_PROMPTS].map((c) => c.tag).filter(Boolean))
+) as string[];
+
 const ResourceVault = () => {
   const navigate = useNavigate();
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const toolkit = useToolkit();
 
   const toggleCard = useCallback((id: string) => {
     setExpandedCard((prev) => (prev === id ? null : id));
   }, []);
 
-  const matchesSearch = (card: ResourceCard) => {
+  const matchesFilters = (card: ResourceCard) => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return true;
-    return (
+    const matchesText = !query || (
       card.title?.toLowerCase().includes(query) ||
       card.category?.toLowerCase().includes(query) ||
       card.content?.toLowerCase().includes(query) ||
       card.description?.toLowerCase().includes(query) ||
       card.tag?.toLowerCase().includes(query)
     );
+    const matchesTag = !selectedTag || card.tag === selectedTag;
+    return matchesText && matchesTag;
   };
 
-  const filteredTemplates = TEMPLATES.filter(matchesSearch);
-  const filteredPrompts = AI_PROMPTS.filter(matchesSearch);
+  const filteredTemplates = TEMPLATES.filter(matchesFilters);
+  const filteredPrompts = AI_PROMPTS.filter(matchesFilters);
 
   const makeToolkitItem = (card: ResourceCard, sourceTab: "templates" | "ai-prompts"): ToolkitItem => ({
     id: card.id,
