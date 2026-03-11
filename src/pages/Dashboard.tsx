@@ -675,7 +675,7 @@ const Dashboard = () => {
                 </p>
               ) : (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-foreground hidden print:block">My Toolkit</h3>
+                  {/* title already printed above */}
                   {toolkit.items.map((item) => {
                     const isCustom = item.type === "customized-ai-prompt";
                     const displayTitle = isCustom
