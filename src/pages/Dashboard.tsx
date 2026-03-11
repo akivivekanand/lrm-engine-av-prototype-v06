@@ -182,6 +182,20 @@ const Dashboard = () => {
       });
       setPlan(result);
       setStrategyGenerated(true);
+
+      // Auto-populate toolkit if student hasn't manually added any items
+      if (!toolkit.hasManualItems) {
+        const templateItems: ToolkitItem[] = TEMPLATES.map((c) => ({
+          id: c.id, title: c.title, sourceTab: "templates" as const,
+          type: "template" as const, tag: c.tag, content: c.content,
+        }));
+        const promptItems: ToolkitItem[] = AI_PROMPTS.map((c) => ({
+          id: c.id, title: c.title, sourceTab: "ai-prompts" as const,
+          type: "ai-prompt" as const, tag: c.tag, content: c.content,
+        }));
+        toolkit.autoPopulateDefaults(templateItems, promptItems);
+      }
+
       confetti({
         particleCount: 150,
         spread: 80,
