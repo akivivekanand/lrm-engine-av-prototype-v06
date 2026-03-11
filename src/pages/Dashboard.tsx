@@ -648,6 +648,7 @@ const Dashboard = () => {
               </Button>
             )}
           </div>
+          <h3 className="text-sm font-semibold text-foreground hidden print:block print:mt-4">My Toolkit</h3>
 
           {showToolkitLearnMore && !toolkit.hasManualItems && toolkit.items.length > 0 && (
             <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-1.5 print:break-inside-avoid">
