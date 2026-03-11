@@ -749,8 +749,16 @@ const ResourceVault = () => {
     return matchesText && matchesTag;
   };
 
-  const filteredTemplates = TEMPLATES.filter(matchesFilters);
-  const filteredPrompts = AI_PROMPTS.filter(matchesFilters);
+  const filteredTemplates = TEMPLATES.filter(matchesFilters).sort((a, b) => {
+    const aIn = toolkit.hasItem(a.id) ? 0 : 1;
+    const bIn = toolkit.hasItem(b.id) ? 0 : 1;
+    return aIn - bIn;
+  });
+  const filteredPrompts = AI_PROMPTS.filter(matchesFilters).sort((a, b) => {
+    const aIn = toolkit.hasItem(a.id) ? 0 : 1;
+    const bIn = toolkit.hasItem(b.id) ? 0 : 1;
+    return aIn - bIn;
+  });
 
   const makeToolkitItem = (card: ResourceCard, sourceTab: "templates" | "ai-prompts"): ToolkitItem => ({
     id: card.id,

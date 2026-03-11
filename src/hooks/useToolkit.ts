@@ -42,5 +42,26 @@ export function useToolkit() {
     return count + 1;
   }, [items]);
 
-  return { items, addItem, removeItem, hasItem, getCustomizedPromptLabel, nextCustomizedNumber };
+  const hasManualItems = items.some((i) => !i.isAutoAdded);
+
+  const autoPopulateDefaults = useCallback((templates: ToolkitItem[], prompts: ToolkitItem[]) => {
+    // Only populate if no manual items exist
+    if (items.some((i) => !i.isAutoAdded)) return;
+    // Clear any previous auto-added items
+    const shuffleAndPick = (arr: ToolkitItem[], n: number) => {
+      const shuffled = [...arr].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, n);
+    };
+    const picked = [
+      ...shuffleAndPick(templates, 3).map((i) => ({ ...i, isAutoAdded: true })),
+      ...shuffleAndPick(prompts, 3).map((i) => ({ ...i, isAutoAdded: true })),
+    ];
+    setItems(picked);
+  }, [items, setItems]);
+
+  const clearAutoAdded = useCallback(() => {
+    setItems((prev) => prev.filter((i) => !i.isAutoAdded));
+  }, [setItems]);
+
+  return { items, addItem, removeItem, hasItem, getCustomizedPromptLabel, nextCustomizedNumber, hasManualItems, autoPopulateDefaults, clearAutoAdded };
 }
