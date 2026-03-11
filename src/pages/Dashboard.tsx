@@ -625,15 +625,41 @@ const Dashboard = () => {
       {/* ── 9. Post-click: My Toolkit ── */}
       {strategyGenerated && (
         <>
-          <Button
-            variant={showToolkit ? "secondary" : "outline"}
-            className="w-full print:hidden"
-            onClick={() => setShowToolkit(!showToolkit)}
-          >
-            <Wrench className="h-4 w-4 mr-2" />
-            My Toolkit
-            {showToolkit ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
-          </Button>
+          <div className="flex items-center gap-2 print:hidden">
+            <Button
+              variant={showToolkit ? "secondary" : "outline"}
+              className="flex-1"
+              onClick={() => setShowToolkit(!showToolkit)}
+            >
+              <Wrench className="h-4 w-4 mr-2" />
+              My Toolkit
+              {showToolkit ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
+            </Button>
+            {!toolkit.hasManualItems && toolkit.items.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="shrink-0 text-xs text-muted-foreground gap-1"
+                onClick={() => setShowToolkitLearnMore(!showToolkitLearnMore)}
+              >
+                <Info className="h-3.5 w-3.5" />
+                Learn More
+              </Button>
+            )}
+          </div>
+
+          {showToolkitLearnMore && !toolkit.hasManualItems && toolkit.items.length > 0 && (
+            <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-1.5 print:break-inside-avoid">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                These resources were added automatically because you had not yet selected toolkit items. They were chosen to give you a starting point with useful templates and AI prompts.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                You can return to{" "}
+                <button onClick={() => navigate("/resource-vault")} className="text-primary underline print:no-underline">Step 5: Resources</button>{" "}
+                to customize your toolkit.
+              </p>
+            </div>
+          )}
 
           {showToolkit && (
             <GlassCard className="print:break-inside-avoid">
