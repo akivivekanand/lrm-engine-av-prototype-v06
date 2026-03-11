@@ -497,6 +497,7 @@ const Dashboard = () => {
               </Button>
             )}
           </div>
+          <h3 className="text-sm font-semibold text-foreground hidden print:block print:mt-4">My Action Plan</h3>
 
           {showActionPlanLearnMore && !hasCuratedTasks && (
             <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-1.5 print:break-inside-avoid">
