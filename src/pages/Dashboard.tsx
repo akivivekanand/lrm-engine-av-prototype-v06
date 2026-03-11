@@ -109,6 +109,8 @@ const Dashboard = () => {
   const [showStrategicGuidance, setShowStrategicGuidance] = useState(true);
   const [showActionPlan, setShowActionPlan] = useState(false);
   const [showToolkit, setShowToolkit] = useState(false);
+  const [showActionPlanLearnMore, setShowActionPlanLearnMore] = useState(false);
+  const [showToolkitLearnMore, setShowToolkitLearnMore] = useState(false);
 
   // Read persisted tasks from Step 4
   const [selectedDailyTasks] = usePersistedState<Record<string, string[]>>("myPlanDailyTasks", {});
