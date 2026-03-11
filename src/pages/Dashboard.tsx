@@ -103,7 +103,7 @@ const Dashboard = () => {
   const [careerPlanStartDate] = usePersistedState<string>("careerPlanStartDate", new Date().toISOString().split("T")[0]);
 
   // Strategy state
-  const [strategyGenerated, setStrategyGenerated] = usePersistedState<boolean>("strategyGenerated", false);
+  const [strategyGenerated, setStrategyGenerated] = useState(false);
   const [showTimelineIntel, setShowTimelineIntel] = useState(true);
   const [showStrategicGuidance, setShowStrategicGuidance] = useState(true);
   const [showActionPlan, setShowActionPlan] = useState(false);
