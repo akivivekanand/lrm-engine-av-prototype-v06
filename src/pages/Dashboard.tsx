@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo, useRef } from "react";
-import { Sparkles, ChevronDown, ChevronUp, Download, Wrench, CalendarDays, Clock, AlertTriangle, Copy, Check } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, Download, Wrench, CalendarDays, Clock, AlertTriangle, Copy, Check, Info } from "lucide-react";
 import confetti from "canvas-confetti";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -109,6 +109,8 @@ const Dashboard = () => {
   const [showStrategicGuidance, setShowStrategicGuidance] = useState(true);
   const [showActionPlan, setShowActionPlan] = useState(false);
   const [showToolkit, setShowToolkit] = useState(false);
+  const [showActionPlanLearnMore, setShowActionPlanLearnMore] = useState(false);
+  const [showToolkitLearnMore, setShowToolkitLearnMore] = useState(false);
 
   // Read persisted tasks from Step 4
   const [selectedDailyTasks] = usePersistedState<Record<string, string[]>>("myPlanDailyTasks", {});
@@ -473,15 +475,41 @@ const Dashboard = () => {
       {/* ── 8. Post-click: My Action Plan ── */}
       {strategyGenerated && plan && (
         <>
-          <Button
-            variant={showActionPlan ? "secondary" : "outline"}
-            className="w-full print:hidden"
-            onClick={() => setShowActionPlan(!showActionPlan)}
-          >
-            <CalendarDays className="h-4 w-4 mr-2" />
-            My Action Plan
-            {showActionPlan ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
-          </Button>
+          <div className="flex items-center gap-2 print:hidden">
+            <Button
+              variant={showActionPlan ? "secondary" : "outline"}
+              className="flex-1"
+              onClick={() => setShowActionPlan(!showActionPlan)}
+            >
+              <CalendarDays className="h-4 w-4 mr-2" />
+              My Action Plan
+              {showActionPlan ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
+            </Button>
+            {!hasCuratedTasks && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="shrink-0 text-xs text-muted-foreground gap-1"
+                onClick={() => setShowActionPlanLearnMore(!showActionPlanLearnMore)}
+              >
+                <Info className="h-3.5 w-3.5" />
+                Learn More
+              </Button>
+            )}
+          </div>
+
+          {showActionPlanLearnMore && !hasCuratedTasks && (
+            <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-1.5 print:break-inside-avoid">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                This action plan was auto-generated because you did not complete or customize enough tasks in Step 4: Strategy. It provides a reasonable starting point based on your timeline and inputs.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                You can return to{" "}
+                <button onClick={() => navigate("/my-plan")} className="text-primary underline print:no-underline">Step 4: Strategy</button>{" "}
+                to personalize your plan further.
+              </p>
+            </div>
+          )}
 
           {showActionPlan && (
             <GlassCard className="print:break-inside-avoid">
@@ -597,15 +625,41 @@ const Dashboard = () => {
       {/* ── 9. Post-click: My Toolkit ── */}
       {strategyGenerated && (
         <>
-          <Button
-            variant={showToolkit ? "secondary" : "outline"}
-            className="w-full print:hidden"
-            onClick={() => setShowToolkit(!showToolkit)}
-          >
-            <Wrench className="h-4 w-4 mr-2" />
-            My Toolkit
-            {showToolkit ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
-          </Button>
+          <div className="flex items-center gap-2 print:hidden">
+            <Button
+              variant={showToolkit ? "secondary" : "outline"}
+              className="flex-1"
+              onClick={() => setShowToolkit(!showToolkit)}
+            >
+              <Wrench className="h-4 w-4 mr-2" />
+              My Toolkit
+              {showToolkit ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
+            </Button>
+            {!toolkit.hasManualItems && toolkit.items.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="shrink-0 text-xs text-muted-foreground gap-1"
+                onClick={() => setShowToolkitLearnMore(!showToolkitLearnMore)}
+              >
+                <Info className="h-3.5 w-3.5" />
+                Learn More
+              </Button>
+            )}
+          </div>
+
+          {showToolkitLearnMore && !toolkit.hasManualItems && toolkit.items.length > 0 && (
+            <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-1.5 print:break-inside-avoid">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                These resources were added automatically because you had not yet selected toolkit items. They were chosen to give you a starting point with useful templates and AI prompts.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                You can return to{" "}
+                <button onClick={() => navigate("/resource-vault")} className="text-primary underline print:no-underline">Step 5: Resources</button>{" "}
+                to customize your toolkit.
+              </p>
+            </div>
+          )}
 
           {showToolkit && (
             <GlassCard className="print:break-inside-avoid">
