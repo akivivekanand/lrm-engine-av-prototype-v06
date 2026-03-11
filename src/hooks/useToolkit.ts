@@ -8,6 +8,7 @@ export interface ToolkitItem {
   type: "template" | "ai-prompt" | "customized-ai-prompt";
   tag?: string;
   content: string;
+  isAutoAdded?: boolean;
 }
 
 const TOOLKIT_KEY = "toolkitItems";
