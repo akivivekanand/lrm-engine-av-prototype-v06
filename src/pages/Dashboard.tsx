@@ -475,15 +475,41 @@ const Dashboard = () => {
       {/* ── 8. Post-click: My Action Plan ── */}
       {strategyGenerated && plan && (
         <>
-          <Button
-            variant={showActionPlan ? "secondary" : "outline"}
-            className="w-full print:hidden"
-            onClick={() => setShowActionPlan(!showActionPlan)}
-          >
-            <CalendarDays className="h-4 w-4 mr-2" />
-            My Action Plan
-            {showActionPlan ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
-          </Button>
+          <div className="flex items-center gap-2 print:hidden">
+            <Button
+              variant={showActionPlan ? "secondary" : "outline"}
+              className="flex-1"
+              onClick={() => setShowActionPlan(!showActionPlan)}
+            >
+              <CalendarDays className="h-4 w-4 mr-2" />
+              My Action Plan
+              {showActionPlan ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
+            </Button>
+            {!hasCuratedTasks && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="shrink-0 text-xs text-muted-foreground gap-1"
+                onClick={() => setShowActionPlanLearnMore(!showActionPlanLearnMore)}
+              >
+                <Info className="h-3.5 w-3.5" />
+                Learn More
+              </Button>
+            )}
+          </div>
+
+          {showActionPlanLearnMore && !hasCuratedTasks && (
+            <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-1.5 print:break-inside-avoid">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                This action plan was auto-generated because you did not complete or customize enough tasks in Step 4: Strategy. It provides a reasonable starting point based on your timeline and inputs.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                You can return to{" "}
+                <button onClick={() => navigate("/my-plan")} className="text-primary underline print:no-underline">Step 4: Strategy</button>{" "}
+                to personalize your plan further.
+              </p>
+            </div>
+          )}
 
           {showActionPlan && (
             <GlassCard className="print:break-inside-avoid">
