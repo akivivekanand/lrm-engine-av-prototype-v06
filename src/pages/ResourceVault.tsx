@@ -19,7 +19,7 @@ interface ResourceCard {
 }
 
 /* ── All Templates (outreach + networking + interview) ── */
-const TEMPLATES: ResourceCard[] = [
+export const TEMPLATES: ResourceCard[] = [
   {
     id: "tpl-info-interview",
     title: "Informational Interview Request",
