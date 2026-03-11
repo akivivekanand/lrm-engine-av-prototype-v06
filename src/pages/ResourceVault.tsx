@@ -267,7 +267,7 @@ Best regards,
 ];
 
 /* ── AI Prompts ── */
-const AI_PROMPTS: ResourceCard[] = [
+export const AI_PROMPTS: ResourceCard[] = [
   {
     id: "ai-resume",
     title: "Resume Optimization",
