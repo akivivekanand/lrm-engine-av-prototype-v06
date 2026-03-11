@@ -17,7 +17,8 @@ import { calculateLRMChainV2, formatDate, getMilestoneStatus, daysBetween, strip
 import { generateCareerPlan, type CareerPlan } from "@/lib/generateCareerPlan";
 import { cn } from "@/lib/utils";
 import content from "@/data/content.json";
-import { useToolkit } from "@/hooks/useToolkit";
+import { useToolkit, type ToolkitItem } from "@/hooks/useToolkit";
+import { TEMPLATES, AI_PROMPTS } from "@/pages/ResourceVault";
 
 const CONFETTI_COLORS = ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#9B59B6"];
 
@@ -181,6 +182,20 @@ const Dashboard = () => {
       });
       setPlan(result);
       setStrategyGenerated(true);
+
+      // Auto-populate toolkit if student hasn't manually added any items
+      if (!toolkit.hasManualItems) {
+        const templateItems: ToolkitItem[] = TEMPLATES.map((c) => ({
+          id: c.id, title: c.title, sourceTab: "templates" as const,
+          type: "template" as const, tag: c.tag, content: c.content,
+        }));
+        const promptItems: ToolkitItem[] = AI_PROMPTS.map((c) => ({
+          id: c.id, title: c.title, sourceTab: "ai-prompts" as const,
+          type: "ai-prompt" as const, tag: c.tag, content: c.content,
+        }));
+        toolkit.autoPopulateDefaults(templateItems, promptItems);
+      }
+
       confetti({
         particleCount: 150,
         spread: 80,
