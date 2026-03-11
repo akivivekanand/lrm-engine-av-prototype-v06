@@ -72,7 +72,7 @@ Best regards,
     category: "Outreach",
     tag: "networking",
     description: "Follow up after meeting someone at an event or meeting.",
-    content: `Subject: Great Connecting at [Event/Meeting] — Following Up
+    content: `Subject: Great Connecting at [Event/Meeting] - Following Up
 
 Dear [Name],
 
@@ -95,19 +95,37 @@ Warm regards,
     content: `I am a [Major] student at Suffolk University specializing in [Skill A] and [Skill B]. I recently achieved [Result] by implementing [Method]. I am currently focusing on the [Industry] sector to solve [Specific Problem] through data-driven strategies. My goal is to bring my international perspective and technical background to a team like yours to help drive [Specific Outcome]. I have been following [Company's] work on [Project], and I would love to learn more about how your team handles [Related Challenge].`,
   },
   {
-    id: "net-referral",
-    title: "Referral Request Template",
+    id: "tpl-referral",
+    title: "Referral Request",
     category: "Networking",
-    tag: "networking",
+    tag: "job search",
     description: "Ask a contact for a referral to an open position.",
-    content: `Subject: Quick question about the [Job Title] role at [Company]
+    content: `Subject: Request for Referral for [Job Title] at [Company]
 
 Hi [Name],
 
-I am applying for the [Job Title] role at [Company]. Would you be open to sharing advice on team priorities and whether a referral might be appropriate? I want to make sure my application highlights the right strengths.
+I hope you have been well. I am reaching out because I am applying for the [Job Title] role at [Company], and I wanted to ask whether you would feel comfortable referring me for the position.
 
-Thank you,
-[Your Name]`,
+I am currently a [degree program] student at Suffolk University, and my background includes [1 to 2 relevant experiences, skills, or qualifications]. I am especially interested in this role because [brief reason connecting your background to the position or company].
+
+To make this easier, I am happy to send along any information that would be helpful, including:
+
+- My resume
+
+- The job description
+
+- A short summary of why I am a strong fit
+
+- Any additional context about my background or work authorization
+
+I completely understand if you are unable to do so, and I appreciate your time and consideration either way.
+
+Thank you very much, and please let me know if I can share anything further.
+
+Best regards,
+[Your Name]
+[LinkedIn Profile URL]
+[Phone Number]`,
   },
   {
     id: "net-thank-you",
@@ -136,6 +154,115 @@ I am a graduate student at Suffolk University with a background in [Skill]. I no
 
 Best regards,
 [Your Name]`,
+  },
+  {
+    id: "tpl-reconnect",
+    title: "Reconnecting with a Dormant Contact",
+    category: "Networking",
+    tag: "networking",
+    description: "Re-engage a previous connection to continue building the relationship.",
+    content: `Subject: Great to Reconnect
+
+Hi [Name],
+
+I hope you have been doing well. We connected previously through [event, class, LinkedIn, prior conversation, etc.], and I wanted to reach out again because I have been continuing to explore opportunities in [industry/role].
+
+I really appreciated our earlier connection and have been reflecting on your perspective, especially around [specific topic, company, or piece of advice if applicable]. I am currently [brief update on where you are now, such as completing your degree, applying for roles, or focusing on a specific area], and I thought it would be valuable to reconnect.
+
+If you are open to it, I would greatly appreciate the chance to briefly catch up and hear any advice you might have as I continue navigating this process.
+
+Thank you, and I hope you are doing well.
+
+Best regards,
+[Your Name]
+[LinkedIn Profile URL]
+[Phone Number]`,
+  },
+  {
+    id: "tpl-app-followup",
+    title: "Following Up After Submitting an Application",
+    category: "Job Search",
+    tag: "job search",
+    description: "Follow up with the employer after submitting a job application.",
+    content: `Subject: Following Up on My Application for [Job Title]
+
+Dear [Name],
+
+I hope you are doing well. I recently submitted my application for the [Job Title] position at [Company] and wanted to follow up to reiterate my interest in the opportunity.
+
+I am currently a [degree program] student at Suffolk University, and I was especially drawn to this role because of [specific reason related to the role, team, or company]. My background in [relevant skill, experience, or area] has prepared me to contribute meaningfully to this kind of work.
+
+I understand the hiring process takes time, but I wanted to express my continued interest and ask whether there is any additional information I could provide to support my application.
+
+Thank you for your time and consideration. I appreciate the opportunity to be considered and would be glad to share any further materials if helpful.
+
+Best regards,
+[Your Name]
+[LinkedIn Profile URL]
+[Phone Number]`,
+  },
+  {
+    id: "tpl-info-thankyou",
+    title: "Thank You After an Informational Interview",
+    category: "Networking",
+    tag: "networking",
+    description: "Express gratitude after an informational interview conversation.",
+    content: `Subject: Thank You for Your Time and Advice
+
+Dear [Name],
+
+Thank you for taking the time to speak with me today. I really appreciated the opportunity to learn more about your career path and your insights into [industry, role, or topic discussed].
+
+Our conversation was especially helpful as I continue exploring opportunities in [target field], and I found your perspective on [specific piece of advice or topic] particularly valuable. It gave me a clearer understanding of how to approach my next steps.
+
+I truly appreciate your time and generosity in sharing your experience. Thank you again, and I hope to stay in touch.
+
+Best regards,
+[Your Name]
+[LinkedIn Profile URL]`,
+  },
+  {
+    id: "tpl-career-fair",
+    title: "Request to Connect After a Career Fair or Networking Event",
+    category: "Networking",
+    tag: "networking",
+    description: "Follow up with someone you met at a career fair or networking event.",
+    content: `Subject: Great Meeting You at [Event Name]
+
+Dear [Name],
+
+It was a pleasure meeting you at [event name] on [date]. I enjoyed learning more about your work at [Company] and appreciated your insights about [specific topic discussed].
+
+I am currently a [degree program] student at Suffolk University and am exploring opportunities in [target role/industry]. Our conversation gave me a stronger understanding of [specific takeaway], and I would be grateful to stay connected as I continue learning more about this field.
+
+Thank you again for your time. I hope to stay in touch.
+
+Best regards,
+[Your Name]
+[LinkedIn Profile URL]`,
+  },
+  {
+    id: "tpl-status-update",
+    title: "Request for Application Status Update",
+    category: "Job Search",
+    tag: "job search",
+    description: "Check in on the status of a pending job application.",
+    content: `Subject: Checking In on the Status of My Application for [Job Title]
+
+Dear [Name],
+
+I hope you are doing well. I wanted to follow up regarding my application for the [Job Title] position at [Company] and see whether there have been any updates on the hiring timeline.
+
+I remain very interested in the opportunity and am especially excited about the possibility of contributing to [specific team, function, or area]. My background in [relevant experience or skill] has continued to strengthen my interest in this role and in the work your team is doing.
+
+I understand hiring processes can take time, and I appreciate the coordination involved. I simply wanted to check in and ask whether there is any additional information I could provide at this stage.
+
+Thank you again for your time and consideration. I appreciate the opportunity to be considered and look forward to any updates you may be able to share.
+
+Best regards,
+[Your Name]
+[LinkedIn Profile URL]
+[Phone Number]`,
   },
 ];
 
