@@ -137,63 +137,6 @@ I am a graduate student at Suffolk University with a background in [Skill]. I no
 Best regards,
 [Your Name]`,
   },
-  {
-    id: "net-icebreaker",
-    title: "Networking Icebreaker Questions",
-    category: "Networking",
-    tag: "networking",
-    description: "Natural conversation starters for professional mixers and events.",
-    content: `Role: Act as a Networking Expert.
-Context: I am attending a professional mixer for [Industry]. I want to approach a Senior Manager at [Company]. Based on their recent company news about [Insert News Item], draft 3 different natural-sounding opening questions that show I have done my research and am interested in their perspective.
-Format: 3 distinct options with brief explanations of why each works.`,
-  },
-  {
-    id: "int-star",
-    title: "STAR Story Generator",
-    category: "Interview",
-    tag: "interview",
-    description: "Build structured behavioral interview answers using STAR method.",
-    content: `Role: Act as an Interview Coach.
-Context: I am preparing for a behavioral interview for a [Job Title] role.
-Task: Using the STAR method (Situation, Task, Action, Result), help me draft a story that demonstrates my ability to solve complex problems under pressure. Use the following context: [Insert Brief Scenario].
-Constraints: Ensure the 'Action' section highlights my specific contributions and the 'Result' is quantified with data or metrics.
-Format: A structured 4-paragraph response.`,
-  },
-  {
-    id: "int-case",
-    title: "Case Interview Framework",
-    category: "Interview",
-    tag: "interview",
-    description: "Structure your thinking for consulting-style case interviews.",
-    content: `Role: Act as a Management Consultant.
-Context: I am preparing for a case interview regarding [Topic, e.g., Market Entry].
-Task: Provide a 5-step framework I can use to structure my thoughts during the interview. For each step, provide 2 probing questions I should ask the interviewer.
-Format: A numbered list with 'Rationale' for each step.`,
-  },
-  {
-    id: "int-technical",
-    title: "Technical Interview Prep",
-    category: "Interview",
-    tag: "interview",
-    description: "Prepare for technical assessments in your field.",
-    content: `Role: You are a senior technical interviewer at a [industry] company.
-Context: I am interviewing for a [role] position that requires [technical skills]. My background includes [relevant experience].
-Task: Create a practice technical assessment with 5 questions that mirror what I would encounter in a real interview. Include questions of varying difficulty. For each question, provide the ideal answer approach and common mistakes.
-Constraints: Questions should be relevant to entry-level/early-career candidates. Include time estimates for each question.
-Format: Questions with difficulty ratings, ideal answer frameworks, and evaluation criteria.`,
-  },
-  {
-    id: "int-questions",
-    title: "Smart Questions to Ask",
-    category: "Interview",
-    tag: "interview",
-    description: "Thoughtful questions that demonstrate research and genuine interest.",
-    content: `Role: You are a career strategist who specializes in interview preparation.
-Context: I am interviewing at [company] for [role]. I want to ask questions that show I have done my research and am genuinely evaluating the opportunity.
-Task: Generate 10 strategic questions organized by category: role clarity, team dynamics, growth trajectory, and company direction. Each question should demonstrate specific knowledge about the company.
-Constraints: No questions that can be answered from the company website. Each question should serve a dual purpose — gathering information while demonstrating competence.
-Format: Categorized questions with notes on what each question signals to the interviewer.`,
-  },
 ];
 
 /* ── AI Prompts ── */
