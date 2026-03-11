@@ -44,7 +44,9 @@ const App = () => (
           <Route path="/my-plan" element={<MyPlan />} />
           <Route path="/resource-vault" element={<ResourceVault />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/admin/events" element={<AdminEvents />} />
+          {import.meta.env.VITE_ENABLE_ADMIN === "true" && (
+            <Route path="/admin/events" element={<AdminEvents />} />
+          )}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
