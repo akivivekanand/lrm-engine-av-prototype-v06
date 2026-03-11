@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo, useRef } from "react";
-import { Sparkles, ChevronDown, ChevronUp, Download, Wrench, CalendarDays, Clock, AlertTriangle, Copy, Check } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, Download, Wrench, CalendarDays, Clock, AlertTriangle, Copy, Check, Info } from "lucide-react";
 import confetti from "canvas-confetti";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
