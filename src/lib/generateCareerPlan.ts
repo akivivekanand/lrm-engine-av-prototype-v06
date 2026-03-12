@@ -57,7 +57,7 @@ export function generateCareerPlan(input: PlanInput): CareerPlan {
   const timelineIntelligence: string[] = [
     `Your Last Responsible Moment (LRM) is ${formatDate(chain.lrmDate)}, which is ${daysToLRM > 0 ? `${daysToLRM} days from today` : `${Math.abs(daysToLRM)} days past`}. The LRM is the latest date you can begin your job search while still having a realistic chance of securing employment within your OPT window.`,
     `Your hiring cycle for ${industry} is estimated at ${hiringWeeks} weeks, with a ${prepWindowDays}-day preparation window built in before active applications begin. This means your preparation phase should start no later than your LRM date.`,
-    `Your Program End Date is ${formatDate(chain.programEndDate)}. Under OPT regulations, you must begin employment within 90 days of this date. Your absolute deadline to begin working is ${formatDate(chain.lastDayToWork)}.`,
+    `Your Program End Date is ${formatDate(chain.programEndDate)}. Under OPT regulations, the latest you can start OPT is 60 days after your Program End Date (the grace period). Once your OPT begins, you have 90 days of permitted unemployment to secure and report employment to ISSO. Your absolute deadline to begin working is ${formatDate(chain.lastDayToWork)}.`,
     daysToLRM > 30
       ? `You have a comfortable buffer before your LRM. Use this time strategically to build relationships, refine your materials, and research target employers in ${industry}.`
       : daysToLRM > 0
