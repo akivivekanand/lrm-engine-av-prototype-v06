@@ -403,11 +403,16 @@ const Dashboard = () => {
                 )}
               </div>
               <div className="flex justify-between text-[9px] text-muted-foreground">
-                <span>{formatDate(startDate)}</span>
-                {prepDays > 0 && <span>{formatDate(prepEnd)}</span>}
-                <span>{formatDate(hiringEnd)}</span>
+                <span>{formatDate(swimlaneStart)}</span>
+                {csldObj && <span className="text-emerald font-medium">Launch: {formatDate(csldObj)}</span>}
                 <span>{formatDate(lastDayToWork)}</span>
               </div>
+              {csldObj && (
+                <p className="text-[9px] text-emerald mt-1">Your personal launch target. Prep and hiring cycle calculate from this date.</p>
+              )}
+              {csldObj && chain && (
+                <p className="text-[9px] text-muted-foreground">Last Responsible Moment (outer boundary): {formatDate(chain.lrmDate)}</p>
+              )}
             </div>
           </GlassCard>
 
