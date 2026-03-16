@@ -392,11 +392,12 @@ const Dashboard = () => {
               </div>
               <div className="flex justify-between text-[9px] text-muted-foreground">
                 <span>{formatDate(swimlaneStart)}</span>
-                {csldObj && <span className="text-emerald font-medium">Launch: {formatDate(csldObj)}</span>}
-                <span>{formatDate(lastDayToWork)}</span>
+                <span>{formatDate(prepEnd)}</span>
+                <span>{formatDate(hiringEnd)}</span>
+                <span>{formatDate(optBufferEnd)}</span>
               </div>
               {csldObj && (
-                <p className="text-[9px] text-emerald mt-1">Your personal launch target. Prep and hiring cycle calculate from this date.</p>
+                <p className="text-[9px] text-emerald mt-1">Your personal launch target. Prep and hiring cycle run forward from this date.</p>
               )}
               {csldObj && chain && (
                 <p className="text-[9px] text-muted-foreground">Last Responsible Moment (outer boundary): {formatDate(chain.lrmDate)}</p>
