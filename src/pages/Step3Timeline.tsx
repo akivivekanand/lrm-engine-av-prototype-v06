@@ -332,7 +332,9 @@ const Step3Timeline = () => {
                       ? "bg-amber"
                       : m.label === "Last Day to Start Working"
                         ? "bg-critical"
-                        : "bg-primary";
+                        : m.label === "Career Strategy Launch Date"
+                          ? "bg-emerald"
+                          : "bg-primary";
                 const isPast = m.date.getTime() < today.getTime() && m.label !== "Today";
                 return (
                   <div key={m.label} className={cn("flex items-center gap-3", isPast && "opacity-40")}>
