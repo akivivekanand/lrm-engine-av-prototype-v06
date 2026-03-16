@@ -291,7 +291,7 @@ const Step3Timeline = () => {
             </div>
           </GlassCard>
 
-          {/* Timeline Visualization */}
+          {/* Timeline Visualization — Vertical List */}
           <GlassCard>
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <h2 className="text-sm font-semibold text-foreground">Timeline Intelligence</h2>
@@ -316,22 +316,16 @@ const Step3Timeline = () => {
                 </p>
               </div>
             )}
-            <SegmentedTimeline chain={chain!} startLabel={startLabel} careerStrategyLaunchDate={csldObj || undefined} />
-          </GlassCard>
-
-          {/* Key Dates — chronological */}
-          <GlassCard>
-            <h2 className="text-sm font-semibold text-foreground mb-4">Key Dates</h2>
             <div className="space-y-3">
               {keyDates.map((m) => {
                 const dotColor = m.label === "Today"
                   ? "bg-sky"
                   : m.label === "Program End Date"
-                    ? "bg-slate"
+                    ? "bg-muted-foreground"
                     : m.label === "LRM"
                       ? "bg-amber"
                       : m.label === "Last Day to Start Working"
-                        ? "bg-critical"
+                        ? "bg-destructive"
                         : m.label === "Career Strategy Launch Date"
                           ? "bg-emerald"
                           : "bg-primary";
