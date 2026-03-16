@@ -48,7 +48,7 @@ const labelColor: Record<string, string> = {
   "Career Strategy Launch Date": "text-emerald",
 };
 
-const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date" }: SegmentedTimelineProps) => {
+const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date", careerStrategyLaunchDate }: SegmentedTimelineProps) => {
   const today = stripTime(new Date());
 
   const rawMarkers: { label: string; date: Date }[] = [
@@ -58,6 +58,10 @@ const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date" }: Segmente
     { label: startLabel, date: chain.chosenStartDate },
     { label: "Last Day to Start Working", date: chain.lastDayToWork },
   ];
+
+  if (careerStrategyLaunchDate) {
+    rawMarkers.push({ label: "Career Strategy Launch Date", date: careerStrategyLaunchDate });
+  }
 
   // Deduplicate by date
   const seen = new Map<number, boolean>();

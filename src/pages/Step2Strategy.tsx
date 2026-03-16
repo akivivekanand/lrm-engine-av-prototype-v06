@@ -267,6 +267,56 @@ const Step2Strategy = () => {
         </div>
       </GlassCard>
 
+      {/* Career Strategy Launch Date — eligibility gate: only if >90 days to LRM */}
+      {showLaunchDatePicker && (
+        <GlassCard>
+          <label className="text-sm font-medium text-foreground block mb-1">Career Strategy Launch Date</label>
+          <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+            Set a personal target date to begin your career strategy. Your hiring cycle and prep window will calculate backwards from this date. Your LRM and OPT dates remain unchanged as your outer boundary.
+          </p>
+          <div className="flex gap-2 items-center">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !launchDateObj && "text-muted-foreground",
+                    launchDateInvalid && "border-destructive text-destructive"
+                  )}
+                >
+                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  {launchDateObj ? format(launchDateObj, "PPP") : "Optional — pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={launchDateObj || undefined}
+                  onSelect={(d) => setCareerStrategyLaunchDate(d ? d.toISOString() : null)}
+                  disabled={(date) => {
+                    const d = stripTime(date);
+                    return d.getTime() < minLaunchDate.getTime() || d.getTime() >= chain!.lrmDate.getTime();
+                  }}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {launchDateObj && (
+              <Button variant="ghost" size="icon" className="shrink-0" onClick={() => setCareerStrategyLaunchDate(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          {launchDateInvalid && (
+            <p className="text-[10px] text-destructive mt-1">
+              Please choose a date at least two weeks from today and before your Last Responsible Moment.
+            </p>
+          )}
+        </GlassCard>
+      )}
+
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate("/step-1-authorization")} className="flex-1">
           Back
