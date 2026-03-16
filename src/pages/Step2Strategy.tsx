@@ -12,7 +12,7 @@ import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { suggestIndustry, type IndustrySuggestion } from "@/lib/smart-suggestions";
-import { calculateLRMChainV2, daysBetween, stripTime, addDays } from "@/lib/calculations";
+import { calculateLRMChainV2, daysBetween, stripTime, addDays, formatDate } from "@/lib/calculations";
 import { cn } from "@/lib/utils";
 
 type Mode = "ai" | "suggested" | "custom";
@@ -49,8 +49,8 @@ const Step2Strategy = () => {
   // Validation for career strategy launch date
   const minLaunchDate = addDays(today, 14);
   const launchDateObj = careerStrategyLaunchDate ? new Date(careerStrategyLaunchDate) : null;
-  const launchDateInvalid = launchDateObj && chain
-    ? (stripTime(launchDateObj).getTime() < minLaunchDate.getTime() || stripTime(launchDateObj).getTime() >= chain.lrmDate.getTime())
+  const launchDateInvalid = launchDateObj
+    ? stripTime(launchDateObj).getTime() < minLaunchDate.getTime()
     : false;
 
   const [suggestion, setSuggestion] = useState<IndustrySuggestion | null>(null);
@@ -272,7 +272,7 @@ const Step2Strategy = () => {
         <GlassCard>
           <label className="text-sm font-medium text-foreground block mb-1">Career Strategy Launch Date</label>
           <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-            Set a personal target date to begin your career strategy. Your hiring cycle and prep window will calculate backwards from this date. Your LRM and OPT dates remain unchanged as your outer boundary.
+            Choose when you want to start your career strategy. Your prep window and hiring cycle will run forward from this date. Your LRM and OPT dates remain your outer compliance boundary.
           </p>
           <div className="flex gap-2 items-center">
             <Popover>
@@ -296,7 +296,7 @@ const Step2Strategy = () => {
                   onSelect={(d) => setCareerStrategyLaunchDate(d ? d.toISOString() : null)}
                   disabled={(date) => {
                     const d = stripTime(date);
-                    return d.getTime() < minLaunchDate.getTime() || d.getTime() >= chain!.lrmDate.getTime();
+                    return d.getTime() < minLaunchDate.getTime();
                   }}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
@@ -311,8 +311,18 @@ const Step2Strategy = () => {
           </div>
           {launchDateInvalid && (
             <p className="text-[10px] text-destructive mt-1">
-              Please choose a date at least two weeks from today and before your Last Responsible Moment.
+              Please choose a date at least two weeks from today.
             </p>
+          )}
+          {launchDateObj && !launchDateInvalid && chain && (
+            <div className="mt-3 p-2 rounded bg-muted/50 space-y-1">
+              <p className="text-[10px] text-muted-foreground">
+                Your prep window begins {format(launchDateObj, "PPP")}. Hiring cycle runs through {format(addDays(addDays(launchDateObj, prepWindowDays), hiringWeeks * 7), "PPP")}.
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                Your compliance deadline remains {formatDate(chain.lrmDate)}.
+              </p>
+            </div>
           )}
         </GlassCard>
       )}

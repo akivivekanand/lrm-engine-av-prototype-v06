@@ -233,8 +233,8 @@ const Step1Authorization = () => {
           <GlassCard>
             <div className="flex items-center justify-between mb-2">
               <div>
-                <label className="text-sm font-medium text-foreground block">Chosen Start Date</label>
-                <p className="text-xs text-muted-foreground">When you want to start working.</p>
+                <label className="text-sm font-medium text-foreground block">Estimated OPT Start Date</label>
+                <p className="text-xs text-muted-foreground">Approximately when you expect your OPT to begin. This is used for planning purposes only.</p>
               </div>
               <Dialog>
                 <DialogTrigger asChild>
