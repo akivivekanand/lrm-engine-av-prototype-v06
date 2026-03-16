@@ -340,7 +340,7 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground leading-relaxed mb-3">
               This timeline shows how your preparation window, hiring cycle, and OPT timing affect your Last Responsible Moment (LRM).
             </p>
-            <SegmentedTimeline chain={chain} startLabel={startLabel} />
+            <SegmentedTimeline chain={chain} startLabel={startLabel} careerStrategyLaunchDate={csldObj || undefined} />
           </GlassCard>
 
           <GlassCard className="print:break-inside-avoid">
