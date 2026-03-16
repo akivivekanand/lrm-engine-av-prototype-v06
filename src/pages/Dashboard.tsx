@@ -294,6 +294,7 @@ const Dashboard = () => {
     if (label === "Program End Date") return "bg-slate";
     if (label === "LRM") return "bg-amber";
     if (label === "Last Day to Start Working") return "bg-critical";
+    if (label === "Career Strategy Launch Date") return "bg-emerald";
     return "bg-primary";
   };
 
