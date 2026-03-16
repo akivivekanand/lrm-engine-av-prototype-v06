@@ -320,41 +320,61 @@ const Dashboard = () => {
         </GlassCard>
       )}
 
-      {/* ── 2. Step 3 Timeline + Key Dates ── */}
+      {/* ── 2. Timeline Intelligence — Bar + Key Dates ── */}
       {chain && (
-        <>
-          <GlassCard className="print:break-inside-avoid">
-            <h2 className="text-sm font-semibold text-foreground mb-1">Timeline Intelligence</h2>
-            <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-              This timeline shows how your preparation window, hiring cycle, and OPT timing affect your Last Responsible Moment (LRM).
-            </p>
-            <SegmentedTimeline chain={chain} startLabel={startLabel} careerStrategyLaunchDate={csldObj || undefined} />
-          </GlassCard>
+        <GlassCard className="print:break-inside-avoid">
+          <h2 className="text-sm font-semibold text-foreground mb-1">Timeline Intelligence</h2>
+          <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+            This timeline shows how your preparation window, hiring cycle, and OPT timing affect your Last Responsible Moment (LRM).
+          </p>
 
-          <GlassCard className="print:break-inside-avoid">
-            <h2 className="text-sm font-semibold text-foreground mb-4">Key Dates</h2>
-            <div className="space-y-3">
-              {keyDates.map((m) => {
-                const isPast = m.date.getTime() < today.getTime() && m.label !== "Today";
-                const status = getDateStatus(m.date);
-                return (
-                  <div key={m.label} className={cn("flex items-center justify-between", isPast && "opacity-40")}>
-                    <div className="flex items-center gap-3">
-                      <div className={cn("w-3 h-3 rounded-full shrink-0", dotColor(m.label))} />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{m.label}</p>
-                        <p className="text-xs text-primary/70">{formatDate(m.date)}</p>
-                      </div>
-                    </div>
-                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", statusBadgeVariant[status])}>
-                      {status}
-                    </span>
+          {/* Horizontal bar with dots only */}
+          {(() => {
+            const allDates = keyDates.map((m) => m.date.getTime());
+            const minT = Math.min(...allDates);
+            const maxT = Math.max(...allDates);
+            const range = maxT - minT || 1;
+            const pct = (d: Date) => ((d.getTime() - minT) / range) * 100;
+
+            return (
+              <div className="relative h-6 mb-6">
+                {/* Track */}
+                <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-1.5 rounded-full bg-muted" />
+                {/* Dots */}
+                {keyDates.map((m) => {
+                  const isPast = m.date.getTime() < today.getTime() && m.label !== "Today";
+                  return (
+                    <div
+                      key={m.label}
+                      className={cn(
+                        "absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full border-2 border-background",
+                        dotColor(m.label),
+                        isPast && "opacity-40"
+                      )}
+                      style={{ left: `${pct(m.date)}%` }}
+                    />
+                  );
+                })}
+              </div>
+            );
+          })()}
+
+          {/* Key Dates list */}
+          <div className="space-y-3">
+            {keyDates.map((m) => {
+              const isPast = m.date.getTime() < today.getTime() && m.label !== "Today";
+              return (
+                <div key={m.label} className={cn("flex items-center gap-3", isPast && "opacity-40")}>
+                  <div className={cn("w-3 h-3 rounded-full shrink-0", dotColor(m.label))} />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{m.label}</p>
+                    <p className="text-xs text-primary/70">{formatDate(m.date)}</p>
                   </div>
-                );
-              })}
-            </div>
-          </GlassCard>
-        </>
+                </div>
+              );
+            })}
+          </div>
+        </GlassCard>
       )}
 
       {/* ── 3. Step 4 Timeline + Key Time Frames ── */}
