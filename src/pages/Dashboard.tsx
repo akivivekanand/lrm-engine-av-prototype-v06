@@ -412,7 +412,7 @@ const Dashboard = () => {
                 <div className="w-3 h-3 rounded-full shrink-0 bg-emerald" />
                 <div>
                   <p className="text-sm font-medium text-foreground">Prep Window</p>
-                  <p className="text-xs text-muted-foreground">{formatDate(startDate)} — {formatDate(prepEnd)}</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(swimlaneStart)} — {formatDate(prepEnd)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -426,7 +426,7 @@ const Dashboard = () => {
                 <div className="w-3 h-3 rounded-full shrink-0 bg-primary" />
                 <div>
                   <p className="text-sm font-medium text-foreground">OPT Buffer</p>
-                  <p className="text-xs text-muted-foreground">{formatDate(hiringEnd)} — {formatDate(lastDayToWork)}</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(hiringEnd)} — {formatDate(optBufferEnd)}</p>
                 </div>
               </div>
             </div>

@@ -257,11 +257,15 @@ const MyPlan = () => {
             {/* Date labels */}
             <div className="flex justify-between text-[9px] text-muted-foreground">
               <span>{formatDate(swimlaneStart)}</span>
-              {csldObj && <span className="text-emerald font-medium">Launch: {formatDate(csldObj)}</span>}
-              <span>{formatDate(lastDayToWork)}</span>
+              <span>{formatDate(prepEnd)}</span>
+              <span>{formatDate(hiringEnd)}</span>
+              <span>{formatDate(optBufferEnd)}</span>
             </div>
+            {csldObj && (
+              <p className="text-[9px] text-emerald mt-1">Your personal launch target. Prep and hiring cycle run forward from this date.</p>
+            )}
             {csldObj && chain && (
-              <p className="text-[9px] text-muted-foreground mt-1">LRM (outer boundary): {formatDate(chain.lrmDate)}</p>
+              <p className="text-[9px] text-muted-foreground">Last Responsible Moment (outer boundary): {formatDate(chain.lrmDate)}</p>
             )}
             {/* Legend */}
             <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground mt-1">

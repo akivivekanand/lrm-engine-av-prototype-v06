@@ -49,8 +49,8 @@ const Step2Strategy = () => {
   // Validation for career strategy launch date
   const minLaunchDate = addDays(today, 14);
   const launchDateObj = careerStrategyLaunchDate ? new Date(careerStrategyLaunchDate) : null;
-  const launchDateInvalid = launchDateObj && chain
-    ? (stripTime(launchDateObj).getTime() < minLaunchDate.getTime() || stripTime(launchDateObj).getTime() >= chain.lrmDate.getTime())
+  const launchDateInvalid = launchDateObj
+    ? stripTime(launchDateObj).getTime() < minLaunchDate.getTime()
     : false;
 
   const [suggestion, setSuggestion] = useState<IndustrySuggestion | null>(null);
