@@ -92,28 +92,19 @@ const MyPlan = () => {
   // LRM warning
   const lrmPassed = chain ? startDate.getTime() > chain.lrmDate.getTime() : false;
 
-  // Swimlane calculations — anchor to careerStrategyLaunchDate if set
+  // Swimlane calculations — forward from careerStrategyLaunchDate if set
   const csldObj = careerStrategyLaunchDate ? stripTime(new Date(careerStrategyLaunchDate)) : null;
-  const swimlaneEndDate = csldObj || (chain ? chain.lastDayToWork : null);
-
+  const swimlaneStart = csldObj || startDate;
   const prepEnd = csldObj
-    ? addDays(csldObj, -(hiringWeeks * 7))
+    ? addDays(csldObj, prepWindowDays)
     : addDays(startDate, prepWindowDays);
-  const hiringEnd = csldObj
-    ? csldObj
-    : addDays(prepEnd, hiringWeeks * 7);
-  const lastDayToWork = chain ? chain.lastDayToWork : hiringEnd;
+  const hiringEnd = addDays(prepEnd, hiringWeeks * 7);
+  const optBufferEnd = chain ? chain.lastDayToWork : hiringEnd;
 
-  const swimlaneStart = csldObj
-    ? addDays(csldObj, -(hiringWeeks * 7 + prepWindowDays))
-    : startDate;
-
-  const totalDays = Math.max(1, daysBetween(swimlaneStart, lastDayToWork));
-  const prepDays = Math.max(0, prepWindowDays);
-  const hiringDays = Math.max(0, hiringWeeks * 7);
-  const bufferDays = csldObj
-    ? Math.max(0, daysBetween(csldObj, lastDayToWork))
-    : Math.max(0, daysBetween(hiringEnd, lastDayToWork));
+  const totalDays = Math.max(1, daysBetween(swimlaneStart, optBufferEnd));
+  const prepDays = Math.max(0, daysBetween(swimlaneStart, prepEnd));
+  const hiringDays = Math.max(0, daysBetween(prepEnd, hiringEnd));
+  const bufferDays = Math.max(0, daysBetween(hiringEnd, optBufferEnd));
 
   const prepPct = (prepDays / totalDays) * 100;
   const hiringPct = (hiringDays / totalDays) * 100;
