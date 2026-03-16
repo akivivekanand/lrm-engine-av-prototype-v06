@@ -185,6 +185,7 @@ const Dashboard = () => {
         { label: "LRM", date: chain.lrmDate },
         { label: startLabel, date: chain.chosenStartDate },
         { label: "Last Day to Start Working", date: chain.lastDayToWork },
+        ...(csldObj ? [{ label: "Career Strategy Launch Date", date: csldObj }] : []),
       ].sort((a, b) => a.date.getTime() - b.date.getTime())
     : [];
 
