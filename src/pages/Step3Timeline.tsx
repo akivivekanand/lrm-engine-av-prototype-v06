@@ -45,6 +45,7 @@ const Step3Timeline = () => {
   const [prepWindowDays, setPrepWindowDays] = usePersistedState<number>("prepWindowDays", 14);
   const [targetWorkReadyDate, setTargetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
   const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
+  const [careerStrategyLaunchDate] = usePersistedState<string | null>("careerStrategyLaunchDate", null);
 
   const isApproved = optStatus === "approved";
   const isNotApplied = optStatus === "notApplied";
