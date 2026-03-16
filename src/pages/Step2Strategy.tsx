@@ -12,7 +12,7 @@ import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { suggestIndustry, type IndustrySuggestion } from "@/lib/smart-suggestions";
-import { calculateLRMChainV2, daysBetween, stripTime, addDays } from "@/lib/calculations";
+import { calculateLRMChainV2, daysBetween, stripTime, addDays, formatDate } from "@/lib/calculations";
 import { cn } from "@/lib/utils";
 
 type Mode = "ai" | "suggested" | "custom";
