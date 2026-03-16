@@ -136,16 +136,33 @@ const Dashboard = () => {
   const daysToLRM = chain ? daysBetween(today, chain.lrmDate) : 0;
   const startLabel = isApproved ? "EAD Start Date" : "Chosen Start Date";
 
-  // Step 4 swimlane calculations
+  const csldObj = careerStrategyLaunchDate ? stripTime(new Date(careerStrategyLaunchDate)) : null;
+
+  // Step 4 swimlane calculations — anchor to careerStrategyLaunchDate if set
   const startDate = stripTime(new Date(careerPlanStartDate));
-  const prepEnd = addDays(startDate, prepWindowDays);
-  const hiringEnd = addDays(prepEnd, hiringWeeks * 7);
+  const anchorDate = csldObj || (chain ? chain.lastDayToWork : null);
+  const prepEnd = csldObj
+    ? addDays(csldObj, -(hiringWeeks * 7 + prepWindowDays))
+    : addDays(startDate, prepWindowDays);
+  const hiringEnd = csldObj
+    ? addDays(csldObj, 0)
+    : addDays(prepEnd, hiringWeeks * 7);
   const lastDayToWork = chain ? chain.lastDayToWork : hiringEnd;
 
-  const totalBandDays = Math.max(1, daysBetween(startDate, lastDayToWork));
-  const prepDays = Math.max(0, daysBetween(startDate, prepEnd));
-  const hiringDays = Math.max(0, daysBetween(prepEnd, hiringEnd));
-  const bufferDays = Math.max(0, daysBetween(hiringEnd, lastDayToWork));
+  // When using CSLD anchor, recalculate prep start from anchor
+  const swimlaneStart = csldObj
+    ? addDays(csldObj, -(hiringWeeks * 7 + prepWindowDays))
+    : startDate;
+  const swimlaneEnd = lastDayToWork;
+
+  const totalBandDays = Math.max(1, daysBetween(swimlaneStart, swimlaneEnd));
+  const prepDays = csldObj
+    ? Math.max(0, prepWindowDays)
+    : Math.max(0, daysBetween(startDate, prepEnd));
+  const hiringDays = Math.max(0, hiringWeeks * 7);
+  const bufferDays = csldObj
+    ? Math.max(0, daysBetween(csldObj, lastDayToWork))
+    : Math.max(0, daysBetween(hiringEnd, lastDayToWork));
 
   const prepPct = (prepDays / totalBandDays) * 100;
   const hiringPct = (hiringDays / totalBandDays) * 100;
