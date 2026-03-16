@@ -24,6 +24,34 @@ const Step2Strategy = () => {
   const [prepWindowDays, setPrepWindowDays] = usePersistedState<number>("prepWindowDays", 14);
   const [hiringMode, setHiringMode] = usePersistedState<Mode>("hiringWeeksMode", "ai");
   const [prepMode, setPrepMode] = usePersistedState<Mode>("prepWindowMode", "ai");
+  const [careerStrategyLaunchDate, setCareerStrategyLaunchDate] = usePersistedState<string | null>("careerStrategyLaunchDate", null);
+
+  // Read Step 1 inputs to compute LRM for eligibility gate
+  const [gradDate] = usePersistedState<string | null>("gradDate", null);
+  const [eadDate] = usePersistedState<string | null>("eadDate", null);
+  const [optStatus] = usePersistedState<string>("optStatus", "notApplied");
+  const [targetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
+  const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
+
+  const isApproved = optStatus === "approved";
+  const chosenStartDateStr = isApproved ? eadDate : (targetWorkReadyDate || estimatedStartDate);
+  const gradDateObj = gradDate ? new Date(gradDate) : undefined;
+  const chosenStartDateObj = chosenStartDateStr ? new Date(chosenStartDateStr) : undefined;
+
+  const chain = gradDateObj && chosenStartDateObj
+    ? calculateLRMChainV2({ programEndDate: gradDateObj, chosenStartDate: chosenStartDateObj, hiringWeeks, prepWindowDays })
+    : null;
+
+  const today = stripTime(new Date());
+  const daysToLRM = chain ? daysBetween(today, chain.lrmDate) : 0;
+  const showLaunchDatePicker = chain && daysToLRM > 90;
+
+  // Validation for career strategy launch date
+  const minLaunchDate = addDays(today, 14);
+  const launchDateObj = careerStrategyLaunchDate ? new Date(careerStrategyLaunchDate) : null;
+  const launchDateInvalid = launchDateObj && chain
+    ? (stripTime(launchDateObj).getTime() < minLaunchDate.getTime() || stripTime(launchDateObj).getTime() >= chain.lrmDate.getTime())
+    : false;
 
   const [suggestion, setSuggestion] = useState<IndustrySuggestion | null>(null);
   const [assessed, setAssessed] = useState(false);
