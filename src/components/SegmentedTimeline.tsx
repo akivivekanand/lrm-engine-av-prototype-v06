@@ -45,6 +45,7 @@ const labelColor: Record<string, string> = {
   "EAD Start Date": "text-primary",
   "Chosen Start Date": "text-primary",
   "Last Day to Start Working": "text-critical",
+  "Career Strategy Launch Date": "text-emerald",
 };
 
 const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date" }: SegmentedTimelineProps) => {
