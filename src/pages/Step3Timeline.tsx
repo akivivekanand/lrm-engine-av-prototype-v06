@@ -291,7 +291,7 @@ const Step3Timeline = () => {
             </div>
           </GlassCard>
 
-          {/* Timeline Visualization — Vertical List */}
+          {/* Timeline Intelligence — Bar + Key Dates */}
           <GlassCard>
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <h2 className="text-sm font-semibold text-foreground">Timeline Intelligence</h2>
@@ -303,11 +303,11 @@ const Step3Timeline = () => {
                 How this works
               </button>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+            <p className="text-xs text-muted-foreground leading-relaxed mb-4">
               This timeline shows how your preparation window, hiring cycle, and OPT timing affect your Last Responsible Moment (LRM).
             </p>
             {showExplanation && (
-              <div className="p-3 rounded-lg bg-muted/50 mb-3 space-y-2">
+              <div className="p-3 rounded-lg bg-muted/50 mb-4 space-y-2">
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Your Last Responsible Moment (LRM) is the latest date you should begin your job search while still allowing enough time to realistically secure employment before your OPT unemployment deadline.
                 </p>
@@ -316,6 +316,48 @@ const Step3Timeline = () => {
                 </p>
               </div>
             )}
+
+            {/* Horizontal bar with dots only */}
+            {(() => {
+              const allDates = keyDates.map((m) => m.date.getTime());
+              const minT = Math.min(...allDates);
+              const maxT = Math.max(...allDates);
+              const range = maxT - minT || 1;
+              const pct = (d: Date) => ((d.getTime() - minT) / range) * 100;
+
+              const getDotColor = (label: string) => {
+                if (label === "Today") return "bg-sky";
+                if (label === "Program End Date") return "bg-muted-foreground";
+                if (label === "LRM") return "bg-amber";
+                if (label === "Last Day to Start Working") return "bg-destructive";
+                if (label === "Career Strategy Launch Date") return "bg-emerald";
+                return "bg-primary";
+              };
+
+              return (
+                <div className="relative h-6 mb-6">
+                  {/* Track */}
+                  <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-1.5 rounded-full bg-muted" />
+                  {/* Dots */}
+                  {keyDates.map((m) => {
+                    const isPast = m.date.getTime() < today.getTime() && m.label !== "Today";
+                    return (
+                      <div
+                        key={m.label}
+                        className={cn(
+                          "absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full border-2 border-background",
+                          getDotColor(m.label),
+                          isPast && "opacity-40"
+                        )}
+                        style={{ left: `${pct(m.date)}%` }}
+                      />
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
+            {/* Key Dates list */}
             <div className="space-y-3">
               {keyDates.map((m) => {
                 const dotColor = m.label === "Today"
