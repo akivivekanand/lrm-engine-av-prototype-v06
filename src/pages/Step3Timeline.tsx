@@ -316,7 +316,7 @@ const Step3Timeline = () => {
                 </p>
               </div>
             )}
-            <SegmentedTimeline chain={chain!} startLabel={startLabel} />
+            <SegmentedTimeline chain={chain!} startLabel={startLabel} careerStrategyLaunchDate={csldObj || undefined} />
           </GlassCard>
 
           {/* Key Dates — chronological */}
