@@ -311,7 +311,7 @@ const Step2Strategy = () => {
           </div>
           {launchDateInvalid && (
             <p className="text-[10px] text-destructive mt-1">
-              Please choose a date at least two weeks from today.
+              Please choose today or a future date.
             </p>
           )}
           {launchDateObj && !launchDateInvalid && chain && (
