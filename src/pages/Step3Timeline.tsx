@@ -101,6 +101,8 @@ const Step3Timeline = () => {
   const startLabel = isApproved ? "EAD Start Date" : "Chosen Start Date";
 
   // Chronological key dates
+  const csldObj = careerStrategyLaunchDate ? new Date(careerStrategyLaunchDate) : null;
+
   const keyDates = chain
     ? [
         { label: "Program End Date", date: chain.programEndDate },
@@ -108,6 +110,7 @@ const Step3Timeline = () => {
         { label: "LRM", date: chain.lrmDate },
         { label: startLabel, date: chain.chosenStartDate },
         { label: "Last Day to Start Working", date: chain.lastDayToWork },
+        ...(csldObj ? [{ label: "Career Strategy Launch Date", date: csldObj }] : []),
       ].sort((a, b) => a.date.getTime() - b.date.getTime())
     : [];
 
