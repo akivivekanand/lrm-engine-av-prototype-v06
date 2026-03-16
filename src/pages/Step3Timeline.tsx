@@ -45,6 +45,7 @@ const Step3Timeline = () => {
   const [prepWindowDays, setPrepWindowDays] = usePersistedState<number>("prepWindowDays", 14);
   const [targetWorkReadyDate, setTargetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
   const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
+  const [careerStrategyLaunchDate] = usePersistedState<string | null>("careerStrategyLaunchDate", null);
 
   const isApproved = optStatus === "approved";
   const isNotApplied = optStatus === "notApplied";
@@ -100,6 +101,8 @@ const Step3Timeline = () => {
   const startLabel = isApproved ? "EAD Start Date" : "Chosen Start Date";
 
   // Chronological key dates
+  const csldObj = careerStrategyLaunchDate ? new Date(careerStrategyLaunchDate) : null;
+
   const keyDates = chain
     ? [
         { label: "Program End Date", date: chain.programEndDate },
@@ -107,6 +110,7 @@ const Step3Timeline = () => {
         { label: "LRM", date: chain.lrmDate },
         { label: startLabel, date: chain.chosenStartDate },
         { label: "Last Day to Start Working", date: chain.lastDayToWork },
+        ...(csldObj ? [{ label: "Career Strategy Launch Date", date: csldObj }] : []),
       ].sort((a, b) => a.date.getTime() - b.date.getTime())
     : [];
 
@@ -312,7 +316,7 @@ const Step3Timeline = () => {
                 </p>
               </div>
             )}
-            <SegmentedTimeline chain={chain!} startLabel={startLabel} />
+            <SegmentedTimeline chain={chain!} startLabel={startLabel} careerStrategyLaunchDate={csldObj || undefined} />
           </GlassCard>
 
           {/* Key Dates — chronological */}
@@ -328,7 +332,9 @@ const Step3Timeline = () => {
                       ? "bg-amber"
                       : m.label === "Last Day to Start Working"
                         ? "bg-critical"
-                        : "bg-primary";
+                        : m.label === "Career Strategy Launch Date"
+                          ? "bg-emerald"
+                          : "bg-primary";
                 const isPast = m.date.getTime() < today.getTime() && m.label !== "Today";
                 return (
                   <div key={m.label} className={cn("flex items-center gap-3", isPast && "opacity-40")}>

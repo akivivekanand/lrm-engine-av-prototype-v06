@@ -10,6 +10,7 @@ interface TimelineMarker {
 interface SegmentedTimelineProps {
   chain: LRMChainResult;
   startLabel?: string;
+  careerStrategyLaunchDate?: Date;
 }
 
 const getMarkerStyle = (label: string) => {
@@ -31,6 +32,9 @@ const getMarkerStyle = (label: string) => {
   if (label === "Last Day to Start Working") {
     return { className: "w-3 h-3 rounded-full bg-critical", ring: false };
   }
+  if (label === "Career Strategy Launch Date") {
+    return { className: "w-3 h-3 rounded-full bg-emerald", ring: false };
+  }
   return { className: "w-3 h-3 rounded-full bg-muted-foreground", ring: false };
 };
 
@@ -41,9 +45,10 @@ const labelColor: Record<string, string> = {
   "EAD Start Date": "text-primary",
   "Chosen Start Date": "text-primary",
   "Last Day to Start Working": "text-critical",
+  "Career Strategy Launch Date": "text-emerald",
 };
 
-const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date" }: SegmentedTimelineProps) => {
+const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date", careerStrategyLaunchDate }: SegmentedTimelineProps) => {
   const today = stripTime(new Date());
 
   const rawMarkers: { label: string; date: Date }[] = [
@@ -53,6 +58,10 @@ const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date" }: Segmente
     { label: startLabel, date: chain.chosenStartDate },
     { label: "Last Day to Start Working", date: chain.lastDayToWork },
   ];
+
+  if (careerStrategyLaunchDate) {
+    rawMarkers.push({ label: "Career Strategy Launch Date", date: careerStrategyLaunchDate });
+  }
 
   // Deduplicate by date
   const seen = new Map<number, boolean>();

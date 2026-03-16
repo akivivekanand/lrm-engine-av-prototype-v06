@@ -102,6 +102,7 @@ const Dashboard = () => {
   const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
   const [industryText] = usePersistedState<string>("industryText", "");
   const [careerPlanStartDate] = usePersistedState<string>("careerPlanStartDate", new Date().toISOString().split("T")[0]);
+  const [careerStrategyLaunchDate] = usePersistedState<string | null>("careerStrategyLaunchDate", null);
 
   // Strategy state
   const [strategyGenerated, setStrategyGenerated] = useState(false);
@@ -135,16 +136,33 @@ const Dashboard = () => {
   const daysToLRM = chain ? daysBetween(today, chain.lrmDate) : 0;
   const startLabel = isApproved ? "EAD Start Date" : "Chosen Start Date";
 
-  // Step 4 swimlane calculations
+  const csldObj = careerStrategyLaunchDate ? stripTime(new Date(careerStrategyLaunchDate)) : null;
+
+  // Step 4 swimlane calculations — anchor to careerStrategyLaunchDate if set
   const startDate = stripTime(new Date(careerPlanStartDate));
-  const prepEnd = addDays(startDate, prepWindowDays);
-  const hiringEnd = addDays(prepEnd, hiringWeeks * 7);
+  const anchorDate = csldObj || (chain ? chain.lastDayToWork : null);
+  const prepEnd = csldObj
+    ? addDays(csldObj, -(hiringWeeks * 7 + prepWindowDays))
+    : addDays(startDate, prepWindowDays);
+  const hiringEnd = csldObj
+    ? addDays(csldObj, 0)
+    : addDays(prepEnd, hiringWeeks * 7);
   const lastDayToWork = chain ? chain.lastDayToWork : hiringEnd;
 
-  const totalBandDays = Math.max(1, daysBetween(startDate, lastDayToWork));
-  const prepDays = Math.max(0, daysBetween(startDate, prepEnd));
-  const hiringDays = Math.max(0, daysBetween(prepEnd, hiringEnd));
-  const bufferDays = Math.max(0, daysBetween(hiringEnd, lastDayToWork));
+  // When using CSLD anchor, recalculate prep start from anchor
+  const swimlaneStart = csldObj
+    ? addDays(csldObj, -(hiringWeeks * 7 + prepWindowDays))
+    : startDate;
+  const swimlaneEnd = lastDayToWork;
+
+  const totalBandDays = Math.max(1, daysBetween(swimlaneStart, swimlaneEnd));
+  const prepDays = csldObj
+    ? Math.max(0, prepWindowDays)
+    : Math.max(0, daysBetween(startDate, prepEnd));
+  const hiringDays = Math.max(0, hiringWeeks * 7);
+  const bufferDays = csldObj
+    ? Math.max(0, daysBetween(csldObj, lastDayToWork))
+    : Math.max(0, daysBetween(hiringEnd, lastDayToWork));
 
   const prepPct = (prepDays / totalBandDays) * 100;
   const hiringPct = (hiringDays / totalBandDays) * 100;
@@ -167,6 +185,7 @@ const Dashboard = () => {
         { label: "LRM", date: chain.lrmDate },
         { label: startLabel, date: chain.chosenStartDate },
         { label: "Last Day to Start Working", date: chain.lastDayToWork },
+        ...(csldObj ? [{ label: "Career Strategy Launch Date", date: csldObj }] : []),
       ].sort((a, b) => a.date.getTime() - b.date.getTime())
     : [];
 
@@ -275,6 +294,7 @@ const Dashboard = () => {
     if (label === "Program End Date") return "bg-slate";
     if (label === "LRM") return "bg-amber";
     if (label === "Last Day to Start Working") return "bg-critical";
+    if (label === "Career Strategy Launch Date") return "bg-emerald";
     return "bg-primary";
   };
 
@@ -320,7 +340,7 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground leading-relaxed mb-3">
               This timeline shows how your preparation window, hiring cycle, and OPT timing affect your Last Responsible Moment (LRM).
             </p>
-            <SegmentedTimeline chain={chain} startLabel={startLabel} />
+            <SegmentedTimeline chain={chain} startLabel={startLabel} careerStrategyLaunchDate={csldObj || undefined} />
           </GlassCard>
 
           <GlassCard className="print:break-inside-avoid">
@@ -383,11 +403,16 @@ const Dashboard = () => {
                 )}
               </div>
               <div className="flex justify-between text-[9px] text-muted-foreground">
-                <span>{formatDate(startDate)}</span>
-                {prepDays > 0 && <span>{formatDate(prepEnd)}</span>}
-                <span>{formatDate(hiringEnd)}</span>
+                <span>{formatDate(swimlaneStart)}</span>
+                {csldObj && <span className="text-emerald font-medium">Launch: {formatDate(csldObj)}</span>}
                 <span>{formatDate(lastDayToWork)}</span>
               </div>
+              {csldObj && (
+                <p className="text-[9px] text-emerald mt-1">Your personal launch target. Prep and hiring cycle calculate from this date.</p>
+              )}
+              {csldObj && chain && (
+                <p className="text-[9px] text-muted-foreground">Last Responsible Moment (outer boundary): {formatDate(chain.lrmDate)}</p>
+              )}
             </div>
           </GlassCard>
 

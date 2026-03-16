@@ -1,14 +1,19 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Sparkles, Check, Pencil, Info, ExternalLink } from "lucide-react";
+import { Sparkles, Check, Pencil, Info, ExternalLink, CalendarIcon, X } from "lucide-react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { suggestIndustry, type IndustrySuggestion } from "@/lib/smart-suggestions";
+import { calculateLRMChainV2, daysBetween, stripTime, addDays } from "@/lib/calculations";
+import { cn } from "@/lib/utils";
 
 type Mode = "ai" | "suggested" | "custom";
 
@@ -19,6 +24,34 @@ const Step2Strategy = () => {
   const [prepWindowDays, setPrepWindowDays] = usePersistedState<number>("prepWindowDays", 14);
   const [hiringMode, setHiringMode] = usePersistedState<Mode>("hiringWeeksMode", "ai");
   const [prepMode, setPrepMode] = usePersistedState<Mode>("prepWindowMode", "ai");
+  const [careerStrategyLaunchDate, setCareerStrategyLaunchDate] = usePersistedState<string | null>("careerStrategyLaunchDate", null);
+
+  // Read Step 1 inputs to compute LRM for eligibility gate
+  const [gradDate] = usePersistedState<string | null>("gradDate", null);
+  const [eadDate] = usePersistedState<string | null>("eadDate", null);
+  const [optStatus] = usePersistedState<string>("optStatus", "notApplied");
+  const [targetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
+  const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
+
+  const isApproved = optStatus === "approved";
+  const chosenStartDateStr = isApproved ? eadDate : (targetWorkReadyDate || estimatedStartDate);
+  const gradDateObj = gradDate ? new Date(gradDate) : undefined;
+  const chosenStartDateObj = chosenStartDateStr ? new Date(chosenStartDateStr) : undefined;
+
+  const chain = gradDateObj && chosenStartDateObj
+    ? calculateLRMChainV2({ programEndDate: gradDateObj, chosenStartDate: chosenStartDateObj, hiringWeeks, prepWindowDays })
+    : null;
+
+  const today = stripTime(new Date());
+  const daysToLRM = chain ? daysBetween(today, chain.lrmDate) : 0;
+  const showLaunchDatePicker = chain && daysToLRM > 90;
+
+  // Validation for career strategy launch date
+  const minLaunchDate = addDays(today, 14);
+  const launchDateObj = careerStrategyLaunchDate ? new Date(careerStrategyLaunchDate) : null;
+  const launchDateInvalid = launchDateObj && chain
+    ? (stripTime(launchDateObj).getTime() < minLaunchDate.getTime() || stripTime(launchDateObj).getTime() >= chain.lrmDate.getTime())
+    : false;
 
   const [suggestion, setSuggestion] = useState<IndustrySuggestion | null>(null);
   const [assessed, setAssessed] = useState(false);
@@ -233,6 +266,56 @@ const Step2Strategy = () => {
           <p className="text-[10px] text-muted-foreground">Baseline recommendation: at least 7 days of preparation time.</p>
         </div>
       </GlassCard>
+
+      {/* Career Strategy Launch Date — eligibility gate: only if >90 days to LRM */}
+      {showLaunchDatePicker && (
+        <GlassCard>
+          <label className="text-sm font-medium text-foreground block mb-1">Career Strategy Launch Date</label>
+          <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+            Set a personal target date to begin your career strategy. Your hiring cycle and prep window will calculate backwards from this date. Your LRM and OPT dates remain unchanged as your outer boundary.
+          </p>
+          <div className="flex gap-2 items-center">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !launchDateObj && "text-muted-foreground",
+                    launchDateInvalid && "border-destructive text-destructive"
+                  )}
+                >
+                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  {launchDateObj ? format(launchDateObj, "PPP") : "Optional — pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={launchDateObj || undefined}
+                  onSelect={(d) => setCareerStrategyLaunchDate(d ? d.toISOString() : null)}
+                  disabled={(date) => {
+                    const d = stripTime(date);
+                    return d.getTime() < minLaunchDate.getTime() || d.getTime() >= chain!.lrmDate.getTime();
+                  }}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {launchDateObj && (
+              <Button variant="ghost" size="icon" className="shrink-0" onClick={() => setCareerStrategyLaunchDate(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          {launchDateInvalid && (
+            <p className="text-[10px] text-destructive mt-1">
+              Please choose a date at least two weeks from today and before your Last Responsible Moment.
+            </p>
+          )}
+        </GlassCard>
+      )}
 
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate("/step-1-authorization")} className="flex-1">
