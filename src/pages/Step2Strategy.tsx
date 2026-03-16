@@ -47,10 +47,10 @@ const Step2Strategy = () => {
   const showLaunchDatePicker = chain && daysToLRM > 90;
 
   // Validation for career strategy launch date
-  const minLaunchDate = addDays(today, 14);
+  const minLaunchDate = today;
   const launchDateObj = careerStrategyLaunchDate ? new Date(careerStrategyLaunchDate) : null;
   const launchDateInvalid = launchDateObj
-    ? stripTime(launchDateObj).getTime() < minLaunchDate.getTime()
+    ? stripTime(launchDateObj).getTime() < today.getTime()
     : false;
 
   const [suggestion, setSuggestion] = useState<IndustrySuggestion | null>(null);
@@ -296,7 +296,7 @@ const Step2Strategy = () => {
                   onSelect={(d) => setCareerStrategyLaunchDate(d ? d.toISOString() : null)}
                   disabled={(date) => {
                     const d = stripTime(date);
-                    return d.getTime() < minLaunchDate.getTime();
+                    return d.getTime() < today.getTime();
                   }}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
@@ -311,7 +311,7 @@ const Step2Strategy = () => {
           </div>
           {launchDateInvalid && (
             <p className="text-[10px] text-destructive mt-1">
-              Please choose a date at least two weeks from today.
+              Please choose today or a future date.
             </p>
           )}
           {launchDateObj && !launchDateInvalid && chain && (

@@ -48,6 +48,37 @@ const labelColor: Record<string, string> = {
   "Career Strategy Launch Date": "text-emerald",
 };
 
+// Fixed label side assignments
+const forcedAbove = new Set(["Career Strategy Launch Date", "Today", "LRM"]);
+const forcedBelow = new Set(["Last Day to Start Working", "Chosen Start Date", "EAD Start Date", "Program End Date"]);
+
+const getIsAbove = (label: string, index: number): boolean => {
+  if (forcedAbove.has(label)) return true;
+  if (forcedBelow.has(label)) return false;
+  return index % 2 === 0; // fallback
+};
+
+// Split long labels at midpoint space
+const renderLabel = (label: string, color: string, smallFont: boolean) => {
+  const baseFontSize = smallFont ? "text-[8px]" : "text-[10px]";
+  if (label.length > 18) {
+    const mid = Math.floor(label.length / 2);
+    let splitIdx = label.lastIndexOf(" ", mid);
+    if (splitIdx <= 0) splitIdx = label.indexOf(" ", mid);
+    if (splitIdx > 0) {
+      const line1 = label.slice(0, splitIdx);
+      const line2 = label.slice(splitIdx + 1);
+      return (
+        <>
+          <p className={`text-[9px] leading-tight font-medium ${color}`}>{line1}</p>
+          <p className={`text-[9px] leading-tight font-medium ${color}`}>{line2}</p>
+        </>
+      );
+    }
+  }
+  return <p className={`${baseFontSize} leading-tight font-medium ${color}`}>{label}</p>;
+};
+
 const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date", careerStrategyLaunchDate }: SegmentedTimelineProps) => {
   const today = stripTime(new Date());
 
@@ -97,6 +128,29 @@ const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date", careerStra
   const lrmPct = pct(chain.lrmDate);
   const startPct = pct(chain.chosenStartDate);
 
+  // Pre-pass: compute positions, sides, and crowding offsets
+  const markerData = markers.map((m, i) => ({
+    ...m,
+    position: pct(m.date),
+    isAbove: getIsAbove(m.label, i),
+  }));
+
+  // Crowding detection: same-side adjacent markers within 12 pct points
+  const crowdingMap = new Map<string, { extraOffset: string; smallFont: boolean }>();
+  for (let i = 1; i < markerData.length; i++) {
+    const prev = markerData[i - 1];
+    const curr = markerData[i];
+    if (
+      prev.isAbove === curr.isAbove &&
+      Math.abs(curr.position - prev.position) < 12
+    ) {
+      crowdingMap.set(curr.label, {
+        extraOffset: curr.isAbove ? "mb-4" : "mt-4",
+        smallFont: true,
+      });
+    }
+  }
+
   return (
     <div className="space-y-1 overflow-hidden">
       <div className="relative pt-14 pb-14 px-4">
@@ -124,13 +178,16 @@ const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date", careerStra
         </div>
 
         {/* Markers */}
-        {markers.map((m, i) => {
-          const left = pct(m.date);
-          const isAbove = i % 2 === 0;
+        {markerData.map((m, i) => {
+          const left = m.position;
+          const isAbove = m.isAbove;
           const style = getMarkerStyle(m.label);
           const color = labelColor[m.label] || "text-muted-foreground";
           const isFirst = i === 0;
-          const isLast = i === markers.length - 1;
+          const isLast = i === markerData.length - 1;
+          const crowding = crowdingMap.get(m.label);
+          const smallFont = crowding?.smallFont ?? false;
+          const extraOffset = crowding?.extraOffset ?? "";
 
           // Label alignment to prevent overflow
           const labelAlign = isFirst
@@ -138,6 +195,10 @@ const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date", careerStra
             : isLast
               ? "right-0 text-right"
               : "left-1/2 -translate-x-1/2 text-center";
+
+          const verticalPos = isAbove
+            ? `bottom-full mb-3 ${extraOffset}`
+            : `top-full mt-3 ${extraOffset}`;
 
           return (
             <div
@@ -153,10 +214,10 @@ const SegmentedTimeline = ({ chain, startLabel = "Chosen Start Date", careerStra
 
               {/* Label */}
               <div
-                className={`absolute whitespace-nowrap ${isAbove ? "bottom-full mb-3" : "top-full mt-3"} ${labelAlign}`}
+                className={`absolute whitespace-nowrap ${verticalPos} ${labelAlign}`}
               >
-                <p className={`text-[10px] leading-tight font-medium ${color}`}>{m.label}</p>
-                <p className="text-[9px] text-muted-foreground leading-tight">{formatDate(m.date)}</p>
+                {renderLabel(m.label, color, smallFont)}
+                <p className={`${smallFont ? "text-[7px]" : "text-[9px]"} text-muted-foreground leading-tight`}>{formatDate(m.date)}</p>
               </div>
             </div>
           );
