@@ -10,6 +10,7 @@ interface TimelineMarker {
 interface SegmentedTimelineProps {
   chain: LRMChainResult;
   startLabel?: string;
+  careerStrategyLaunchDate?: Date;
 }
 
 const getMarkerStyle = (label: string) => {
