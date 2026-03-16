@@ -296,7 +296,7 @@ const Step2Strategy = () => {
                   onSelect={(d) => setCareerStrategyLaunchDate(d ? d.toISOString() : null)}
                   disabled={(date) => {
                     const d = stripTime(date);
-                    return d.getTime() < minLaunchDate.getTime();
+                    return d.getTime() < today.getTime();
                   }}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
