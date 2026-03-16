@@ -28,6 +28,7 @@ const MyPlan = () => {
   const [targetWorkReadyDate] = usePersistedState<string | null>("targetWorkReadyDate", null);
   const [estimatedStartDate] = usePersistedState<string | null>("estimatedStartDate", null);
   const [industryText] = usePersistedState<string>("industryText", "");
+  const [careerStrategyLaunchDate] = usePersistedState<string | null>("careerStrategyLaunchDate", null);
 
   // My Plan specific state
   const todayStr = new Date().toISOString().split("T")[0];
