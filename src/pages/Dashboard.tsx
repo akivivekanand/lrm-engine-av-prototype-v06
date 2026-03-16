@@ -11,7 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
 import ContactCard from "@/components/ContactCard";
-import SegmentedTimeline from "@/components/SegmentedTimeline";
+
 import { usePersistedState } from "@/hooks/usePersistedState";
 import { calculateLRMChainV2, formatDate, getMilestoneStatus, daysBetween, stripTime, addDays } from "@/lib/calculations";
 import { generateCareerPlan, type CareerPlan } from "@/lib/generateCareerPlan";
