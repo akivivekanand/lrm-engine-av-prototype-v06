@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import GlassCard from "@/components/GlassCard";
 import StepLayout from "@/components/StepLayout";
-import SegmentedTimeline from "@/components/SegmentedTimeline";
+
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
