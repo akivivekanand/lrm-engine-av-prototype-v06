@@ -32,6 +32,9 @@ const getMarkerStyle = (label: string) => {
   if (label === "Last Day to Start Working") {
     return { className: "w-3 h-3 rounded-full bg-critical", ring: false };
   }
+  if (label === "Career Strategy Launch Date") {
+    return { className: "w-3 h-3 rounded-full bg-emerald", ring: false };
+  }
   return { className: "w-3 h-3 rounded-full bg-muted-foreground", ring: false };
 };
 
